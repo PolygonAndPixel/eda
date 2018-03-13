@@ -7,34 +7,57 @@
 
 #include "TestFunctions.h"
 
-TestFunctions::TestFunctions(std::string func_name, uint32_t ndims) {
+TestFunctions::TestFunctions() {
     
-    switch(func_name) {
-        case "egg":
-            lh_p = &TestFunctions::eggholder;
-            ndims = 2;
-            break;
-        case "town":
-            lh_p = &TestFunctions::townsend;
-            ndims = 2;
-            break;
-        case "rosenbrock":
-            lh_p = &TestFunctions::rosenbrock;
-            ndims = ndims;
-            break;
-        case "himmelblau":
-            lh_p = &TestFunctions::himmelblau;
-            ndims = 2;
-            break;
-        default:
-            lh_p = &TestFunctions::gauss;
-            ndims = ndims;
-            // Values taken from
-            // "MultiNest: an efficient and robust Bayesian inference tool 
-            // for cosmology and particle physics"
-            shell_width = 0.1;
-            r = 2;
+
+    lh_p = &TestFunctions::gauss_shell;
+    ndims = 2;
+    // Values taken from
+    // "MultiNest: an efficient and robust Bayesian inference tool 
+    // for cosmology and particle physics"
+    shell_width = 0.1;
+    r = 2;
+    
+}
+
+TestFunctions::TestFunctions(
+    std::string func_name, 
+    uint32_t ndims) {
+    
+    if(func_name == "egg") {
+        lh_p = &TestFunctions::eggholder;
+        ndims = 2;
     }
+    else if(func_name == "town") {
+        lh_p = &TestFunctions::townsend;
+        ndims = 2;
+    }
+        else if(func_name == "rosenbrock") {
+        lh_p = &TestFunctions::rosenbrock;
+        ndims = ndims;
+    }
+    else if(func_name == "himmelblau") {
+        lh_p = &TestFunctions::himmelblau;
+        ndims = 2;
+    }
+    else {
+        lh_p = &TestFunctions::gauss_shell;
+        ndims = ndims;
+        // Values taken from
+        // "MultiNest: an efficient and robust Bayesian inference tool 
+        // for cosmology and particle physics"
+        shell_width = 0.1;
+        r = 2;
+    }
+}
+
+/** Getter for the dimension.
+ * 
+ *  \return         ndims
+ * */
+uint32_t TestFunctions::get_ndims() {
+    
+    return ndims;
 }
 
 /** Call the member function stored in lh_p. If you can use C++17, I 
@@ -44,9 +67,12 @@ TestFunctions::TestFunctions(std::string func_name, uint32_t ndims) {
  * 
  *  \return         Likelihood
  * */
-double TestFunctions::get_lh(v_d theta) {
+double TestFunctions::get_lh(
+    v_d theta) {
     
-    return *lh_p(theta);
+    return CALL_MEMBER_FN(*this, lh_p)(theta);
+    
+//     return this.*lh_p(theta);
 }
 
 /** Calculate the likelihood by evaluating the eggholder function.
@@ -58,7 +84,9 @@ double TestFunctions::get_lh(v_d theta) {
  * 
  *  \return         Likelihood
  * */
-double TestFunctions::eggholder(v_d theta) {
+double TestFunctions::eggholder(
+    v_d theta) {
+    
     double left = -(theta[1] + 47)*sin(sqrt(abs(theta[0]/2 + (theta[1]+47))));
     double right = theta[0] * sin(sqrt(abs(theta[0] - (theta[1]+47))));
     return left - right;
@@ -75,7 +103,9 @@ double TestFunctions::eggholder(v_d theta) {
  * 
  *  \return         Likelihood
  * */
-double TestFunctions::townsend(v_d theta) {
+double TestFunctions::townsend(
+    v_d theta) {
+    
     double t = atan2(theta[0], theta[1]);
     double constraint = 2*cos(t) - 0.5*cos(2*t) 
         - 0.25*cos(3*t) - 0.125*cos(4*t);
@@ -98,7 +128,9 @@ double TestFunctions::townsend(v_d theta) {
  * 
  *  \return         Likelihood
  * */
-double TestFunctions::rosenbrock(v_d theta) {
+double TestFunctions::rosenbrock(
+    v_d theta) {
+    
     double lh = 0;
     for(uint32_t i = 0; i<theta.size()-1; ++i) {
         lh += (100 * (theta[i+1]-theta[i]*theta[i]) 
@@ -119,7 +151,9 @@ double TestFunctions::rosenbrock(v_d theta) {
  * 
  *  \return         Likelihood
  * */
-double TestFunctions::himmelblau(v_d theta) {
+double TestFunctions::himmelblau(
+    v_d theta) {
+    
     double left = (theta[0]*theta[0] + theta[1] - 11);
     left *= left;
     double right = (theta[0] + theta[1]*theta[1] - 7);
@@ -138,7 +172,9 @@ double TestFunctions::himmelblau(v_d theta) {
  * 
  *  \return         Likelihood
  * */
-double TestFunctions::gauss(v_d theta) {
+double TestFunctions::gauss_shell(
+    v_d theta) {
+    
     double factor = 1/sqrt(2*M_PI*shell_width*shell_width);
     double left = (theta[0]-2.5)*(theta[0]-2.5);
     double right = (theta[0]+2.5)*(theta[0]+2.5);
@@ -156,7 +192,7 @@ double TestFunctions::gauss(v_d theta) {
     right = sqrt(right) - r;
     right *= right;
     right /= 2 * shell_width*shell_width;
-    right = factor * exp(right;
+    right = factor * exp(right);
     
     return left + right;
 }

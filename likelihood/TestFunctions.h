@@ -1,35 +1,43 @@
 #ifndef TESTFUNCTIONS_H_INCLUDED
 #define TESTFUNCTIONS_H_INCLUDED
 
+#include <boost/cstdint.hpp>
 #include <math.h>
 #include <vector>
+#include <string>
+#include <limits>
 
-#typedef std::vector v_d;
-#typedef int(TestFunctions::*lh_pointer)(v_d theta);
+#define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
+
+typedef std::vector<double> v_d;
 
 class TestFunctions {
+    typedef double(TestFunctions::*lh_pointer)(v_d theta);
 public:
+    TestFunctions();
     /// Set the function and the number of dimensions for these functions.
-    TestFunctions(std::string func_name, uint32_t ndims=2);
+    TestFunctions(std::string, uint32_t);
     
-    virtual ~TestFunctions();
     /// function pointer.
-    llh_pointer lh_p;
+    lh_pointer lh_p;
+    uint32_t get_ndims();
     /// Generic likelihood function which calls the actual function which has 
     /// been choosen during creation of this class.
     double get_lh(v_d theta);
     /// The likelihood functions that take one vector of doubles and calculate
     /// the likelihood.
-    double eggbox(v_d theta);
+    double eggholder(v_d theta);
     double townsend(v_d theta);
     double rosenbrock(v_d theta);
     double himmelblau(v_d theta);
-    double gauss(v_d theta);
+    double gauss_shell(v_d theta);
 
 private:
     uint32_t ndims;
     // Some variables for the gaussian shell
     double shell_width, r; // width and radius of the shells
-}
+};
+
+
 
 #endif
