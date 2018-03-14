@@ -1,5 +1,5 @@
 GCC=g++
-GCCFLAGS= -O2 
+GCCFLAGS= -O2
 
 all: test
 

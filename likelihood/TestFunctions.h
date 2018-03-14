@@ -20,6 +20,7 @@ public:
     
     /// function pointer.
     lh_pointer lh_p;
+    std::string get_name();
     uint32_t get_ndims();
     /// Generic likelihood function which calls the actual function which has 
     /// been choosen during creation of this class.
@@ -33,7 +34,8 @@ public:
     double gauss_shell(v_d theta);
 
 private:
-    uint32_t ndims;
+    std::string name;
+    uint32_t ndims_;
     // Some variables for the gaussian shell
     double shell_width, r; // width and radius of the shells
 };

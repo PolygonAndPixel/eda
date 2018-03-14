@@ -10,7 +10,6 @@
 #include <boost/nondet_random.hpp>
 #include <fstream>
 
-
 /** Constructor and destructor **/
 SampleSpace::SampleSpace(
     uint32_t max_iter, 
@@ -40,14 +39,20 @@ void SampleSpace::sample_space(
     for(int j=0; j<nDims; j++) ofile << "Param" << j << "\t";
     ofile << std::endl;
     for(int i=0; i<max_iter_; i++, c++) {
-        if(i%5000 == 0) {printf("\r (>^.^)> %d     ", i); fflush(stdout);}
-        else if(i%7500 == 0) {printf("\r (>°.°)> %d", i); fflush(stdout);}
+        if(i%50000 == 0) {printf("\r (>^.^)> %d     ", i); fflush(stdout);}
+        else if(i%75000 == 0) {printf("\r (>°.°)> %d", i); fflush(stdout);}
         for(int j=0; j<nDims; j++) cube[j] =uf();
 
         v_d theta = to_physics(cube, nDims);
-        results.insert(results.end(), theta.begin(), theta.end());
-        results.push_back(get_llh(theta));
 
+        results.insert(results.end(), theta.begin(), theta.end());
+        double current_result = get_llh(theta);
+        results.push_back(current_result);
+        if(i == 0 || result.best_fit > current_result) {
+            result.best_fit = current_result;
+            result.params_best_fit = theta;
+        }
+        
         if(c%max_points_ == 0 || i == max_iter_-1) {
             int d = 1;
             for(v_d::iterator p=results.begin();
@@ -61,6 +66,8 @@ void SampleSpace::sample_space(
         }
     }
     ofile.close();
+    result.n_lh_calls = c-1;
+    result.lh_efficiency = 1;
 }
 
 /** Function that evaluates the llh.
@@ -109,7 +116,7 @@ SampleSpace::Minimize(
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
     sample_space(test_func_->get_ndims());
-
-    MinimizerResult result;
+    result.minimizer_name = "SampleSpace";
+    result.function_name = test_func_->get_name();
     return result;
 }

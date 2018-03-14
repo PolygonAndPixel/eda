@@ -51,6 +51,7 @@ public:
     
     uint32_t n_lh_calls, n_accepted;
     TestFunctions *test_func_;
+    MinimizerResult result;
     
 private:
 

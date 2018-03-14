@@ -11,7 +11,7 @@ TestFunctions::TestFunctions() {
     
 
     lh_p = &TestFunctions::gauss_shell;
-    ndims = 2;
+    ndims_ = 2;
     // Values taken from
     // "MultiNest: an efficient and robust Bayesian inference tool 
     // for cosmology and particle physics"
@@ -24,25 +24,26 @@ TestFunctions::TestFunctions(
     std::string func_name, 
     uint32_t ndims) {
     
+    name = func_name;
     if(func_name == "egg") {
         lh_p = &TestFunctions::eggholder;
-        ndims = 2;
+        ndims_ = 2;
     }
     else if(func_name == "town") {
         lh_p = &TestFunctions::townsend;
-        ndims = 2;
+        ndims_ = 2;
     }
         else if(func_name == "rosenbrock") {
         lh_p = &TestFunctions::rosenbrock;
-        ndims = ndims;
+        ndims_ = ndims;
     }
     else if(func_name == "himmelblau") {
         lh_p = &TestFunctions::himmelblau;
-        ndims = 2;
+        ndims_ = 2;
     }
     else {
         lh_p = &TestFunctions::gauss_shell;
-        ndims = ndims;
+        ndims_ = ndims;
         // Values taken from
         // "MultiNest: an efficient and robust Bayesian inference tool 
         // for cosmology and particle physics"
@@ -51,13 +52,21 @@ TestFunctions::TestFunctions(
     }
 }
 
+/** Getter for the name of the used function.
+ * 
+ *  \return         name
+ * */
+std::string TestFunctions::get_name() {
+    return name;
+}
+
 /** Getter for the dimension.
  * 
- *  \return         ndims
+ *  \return         ndims_
  * */
 uint32_t TestFunctions::get_ndims() {
     
-    return ndims;
+    return ndims_;
 }
 
 /** Call the member function stored in lh_p. If you can use C++17, I 
@@ -89,6 +98,7 @@ double TestFunctions::eggholder(
     
     double left = -(theta[1] + 47)*sin(sqrt(abs(theta[0]/2 + (theta[1]+47))));
     double right = theta[0] * sin(sqrt(abs(theta[0] - (theta[1]+47))));
+    
     return left - right;
 }
 
@@ -176,6 +186,7 @@ double TestFunctions::gauss_shell(
     v_d theta) {
     
     double factor = 1/sqrt(2*M_PI*shell_width*shell_width);
+    
     double left = (theta[0]-2.5)*(theta[0]-2.5);
     double right = (theta[0]+2.5)*(theta[0]+2.5);
     for(v_d::iterator theta_iter=theta.begin()+1; theta_iter<theta.end(); 
