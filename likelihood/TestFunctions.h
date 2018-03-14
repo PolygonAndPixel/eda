@@ -32,6 +32,8 @@ public:
     double rosenbrock(v_d theta);
     double himmelblau(v_d theta);
     double gauss_shell(v_d theta);
+    
+    void set_func(std::string func_name, uint32_t ndims);
 
 private:
     std::string name;

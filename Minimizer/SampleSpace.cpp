@@ -112,6 +112,7 @@ SampleSpace::Minimize(
     v_d lower_bounds,
     v_d upper_bounds ) {
     
+    reset_calls();
     upper_bnds = upper_bounds;
     lower_bnds = lower_bounds;
     test_func_ = &test_func;

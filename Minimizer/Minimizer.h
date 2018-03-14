@@ -24,13 +24,13 @@ public:
         boost::uniform_real<> uni_dist(0,1);
         boost::variate_generator<boost::mt19937&, 
             boost::uniform_real<> > uf(intgen, uni_dist);
-        n_lh_calls = 0;
-        n_accepted = 0;
+        result.n_lh_calls = 0;
+        result.lh_efficiency = 0;
     };
 
-    uint32_t get_n_lh_calls() {return n_lh_calls;};
-    double get_lh_efficiency() {return n_accepted/n_lh_calls;};
-    void reset_calls(){n_lh_calls=0; n_accepted=0;};
+    uint32_t get_n_lh_calls() {return result.n_lh_calls;};
+    double get_lh_efficiency() {return result.lh_efficiency;};
+    void reset_calls(){result.n_lh_calls=0; result.lh_efficiency=0;};
     void set_bounds(v_d upper, v_d lower) {upper_bnds=upper; lower_bnds=lower;};
     
     /// core method: minimizer a given function with given initial conditions
@@ -49,7 +49,6 @@ public:
     double precision_criterion_;
     uint32_t min_iter_, max_iter_, max_points_;
     
-    uint32_t n_lh_calls, n_accepted;
     TestFunctions *test_func_;
     MinimizerResult result;
     

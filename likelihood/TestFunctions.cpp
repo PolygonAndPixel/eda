@@ -25,11 +25,11 @@ TestFunctions::TestFunctions(
     uint32_t ndims) {
     
     name = func_name;
-    if(func_name == "egg") {
+    if(func_name == "eggholder") {
         lh_p = &TestFunctions::eggholder;
         ndims_ = 2;
     }
-    else if(func_name == "town") {
+    else if(func_name == "townsend") {
         lh_p = &TestFunctions::townsend;
         ndims_ = 2;
     }
@@ -206,4 +206,48 @@ double TestFunctions::gauss_shell(
     right = factor * exp(right);
     
     return left + right;
+}
+
+/** Change the used function and the number of dimensions.
+ * 
+ *  \param func_name    The name of the desired function. Options are:
+ *                      egg:        eggholder function
+ *                      town:       townsend function
+ *                      rosenbrock: rosenbrock function
+ *                      himmelblau: himmelblau's function
+ *                      else just use gaussian shell function
+ *  \param ndims        The number of dimension.
+ * 
+ * */
+void TestFunctions::set_func(
+    std::string func_name, 
+    uint32_t ndims) {
+    
+    name = func_name;
+    if(func_name == "eggholder") {
+        lh_p = &TestFunctions::eggholder;
+        ndims_ = 2;
+    }
+    else if(func_name == "townsend") {
+        lh_p = &TestFunctions::townsend;
+        ndims_ = 2;
+    }
+        else if(func_name == "rosenbrock") {
+        lh_p = &TestFunctions::rosenbrock;
+        ndims_ = ndims;
+    }
+    else if(func_name == "himmelblau") {
+        lh_p = &TestFunctions::himmelblau;
+        ndims_ = 2;
+    }
+    else {
+        lh_p = &TestFunctions::gauss_shell;
+        ndims_ = ndims;
+        // Values taken from
+        // "MultiNest: an efficient and robust Bayesian inference tool 
+        // for cosmology and particle physics"
+        shell_width = 0.1;
+        r = 2;
+    }
+    
 }
