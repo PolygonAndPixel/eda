@@ -9,12 +9,14 @@
 int main(int argc, char* argv[]) {
     
     uint32_t n_iterations = 1000000;
-    uint32_t max_points = n_iterations+2;
+    uint32_t max_points = n_iterations/10;
     uint32_t seed = 1025;
     uint32_t ndims = 2;
+    std::string path = "output/";
     // Try the eggholder function
     TestFunctions test_func("eggholder", ndims);
     SampleSpace sampler(n_iterations, max_points, seed);
+    sampler.set_output(path);
     v_d lower_bounds(ndims);
     v_d upper_bounds(ndims);
     lower_bounds[0] = -512;

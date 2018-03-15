@@ -34,7 +34,7 @@ void SampleSpace::sample_space(
     boost::variate_generator<boost::mt19937&,
         boost::uniform_real<> > uf(intgen, uni_dist);
 
-    std::ofstream ofile(base_dir_.c_str(),
+    std::ofstream ofile((base_dir_+file_name_).c_str(),
         std::ofstream::out  | std::ofstream::app);
     for(int j=0; j<nDims; j++) ofile << "Param" << j << "\t";
     ofile << std::endl;
@@ -89,18 +89,28 @@ double SampleSpace::get_llh(
  *                          free parameter for minimization
  * */
 v_d SampleSpace::to_physics(
-     double *cube,
-     uint32_t nDims) {
+    double *cube,
+    uint32_t nDims) {
 
-     v_d theta;
+    v_d theta;
 
-     for (int i=0; i<nDims; i++) {
-         theta.push_back(this->lower_bnds[i]
-            + (this->upper_bnds[i] - this->lower_bnds[i])
-            * cube[i]);
-     }
-     return theta;
- }
+    for (int i=0; i<nDims; i++) {
+        theta.push_back(this->lower_bnds[i]
+        + (this->upper_bnds[i] - this->lower_bnds[i])
+        * cube[i]);
+    }
+    return theta;
+}
+
+/** Set the path for the output.
+ * 
+ *  \param path     The path ending with '/'.
+ * */
+void SampleSpace::set_output(
+    std::string path) {
+    
+    base_dir_ = path + "SampleSpace/";
+}
 
 /** Required Minimize() function for every minimizer. Sets the bounds.
  *
@@ -113,9 +123,11 @@ SampleSpace::Minimize(
     v_d upper_bounds ) {
     
     reset_calls();
+    results.clear();
     upper_bnds = upper_bounds;
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
+    file_name_ = test_func_->get_name();
     sample_space(test_func_->get_ndims());
     result.minimizer_name = "SampleSpace";
     result.function_name = test_func_->get_name();

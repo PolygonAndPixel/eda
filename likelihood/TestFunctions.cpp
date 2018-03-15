@@ -80,8 +80,6 @@ double TestFunctions::get_lh(
     v_d theta) {
     
     return CALL_MEMBER_FN(*this, lh_p)(theta);
-    
-//     return this.*lh_p(theta);
 }
 
 /** Calculate the likelihood by evaluating the eggholder function.

@@ -21,9 +21,11 @@ public:
     double get_llh(v_d theta);
     /// Transform point from hypercube to physical space
     v_d to_physics(double *cube, uint32_t nDims);
+    
+    void set_output(std::string path);
 
 private:
-    std::string base_dir_;
+    std::string base_dir_, file_name_;
     v_d results;
 };
 
