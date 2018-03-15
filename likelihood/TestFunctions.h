@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <limits>
+#include "../helper/abbreviations.h"
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 

@@ -1,6 +1,7 @@
 #include <boost/cstdint.hpp>
 #include <iostream>
 
+#include "helper/abbreviations.h"
 #include "Minimizer/SampleSpace.h"
 #include "likelihood/TestFunctions.h"
 #include "Minimizer/MinimizerResult.h"

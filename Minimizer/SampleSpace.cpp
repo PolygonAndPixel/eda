@@ -14,7 +14,8 @@
 SampleSpace::SampleSpace(
     uint32_t max_iter, 
     uint32_t max_points,
-    uint32_t seed) : Minimizer(0, max_iter, 0, max_points, seed)
+    uint32_t seed,
+    bool dump_points) : Minimizer(0, max_iter, 0, max_points, seed, dump_points)
 {
     
 }
@@ -29,15 +30,19 @@ void SampleSpace::sample_space(
     uint32_t nDims){
 
     uint32_t c = 1;
-    double *cube = new double[nDims];
+    v_d cube(nDims);
     boost::uniform_real<> uni_dist(0,1);
     boost::variate_generator<boost::mt19937&,
         boost::uniform_real<> > uf(intgen, uni_dist);
 
-    std::ofstream ofile((base_dir_+file_name_).c_str(),
-        std::ofstream::out  | std::ofstream::app);
-    for(int j=0; j<nDims; j++) ofile << "Param" << j << "\t";
-    ofile << std::endl;
+    if(dump_points_) {
+        std::ofstream ofile((base_dir_+file_name_).c_str(),
+            std::ofstream::out  | std::ofstream::app);
+  
+        for(int j=0; j<nDims; j++) ofile << "Param" << j << "\t";
+        ofile << std::endl;
+        ofile.close();
+    }
     for(int i=0; i<max_iter_; i++, c++) {
         if(i%50000 == 0) {printf("\r (>^.^)> %d     ", i); fflush(stdout);}
         else if(i%75000 == 0) {printf("\r (>°.°)> %d", i); fflush(stdout);}
@@ -53,8 +58,11 @@ void SampleSpace::sample_space(
             result.params_best_fit = theta;
         }
         
-        if(c%max_points_ == 0 || i == max_iter_-1) {
+        if(dump_points_ && (c%max_points_ == 0 || i == max_iter_-1)) {
             int d = 1;
+            
+            std::ofstream ofile((base_dir_+file_name_).c_str(),
+                std::ofstream::out  | std::ofstream::app);
             for(v_d::iterator p=results.begin();
                 p != results.end(); ++p) {
 
@@ -62,23 +70,11 @@ void SampleSpace::sample_space(
                 if(d%(nDims+1) == 0) ofile << std::endl;
                 d++;
             }
+            ofile.close();
             results.clear();
         }
     }
-    ofile.close();
-    result.n_lh_calls = c-1;
     result.lh_efficiency = 1;
-}
-
-/** Function that evaluates the llh.
- *
- *  \param theta            Physical parameters of point that
- *                          shall be evaluated.
- * */
-double SampleSpace::get_llh(
-    v_d theta) {
-
-    return test_func_->get_lh(theta);
 }
 
 /** Function to map from the unit hypercube to Theta in the physical space.
@@ -89,7 +85,7 @@ double SampleSpace::get_llh(
  *                          free parameter for minimization
  * */
 v_d SampleSpace::to_physics(
-    double *cube,
+    v_d cube,
     uint32_t nDims) {
 
     v_d theta;
@@ -102,18 +98,12 @@ v_d SampleSpace::to_physics(
     return theta;
 }
 
-/** Set the path for the output.
- * 
- *  \param path     The path ending with '/'.
- * */
-void SampleSpace::set_output(
-    std::string path) {
-    
-    base_dir_ = path + "SampleSpace/";
-}
-
 /** Required Minimize() function for every minimizer. Sets the bounds.
  *
+ *  \param test_func        The function which shall be minimized
+ *  \param lower_bounds     The lower bounds for each dimension
+ *  \param upper_bounds     The upper bounds for each dimension
+ * 
  *  \return                 The result of the minimization
  * */
 MinimizerResult
