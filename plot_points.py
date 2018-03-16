@@ -38,12 +38,15 @@ with open(sys.argv[1], 'r') as f:
             dim_names = [str(data[i]) for i in dim_idx]
             first = False                    
         elif data[0] != "Param0":        
+            tmp_llh = float(data[nDims])
+            if np.isinf(tmp_llh):
+                tmp_llh = np.finfo(tmp_llh).max
+            llh.append(tmp_llh)
             params = [float(data[i]) for i in dim_idx]
             params.append(float(data[nDims]))
             x.append(params)
-            llh.append(float(data[nDims]))
-
-
+            
+            
 x = np.asarray(x)
 llh = np.asarray(llh)
 
@@ -53,7 +56,9 @@ if len(x[:,0]) > 3000 and contour:
     llh = llh[0::step]
     
 min_llh = np.min(llh)
-max_llh = np.max(llh)
+tmp_llh = np.copy(llh)
+mask = np.ma.masked_where(llh == np.finfo(min_llh).max, llh)
+max_llh = np.max(mask)
 levels = np.linspace(min_llh, max_llh, 100)
 
 if three_d:
@@ -83,7 +88,7 @@ ax.set_ylabel(dim_names[1])
 
 plt.suptitle(text)
 fig.colorbar(sc)
-sc.colorbar.set_label('likelihood')
+sc.colorbar.set_label('function evaluation')
 plt.savefig(base_dir + sys.argv[2], dpi=600)
 plt.close()
 

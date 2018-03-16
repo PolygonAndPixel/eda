@@ -15,8 +15,9 @@ TestFunctions::TestFunctions() {
     // Values taken from
     // "MultiNest: an efficient and robust Bayesian inference tool 
     // for cosmology and particle physics"
+    // radius made a bit smaller to avoid overlaps.
     shell_width = 0.1;
-    r = 2;
+    r = 0.5;
     
 }
 
@@ -48,7 +49,7 @@ TestFunctions::TestFunctions(
         // "MultiNest: an efficient and robust Bayesian inference tool 
         // for cosmology and particle physics"
         shell_width = 0.1;
-        r = 2;
+        r = 0.5;
     }
 }
 
@@ -169,12 +170,14 @@ double TestFunctions::himmelblau(
     return left+right;
 }
 
-/** Calculate the likelihood by evaluating teh gaussian shell function.
+/** Calculate the negative log-likelihood by evaluating the 
+ *  gaussian shell function, where -log(0) is set to 0.
  *  See "MultiNest: an efficient and robust Bayesian inference tool for 
  *  cosmology and particle physics", Eq. 32 and 33.
  *  We always set the center of the shells at (-2.5, 0, 0, ..., 0)
  *  and (2.5, 0, 0, ..., 0).
  *  Dimensions should be bounded by -6 and 6 in all dimensions.
+ *  
  * 
  *  \param theta    Physical parameters of point that shall be evaluated.
  * 
@@ -201,9 +204,10 @@ double TestFunctions::gauss_shell(
     right = sqrt(right) - r;
     right *= right;
     right /= 2 * shell_width*shell_width;
-    right = factor * exp(right);
-    
-    return left + right;
+    right = factor * exp(-right);
+
+    if(isinf(log(left + right))) return 0;
+    return -log(left + right);
 }
 
 /** Change the used function and the number of dimensions.
@@ -245,7 +249,7 @@ void TestFunctions::set_func(
         // "MultiNest: an efficient and robust Bayesian inference tool 
         // for cosmology and particle physics"
         shell_width = 0.1;
-        r = 2;
+        r = 0.5;
     }
     
 }

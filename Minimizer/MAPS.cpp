@@ -51,7 +51,7 @@ bool MAPS::check_premature(
 
     v_d mean = get_center(pop);
     m_d cov = get_cov(pop, real_cov);
-    for(m_d::iterator discarded_means=discarded_pops_.begin();
+    for(auto discarded_means=discarded_pops_.begin();
         discarded_means<discarded_pops_.end(); discarded_means++) {
 
         if(is_similar(mean, *discarded_means, cov)) {
@@ -96,8 +96,8 @@ v_i MAPS::make_histogram(
     v_i freq(n_bins);
     freq_pop.resize(n_bins);
     uint32_t width = SDIV(max_value-min_value, n_bins);
-    m_d::iterator not_projected = pop.begin();
-    for(v_d::iterator p=projected_pop.begin(); p<projected_pop.end();
+    auto not_projected = pop.begin();
+    for(auto p=projected_pop.begin(); p<projected_pop.end();
         p++, not_projected++) {
 
         uint32_t idx = SDIV(*p-min_value, width);
@@ -121,9 +121,9 @@ v_d prod(
 
     v_d projected(a.size());
     uint32_t i=0;
-    for(m_d::iterator m_iter=a.begin(); m_iter<a.end(); ++m_iter, ++i) {
+    for(auto m_iter=a.begin(); m_iter<a.end(); ++m_iter, ++i) {
         double sum = 0;
-        for(v_d::iterator a_iter=m_iter->begin(), b_iter=b.begin();
+        for(auto a_iter=m_iter->begin(), b_iter=b.begin();
             (a_iter<m_iter->end() && b_iter<b.end()); ++a_iter, ++b_iter) {
 
             sum += (*a_iter) * (*b_iter);
@@ -230,7 +230,7 @@ std::vector<m_d> MAPS::iterative_observation(
     v_i higher_bins = find_higher_bin(freq);
     std::vector<m_d> new_sub_pops = confirm_bins(higher_bins, freq, freq_pop);
     if(dim < ndims) {
-        for(std::vector<m_d>::iterator sub_pop_p=new_sub_pops.begin();
+        for(auto sub_pop_p=new_sub_pops.begin();
             sub_pop_p<new_sub_pops.end(); sub_pop_p++) {
 
             fine_sub_pop = iterative_observation(*sub_pop_p,
@@ -261,7 +261,7 @@ std::vector<m_d> MAPS::maintaining(
                                    // make up 85%, see paper page 4
     double eigen_sum = 0;
 
-    for(v_d::iterator eigen=eigen_values.begin(); eigen<eigen_values.end();
+    for(auto eigen=eigen_values.begin(); eigen<eigen_values.end();
         eigen++) {
 
         eigen_sum += abs(*eigen);
@@ -269,8 +269,8 @@ std::vector<m_d> MAPS::maintaining(
     m_d directions;
     eigen_sum *= eigen_threshold;
     double current_sum = 0;
-    m_d::iterator eigen_vec=eigen_v.begin();
-    for(v_d::iterator eigen=eigen_values.begin(); eigen<eigen_values.end();
+    auto eigen_vec=eigen_v.begin();
+    for(auto eigen=eigen_values.begin(); eigen<eigen_values.end();
         eigen++, eigen_vec++) {
 
         current_sum += abs(*eigen);
@@ -298,7 +298,7 @@ std::vector<m_d> MAPS::processing(
 
     boost::uniform_real<> uni_dist(0,1);
     boost::uniform_01<boost::minstd_rand> uf(intgen);
-    for(std::vector<m_d>::iterator pop=estimated_sub_pops.begin();
+    for(auto pop=estimated_sub_pops.begin();
         pop<estimated_sub_pops.end(); pop++) {
 
         m_d tmp_pop;
@@ -313,20 +313,20 @@ std::vector<m_d> MAPS::processing(
         m_d selected_pop = truncatedly_select(tmp_pop, n_sub_selected_, ndims);
 
         // Update the parameters with the selected individuals
-        *pop = evolve_population(selected_pop);
+        *pop = evolve_population(selected_pop, ndims);
     }
 
     // Calculate the means of each population first to avoid further calculations
-    m_d centers(estimated_sub_pops.size(), ndims);
-    m_d::iterator c_iter = centers.begin();
-    for(std::vector<m_d>::iterator pop=estimated_sub_pops.begin();
-        pop<estimated_sub_pops.end(); pop++; c_iter++) {
+    m_d centers(estimated_sub_pops.size(), v_d(ndims));
+    auto c_iter = centers.begin();
+    for(auto pop=estimated_sub_pops.begin(); pop<estimated_sub_pops.end(); 
+        pop++, c_iter++) {
 
         c_iter->push_back(get_center(*pop));
     }
     std::vector<m_d> final_selected_pops;
     uint32_t idx_current_pop = 0;
-    for(std::vector<m_d>::iterator pop=estimated_sub_pops.begin();
+    for(auto pop=estimated_sub_pops.begin();
         pop<estimated_sub_pops.end(); pop++) {
 
         // Check if this population is premature
@@ -341,13 +341,13 @@ std::vector<m_d> MAPS::processing(
         // Check if population is similar to any other one
         uint32_t compare_idx = 0;
         bool break_up = false;
-        for(m_d::iterator c_iter=centers.begin(); c_iter<centers.end();
+        for(auto c_iter=centers.begin(); c_iter<centers.end();
             c_iter++, compare_idx++) {
 
             if(compare_idx == idx_current_pop) continue;
-            if(is_similar(*c_iter, centers[idx_current_pop], cov)) {
+            if(is_similar(*c_iter, centers[idx_current_pop], cov_)) {
                 // Check which one is better
-                if(*pop[ndims] < (*c_iter)[ndims]) {
+                if((*pop)[ndims] < (*c_iter)[ndims]) {
                     break_up = true;
                     break;
 
@@ -360,11 +360,10 @@ std::vector<m_d> MAPS::processing(
         }
 
         // Check if population is similar with any discarded one
-        for(m_d::iterator dis_iter=discarded_pops_.begin();
+        for(auto dis_iter=discarded_pops_.begin();
             dis_iter<discarded_pops_.end(); dis_iter++) {
 
-            v_d current_center = get_center(*dis_iter);
-            if(is_similar(current_center, centers[idx_current_pop], )) {
+            if(is_similar(*dis_iter, centers[idx_current_pop], cov_)) {
                 break_up = true;
                 break;
             }
@@ -432,9 +431,9 @@ v_d MAPS::to_physics(
  * */
 int MAPS::pca(
     m_d in,
-    m_d &eigen_v,
-    m_d &cov,
-    v_d &eigen_values,
+    m_d eigen_v,
+    m_d cov,
+    v_d eigen_values,
     uint32_t ndims,
     bool real_cov) {
 
@@ -442,17 +441,17 @@ int MAPS::pca(
     if(real_cov) {
         // Adjust data s.t. it is centered around 0
         v_d means(ndims);
-        for(m_d::iterator v=in.begin(); v<in.end(); v++) {
+        for(auto v=in.begin(); v<in.end(); v++) {
             uint32_t i = 0;
-            for(m_d::iterator2 e=v.begin(); e<v.end(); e++, i++) {
+            for(auto e=v.begin(); e<v.end(); e++, i++) {
                 means(i) += *e;
             }
         }
-        for(v_d::iterator e=means.begin(); e<means.end(); e++) {
+        for(auto e=means.begin(); e<means.end(); e++) {
             *e /= in.size();
         }
 
-        for(m_d::iterator v=in.begin(); v<in.end(); v++) {
+        for(auto v=in.begin(); v<in.end(); v++) {
             *v -= means;
         }
         // Easier to read but is it also faster than plain for loops?
@@ -567,7 +566,7 @@ v_d MAPS::get_center(
     bool ignore_last_col) {
 
     v_d centre(pop[0].size());
-    for(m_d::iterator v=pop.begin(); v<pop.end(); v++) {
+    for(auto v=pop.begin(); v<pop.end(); v++) {
         centre += *v;
     }
     centre /= pop.size();
@@ -595,7 +594,7 @@ v_d MAPS::get_center(
  * */
 m_d MAPS::get_cov(
     m_d pop,
-    unit32_t ndims,
+    uint32_t ndims,
     bool ignore_last_col,
     bool real_cov) {
 
@@ -604,17 +603,17 @@ m_d MAPS::get_cov(
     if(real_cov) {
         // Adjust data s.t. it is centered around 0
         v_d means(ndims);
-        for(m_d::iterator v=pop.begin(); v<pop.end(); v++) {
+        for(auto v=pop.begin(); v<pop.end(); v++) {
             uint32_t i = 0;
             for(m_d::iterator2 e=v.begin(); e<v.end(); e++, i++) {
                 means[i] += *e;
             }
         }
-        for(v_d::iterator e=means.begin(); e<means.end(); e++) {
+        for(auto e=means.begin(); e<means.end(); e++) {
             *e /= pop.size();
         }
 
-        for(m_d::iterator v=pop.begin(); v<pop.end(); v++) {
+        for(auto v=pop.begin(); v<pop.end(); v++) {
             *v -= means;
         }
         // Easier to read but is it also faster than plain for loops?
@@ -677,8 +676,7 @@ void MAPS::execute_maps(
         vector<m_d> sub_pops = maintaining(offspring);
 
         // Sort points in each sub_pop descending of its fitness
-        for(vector<m_d>::iterator pop=sub_pops.begin();
-            pop<sub_pops.end(); pop++) {
+        for(auto pop=sub_pops.begin(); pop<sub_pops.end(); pop++) {
 
             std::sort(pop->begin(), pop->end(),
                 boost::bind(&v_d[ndims], _1) <
@@ -692,13 +690,13 @@ void MAPS::execute_maps(
         // then add point to estimated population
         int n_estimated_models = 0;
         int offset = 0;
-        for(vector<m_d>::iterator pop=sub_pops.begin();
+        for(auto pop=sub_pops.begin();
             pop<sub_pops.end(); pop++) {
 
             v_d best_fit_individual = (*pop)[0];
             // Check for similarity in discarded points and estimated_pop
             bool add_this = true;
-            for(m_d::iterator es=estimated_pops.begin();
+            for(auto es=estimated_pops.begin();
                 es<estimated_pops.end(); es++) {
 
                 if(is_similar(*es, best_fit_individual, identity)) {
@@ -707,7 +705,7 @@ void MAPS::execute_maps(
                 }
             }
             if(!add_this) continue;
-            for(m_d::iterator ds=discarded_points.begin();
+            for(auto ds=discarded_points.begin();
                 ds<discarded_points.end(); ds++) {
 
                 if(is_similar(*ds, best_fit_individual, identity, ndims)) {
@@ -738,7 +736,7 @@ void MAPS::execute_maps(
                 params_best_fit[d] = estimated_pops[0][0][d];
             }
             lh_worstFit_ = lh_bestFit_;
-            for(std::vector<m_d>::iterator e_iter=estimated_pops.begin();
+            for(auto e_iter=estimated_pops.begin();
                 e_iter<estimated_pops.end(); e_iter++) {
 
                 for(m_d::iterator pop_iter=e_iter->begin(); pop_iter<e_iter->end();
@@ -820,7 +818,7 @@ m_d MAPS::evolve_population(
     double multiplier = 1.0/(std::sqrt(variance_2*M_PI));
     variance_2 = -1.0/variance_2;
     uint32_t p=0;
-    for(m_d::iterator pop_iter=pop.begin();
+    for(auto pop_iter=pop.begin();
         pop_iter<pop.end(); pop_iter++, p++) {
 
         v_d new_p(ndims+1);
