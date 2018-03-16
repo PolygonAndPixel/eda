@@ -207,7 +207,7 @@ double TestFunctions::gauss_shell(
     right = factor * exp(-right);
 
     if(isinf(log(left + right))) return 0;
-    return -log(left + right);
+    return log(left + right);
 }
 
 /** Change the used function and the number of dimensions.
