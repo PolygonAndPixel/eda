@@ -31,9 +31,6 @@ void SampleSpace::sample_space(
 
     uint32_t c = 1;
     v_d cube(nDims);
-    boost::uniform_real<> uni_dist(0,1);
-    boost::variate_generator<boost::mt19937&,
-        boost::uniform_real<> > uf(intgen, uni_dist);
 
     if(dump_points_) {
         std::ofstream ofile((base_dir_+file_name_).c_str(),
@@ -46,7 +43,7 @@ void SampleSpace::sample_space(
     for(int i=0; i<max_iter_; i++, c++) {
         if(i%50000 == 0) {printf("\r (>^.^)> %d     ", i); fflush(stdout);}
         else if(i%75000 == 0) {printf("\r (>°.°)> %d", i); fflush(stdout);}
-        for(int j=0; j<nDims; j++) cube[j] =uf();
+        for(int j=0; j<nDims; j++) cube[j] =uf(intgen);
 
         v_d theta = to_physics(cube, nDims);
 

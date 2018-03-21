@@ -10,8 +10,9 @@
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 
 const double EULER_CONST = exp(1.0);
-typedef std::vector<double> v_d;
-typedef std::vector<uint32_t>  v_i;
-typedef std::vector<v_d>  m_d;
+
+using v_d = std::vector<double>;
+using v_i = std::vector<uint32_t>;
+using m_d = std::vector<v_d>;
 
 #endif

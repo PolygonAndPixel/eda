@@ -45,8 +45,9 @@ public:
         return test_func_->get_lh(theta);};
     /// Transform point from hypercube to physical space
     virtual v_d to_physics(v_d cube, uint32_t nDims) = 0;
-    boost::mt19937 intgen;
     
+    std::mt19937 intgen;
+    std::uniform_real_distribution<> uf;
     v_d upper_bnds, lower_bnds;
     v_d params_best_fit;
     double lh_bestFit_, lh_worstFit_;
@@ -58,6 +59,7 @@ public:
     std::string base_dir_, file_name_;
     bool dump_points_;
     v_d results;
+    
     
 private:
     

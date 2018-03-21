@@ -5,12 +5,10 @@
 #include "Minimizer.h"
 #include "../helper/abbreviations.h"
 
+#include <random>
 #include <boost/fusion/include/push_back.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/vector.hpp>
 #include <lapacke.h>
-
-using namespace boost::numeric::ublas;
+#include <cblas.h>
 
 class MAPS : public Minimizer {
 public:
@@ -25,8 +23,10 @@ public:
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds, 
                              v_d upper_bounds);
 
-    // Check if a population is premature and store it to the discarded ones.
-    bool check_premature(m_d pop, bool real_cov=false);
+    // Check if a population is premature and store it to the discarded ones
+    // if true
+    bool check_premature(m_d pop, uint32_t idx, uint32_t ndims, 
+                         double epsilon=1e-3);
 
     // Construct a histogram in 1D sub-space. The direction is the direction
     // to go in this subspace. This can be the Cartesian coordinates given
@@ -52,7 +52,7 @@ public:
     std::vector<m_d> processing(std::vector<m_d> estimated_sub_pops,
         uint32_t ndims);
 
-    void pca(m_d in, m_d &eigen_v, m_d &cov, v_d &eigen_values,
+    void pca(m_d in, m_d & eigen_v, m_d & cov, v_d & eigen_values,
              uint32_t ndims, bool real_cov=false);
 
     // Check by using Mahalanobis distance of parameters + llh with identity matrix as
@@ -60,11 +60,12 @@ public:
     // which leads to the question, which one?
     // TODO: Change epsilon to (h-l)/100 which only makes sense if all
     // parameters are in the same range though...
-    bool is_similar(v_d a, v_d b, m_d cov, double epsilon=1e-3);
-    bool is_similar(m_d A, m_d B, m_d cov, uint32_t ndims, double epsilon=1e-3);
+    bool is_similar(v_d a, v_d b, m_d & cov, double epsilon=1e-3);
+    bool is_similar(m_d A, m_d B, m_d & cov, uint32_t ndims, double epsilon=1e-3);
 
     v_d get_center(m_d pop, bool ignore_last_col=true);
-    m_d get_cov(m_d pop, bool ignore_last_col=true, bool real_cov=false);
+    m_d get_cov(m_d pop, uint32_t ndims, bool ignore_last_col=true, 
+                bool real_cov=false);
 
     void execute_maps(uint32_t ndims);
 
@@ -85,6 +86,7 @@ private:
     uint32_t n_start_points_, max_sub_pops_;
     uint32_t size_sub_pop_, n_selected_, n_sub_selected_;
     m_d cov_;
+    std::vector<std::pair<uint32_t, double>> premature_list_;
 };
 
 #endif

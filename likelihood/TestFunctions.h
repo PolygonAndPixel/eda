@@ -8,10 +8,6 @@
 #include <limits>
 #include "../helper/abbreviations.h"
 
-#define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
-
-typedef std::vector<double> v_d;
-
 class TestFunctions {
     typedef double(TestFunctions::*lh_pointer)(v_d theta);
 public:
@@ -42,7 +38,5 @@ private:
     // Some variables for the gaussian shell
     double shell_width, r; // width and radius of the shells
 };
-
-
 
 #endif

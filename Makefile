@@ -1,11 +1,11 @@
-GCC=g++
-GCCFLAGS= -O3 -I /home/mhierony/lib/lapack-3.8.0/LAPACKE/include -std=c++11
-FILES= Minimizer/SampleSpace.cpp Minimizer/SampleSpace.h likelihood/*.cpp helper/*
+CXX=g++-4.8
+CXXFLAGS= -O3 -I /opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib -lopenblas -lpthread -llapack -std=c++11 -g
+FILES= main.cpp Minimizer/*.cpp likelihood/*.cpp helper/*
 
-all: test
+all: main
 
-test: main.cpp
-	$(GCC) $(GCCFLAGS) main.cpp $(FILES)  -o main 
+main: main.cpp
+	$(CXX) $(CXXFLAGS) $(FILES)  -o main 
 
 clean:
 	rm -f main

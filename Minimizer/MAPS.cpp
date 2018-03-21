@@ -36,30 +36,44 @@ MAPS::MAPS(
     n_sub_selected = n_sub_selected_;
 }
 
-/** Check if a population is similar to a discarded one and return true.
- *  Also stores the mean of the discarded population in discarded_pops_.
+/** Check if a population is premature.
+ *  If the fit of the best individual didn't change within 1e-4 for ten 
+ *  generations, it is considered premature (aka doesn't contain a global 
+ *  optimum). If it is premature, it is recorded to discarded_pop_.
  *
  *  \param pop      The population to check
- *  \param real_cov Calculate the real covariance matrix if true. Else just
- *                  use a tenth of the identity matrix.
+ *  \param idx      The index of this population in premature_list_.
+ *  \param ndims    Dimensionallity of parameter space in terms of
+ *                  free parameter for minimization
+ *  \param epsilon  Precision at which two fits are similar.
  *
- *  \return         True if population is similar to a discarded one
+ *  \return         True if population is premature
  * */
 bool MAPS::check_premature(
     m_d pop,
-    bool real_cov) {
-
-    v_d mean = get_center(pop);
-    m_d cov = get_cov(pop, real_cov);
-    for(auto discarded_means=discarded_pops_.begin();
-        discarded_means<discarded_pops_.end(); discarded_means++) {
-
-        if(is_similar(mean, *discarded_means, cov)) {
-            discarded_pops_.push_back(mean);
-            return true;
+    uint32_t idx,
+    uint32_t ndims,
+    double epsilon) {
+    
+    double best_fit = pop[0][ndims];
+    for(auto pop_iter=pop.begin(); pop_iter<pop.end(); ++pop_iter) {
+        if(best_fit > (*pop_iter)[ndims]) {
+            best_fit = (*pop_iter)[ndims];
         }
     }
-    return false;
+    if(abs(premature_list_[idx].second - best_fit) < epsilon) {
+        if(premature_list_[idx].first == 10) {
+            v_d mean = get_center(pop);
+            discarded_pops_.push_back(mean);
+            return true;
+        } else {
+            premature_list_[idx].first++;
+            return false;
+        }
+    } else {
+        premature_list_[idx].first = 1;
+        premature_list_[idx].second = best_fit;
+    }
 }
 
 
@@ -74,7 +88,7 @@ bool MAPS::check_premature(
  *  \param dim              The current dimension in the parameter above we
  *                          are interested in
  *  \param freq_pop         The population sorted in its bins. The row is the
- *                          bin and the vectors are concatenated in each row.
+ *                          bin and the vectors are concatenated in each row
  *
  *  \return                 A histogram
  * */
@@ -115,7 +129,7 @@ v_i MAPS::make_histogram(
  *
  *  \return         The projected values.
  * */
-v_d prod(
+v_d MAPS::prod(
     m_d a,
     v_d b) {
 
@@ -296,15 +310,13 @@ std::vector<m_d> MAPS::processing(
     std::vector<m_d> estimated_sub_pops,
     uint32_t ndims) {
 
-    boost::uniform_real<> uni_dist(0,1);
-    boost::uniform_01<boost::minstd_rand> uf(intgen);
     for(auto pop=estimated_sub_pops.begin();
         pop<estimated_sub_pops.end(); pop++) {
 
         m_d tmp_pop;
         // Sample size_sub_pop_ many points
         for(uint32_t i=0; i<n_sub_selected_; i++) {
-            double rnd = uf();
+            double rnd = uf(intgen);
             uint32_t idx = round(rnd * (pop->size()));
             tmp_pop.push_back((*pop)[idx]);
         }
@@ -318,23 +330,30 @@ std::vector<m_d> MAPS::processing(
 
     // Calculate the means of each population first to avoid further calculations
     m_d centers(estimated_sub_pops.size(), v_d(ndims));
-    auto c_iter = centers.begin();
     for(auto pop=estimated_sub_pops.begin(); pop<estimated_sub_pops.end(); 
-        pop++, c_iter++) {
+        pop++) {
 
-        c_iter->push_back(get_center(*pop));
+       centers.push_back(get_center(*pop));
     }
     std::vector<m_d> final_selected_pops;
     uint32_t idx_current_pop = 0;
+    uint32_t idx_premature = 0;
+    
+    std::vector<std::pair<uint32_t, double>> premature_list_tmp(premature_list_.size());
+    std::copy(premature_list_.begin(), premature_list_.end(), premature_list_tmp.begin());
+    
     for(auto pop=estimated_sub_pops.begin();
-        pop<estimated_sub_pops.end(); pop++) {
+        pop<estimated_sub_pops.end(); ++pop, ++idx_premature, ++idx_current_pop) {
 
         // Check if this population is premature
         // Need to store the value of the best fit and how long it didn't
         // change. If it didn't change within 1e-4 for then generations,
         // it is considered premature.
-        if(check_premature(*pop)) {
-            idx_current_pop++;
+        if(check_premature(*pop, idx_premature, ndims)) {
+            // Rearrange the list of best fits and generations.
+            premature_list_.erase(premature_list_.begin()+idx_premature);
+            // Need to reduce the idx because we just erased an element.
+            idx_premature--;
             continue;
         }
 
@@ -342,12 +361,12 @@ std::vector<m_d> MAPS::processing(
         uint32_t compare_idx = 0;
         bool break_up = false;
         for(auto c_iter=centers.begin(); c_iter<centers.end();
-            c_iter++, compare_idx++) {
+            ++c_iter, ++compare_idx) {
 
             if(compare_idx == idx_current_pop) continue;
             if(is_similar(*c_iter, centers[idx_current_pop], cov_)) {
                 // Check which one is better
-                if((*pop)[ndims] < (*c_iter)[ndims]) {
+                if(premature_list_[idx_premature].second < premature_list_tmp[compare_idx].second) {
                     break_up = true;
                     break;
 
@@ -355,7 +374,10 @@ std::vector<m_d> MAPS::processing(
             }
         }
         if(break_up) {
-            idx_current_pop++;
+            // Rearrange the list of best fits and generations.
+            premature_list_.erase(premature_list_.begin()+idx_premature);
+            // Need to reduce the idx because we just erased an element.
+            idx_premature--;
             continue;
         }
 
@@ -369,13 +391,15 @@ std::vector<m_d> MAPS::processing(
             }
         }
         if(break_up) {
-            idx_current_pop++;
+            // Rearrange the list of best fits and generations.
+            premature_list_.erase(premature_list_.begin()+idx_premature);
+            // Need to reduce the idx because we just erased an element.
+            idx_premature--;
             continue;
         }
 
         // Add current population to final one
         final_selected_pops.push_back(*pop);
-        idx_current_pop++;
     }
 
     return final_selected_pops;
@@ -397,7 +421,7 @@ v_d MAPS::to_physics(
     v_d theta(ndims);
 
     for (int i=0; i<ndims; i++) {
-        theta(i) = (this->lower_bnds[i]
+        theta[i] = (this->lower_bnds[i]
             + (this->upper_bnds[i] - this->lower_bnds[i])
             * cube[i]);
     }
@@ -429,14 +453,14 @@ v_d MAPS::to_physics(
  *                               diagonal elements of an intermediate
  *                               tridiagonal form  did not converge to zero.
  * */
-int MAPS::pca(
+void MAPS::pca(
     m_d in,
-    m_d eigen_v,
-    m_d cov,
-    v_d eigen_values,
+    m_d & eigen_v,
+    m_d & cov,
+    v_d & eigen_values,
     uint32_t ndims,
     bool real_cov) {
-
+    /*
     in.resize(in.size(), ndims);
     if(real_cov) {
         // Adjust data s.t. it is centered around 0
@@ -498,12 +522,18 @@ int MAPS::pca(
         &eigen_v[0],                    // Input matrix and the eigenvectors on output
         eigen_v.size(),                // Leading order dimension
         &eigen_values[0]);              // The eigenvalues on output
-
-    return info;
+    */
 }
 
 /** Check if two vectors are similar by calculating the Mahalanobis distance
  *  of their means in parameter space.
+ *                  distance = sqrt((a-b)^T cov^-1 (a-b))
+ *  Calculate a-b first. Factorize cov, s.t. it is an upper (or lower)
+ *  triangular matrix. Cholesky decomposition using forward substitution:
+ *                  cov = L D L*
+ *  Solve for y in
+ *                  L y = (a-b)
+ *                  distance = y^T*y
  *
  *  \param a            Vector a
  *  \param b            Vector b
@@ -515,18 +545,105 @@ int MAPS::pca(
 bool MAPS::is_similar(
     v_d a,
     v_d b,
-    m_d cov,
+    m_d & cov,
     double epsilon) {
 
-    // sqrt((a-b)T cov^-1 (a-b))
     v_d a_b(a.size());
     for(uint32_t i=0; i<a.size(); i++) {
-        a_b = a[i] - b[i];
+        a_b[i] = a[i] - b[i];
     }
-    double distance = inner_prod(prod<v_d>(prod<v_d>(trans<v_d>(a_b),
-        inverse<m_d>(cov)) ,a_b)))
-    return (distance < epsilon);
-
+    // If we use the identity matrix, we won't need any fancy inverse matrix.
+    // Just use Euclidean distance.
+    if(&cov == &cov_) {
+        double distance = 0.0;
+        for(auto const &val : a_b) {
+            distance += val*val;
+        }
+        return (sqrt(distance) < epsilon);
+    } 
+    int info = 0;
+    int lda = cov.size();
+    int nrhs = 1;
+    char triang = 'U';
+    double * L = new double[cov.size()*cov.size()];
+    std::copy(&(cov[0][0]), &(cov[0][0])+(cov.size()*cov.size()), L);
+    double * y = new double[a_b.size()];
+    std::copy(&(a_b[0]), &(a_b[0])+a_b.size(), y);
+    // http://www.netlib.org/lapack/explore-html/d1/d7a/group__double_p_ocomputational_ga167aa0166c4ce726385f65e4ab05e7c1.html
+    // cov * x = a_b
+    LAPACK_dpotrs(&triang,        // Store the upper triangular part
+            &lda,           // The order of cov (N)
+            &nrhs,          // The number of columns on the right hand side
+            L,            // Array of size (lda,N)
+            &lda,           // Leading dimension of cov (lda)
+            y,            // The right hand side. on exit the solution
+            &nrhs,          // Leading dimension of a_b (ldb)
+            &info);
+        
+    if(info < 0) {
+        std::cout << "Error in MAPS::is_similar: Factorization of ";
+        std::cout << "covariance matrix failed!. Illegal value at ";
+        std::cout << abs(info) << std::endl;
+        return false;
+    } else if(info > 0) {
+        std::cout << "Error in MAPS::is_similar: Factorization of ";
+        std::cout << "covariance matrix failed!. leading minor of order ";
+        std::cout << abs(info) << " is not positive definite!" << std::endl;
+        return false;
+    }
+    double distance = 0;
+    for(uint32_t i=0; i<a_b.size(); i++) {
+        distance += y[i]*y[i];
+    }
+    
+    return (sqrt(distance) < epsilon);
+    /*
+    // Factorize cov = L D L*
+    double * cov_pointer = &(cov[0][0]);
+    double * L = new double[cov.size()*cov.size()];
+    std::copy(cov_pointer, cov_pointer+(cov.size()*cov.size()), L);
+    // http://www.netlib.org/lapack/explore-html/d1/d7a/group__double_p_ocomputational_ga2f55f604a6003d03b5cd4a0adcfb74d6.html
+    int info = 0;
+    int lda = cov.size();
+    char triang = 'U';
+    dpotrf_(&triang,           // Store the upper triangular part
+            &lda,          // The order of cov 
+            L,             // On out: the upper triangular matrix
+            &lda,          // The leading dimension
+            &info);
+    if(info < 0) {
+        std::cout << "Error in MAPS::is_similar: Factorization of ";
+        std::cout << "covariance matrix failed!. Illegal value at ";
+        std::cout << abs(info) << std::endl;
+        return false;
+    } else if(info > 0) {
+        std::cout << "Error in MAPS::is_similar: Factorization of ";
+        std::cout << "covariance matrix failed!. leading minor of order ";
+        std::cout << abs(info) << " is not positive definite!" << std::endl;
+        return false;
+    }
+    
+    // Solve L*y = (a-b)
+    v_d y(lda);
+    
+    
+    /* Sigh - lapacke cant find this one...
+    dtrsv_(triang,                  // L is an upper triangular matrix
+           'N',                  // Do not transpose L
+           'N',                  // Do not assume L to be unit triangular
+           &lda,                 // Order of L
+           L,                    // The matrix of the system
+           &lda,                 // The leading dimension of L
+           y,                    // The output array
+           1);                   // The increment for the elements of y
+    / 
+    double distance = 0;
+    for(auto val : y) {
+        distance += val*val;
+    }
+    
+    return (sqrt(distance) < epsilon);
+    */
 }
 
 /** Check if two populations are similar by calculating the Mahalanobis distance
@@ -544,13 +661,13 @@ bool MAPS::is_similar(
 bool MAPS::is_similar(
     m_d A,
     m_d B,
-    m_d cov,
+    m_d & cov,
     uint32_t ndims,
     double epsilon) {
 
     v_d a = get_center(A);
     v_d b = get_center(B);
-    return is_similar(a, b, cov, epsilon, ndims);
+    return is_similar(a, b, cov, epsilon);
 }
 
 /** Calculates the center of a population.
@@ -565,11 +682,14 @@ v_d MAPS::get_center(
     m_d pop,
     bool ignore_last_col) {
 
-    v_d centre(pop[0].size());
-    for(auto v=pop.begin(); v<pop.end(); v++) {
-        centre += *v;
+    v_d centre(pop[0].size(), 0.0);
+    for(auto const &v : pop) {
+        for(uint32_t i=0; i<v.size(); i++) {
+            centre[i] += v[i];
+        }
     }
-    centre /= pop.size();
+    for(auto &c : centre) c /= pop.size();
+
     return centre;
 }
 
@@ -598,39 +718,43 @@ m_d MAPS::get_cov(
     bool ignore_last_col,
     bool real_cov) {
 
-    if(ignore_last_col) pop.resize(pop.size(), ndims, true);
+    if(ignore_last_col) {
+        for(auto &v : pop) {
+            v.resize(ndims);
+        }
+    }
     m_d cov(ndims, v_d(ndims));
     if(real_cov) {
         // Adjust data s.t. it is centered around 0
         v_d means(ndims);
-        for(auto v=pop.begin(); v<pop.end(); v++) {
+        for(auto const &v : pop) {
             uint32_t i = 0;
-            for(m_d::iterator2 e=v.begin(); e<v.end(); e++, i++) {
-                means[i] += *e;
+            for(auto const &e : v) {
+                means[i] += e;
             }
         }
-        for(auto e=means.begin(); e<means.end(); e++) {
-            *e /= pop.size();
+        for(auto &e : means) {
+            e /= pop.size();
+        }
+        
+        for(auto &v : pop) {
+            for(uint32_t i=0; i<v.size(); i++) {
+                v[i] -= means[i];
+            }
         }
 
-        for(auto v=pop.begin(); v<pop.end(); v++) {
-            *v -= means;
+        // Calculate the symmetric covariance matrix
+        for(uint32_t row=0; row<ndims; row++) {
+            for(uint32_t col=0; col<ndims; col++) {
+                if(row <= col) {
+                    double cov_v = 0.0;
+                    for(uint32_t i=0; i<pop.size(); i++) {
+                        cov_v += pop[i][row]*pop[i][col];
+                    }
+                    cov[row][col] = cov[row][col] = cov_v/pop.size();
+                }
+            }
         }
-        // Easier to read but is it also faster than plain for loops?
-        cov = 1/(pop.size()-1) * outer_prod(trans<m_d>(pop), pop);
-
-        // // Calculate the symmetric covariance matrix
-        // for(uint32_t row=0; row<ndims; row++) {
-        //     for(uint32_t col=0; col<ndims; col++) {
-        //         if(row <= col) {
-        //             double cov_v = 0.0;
-        //             for(uint32_t i=0; i<in.size(); i++) {
-        //                 cov_v += in(i, row)*in(i, col);
-        //             }
-        //             cov(row, col) = cov(row, col) = cov_v/in.size();
-        //         }
-        //     }
-        // }
     } else {
         // for(uint32_t i=0; i<ndims; i++) {
         //     double high = pop[0, i];
@@ -656,75 +780,81 @@ void MAPS::execute_maps(
     uint32_t ndims) {
 
     uint32_t n_iter = 0;
-    // This is just preliminarily
-    identity_matrix<double, ndims> identity;
-    boost::uniform_real<> uni_dist(0,1);
-    boost::uniform_01<boost::minstd_rand> uf(intgen);
+    premature_list_.clear();
     while(true) {
         m_d init_samples(n_start_points_, v_d(ndims+1));
-        for(uint32 i=0; i<n_start_points_; i++) {
+        for(uint32_t i=0; i<n_start_points_; i++) {
             for(uint32_t j=0; j<ndims; j++) {
-                init_samples(i, j) = uf();
+                init_samples[i][j] = uf(intgen);
             }
-            init_samples(i, ndims) = get_llh(to_physics(init_samples[i],
+            init_samples[i][ndims] = get_llh(to_physics(init_samples[i],
                 ndims));
         }
 
         m_d offspring = truncatedly_select(init_samples, n_selected_, ndims);
 
         // sub_pops is SS from the paper, page 5
-        vector<m_d> sub_pops = maintaining(offspring);
+        std::vector<m_d> sub_pops = maintaining(offspring, ndims);
 
         // Sort points in each sub_pop descending of its fitness
-        for(auto pop=sub_pops.begin(); pop<sub_pops.end(); pop++) {
-
-            std::sort(pop->begin(), pop->end(),
-                boost::bind(&v_d[ndims], _1) <
-                boost::bind(&v_d[ndims], _2));
+        for(auto &pop : sub_pops) {
+            std::sort(pop.begin(), pop.end(), 
+                [](const v_d & a, const v_d & b) {
+                    return a[a.size()-1] < b[b.size()-1];});
         }
         // estimated_pops is ES from the paper, page 5
-        std::vector<m_d> estimated_pops(max_sub_pops_, v_d(1, v_d(ndims+1)));
+        std::vector<m_d> estimated_pops(max_sub_pops_, m_d(1, v_d(ndims+1)));
         // Pick point from the first order on
-        // if estimated population is not full and point != any of the
-        // points in the estimated population and in the premature populations
+        // if estimated population is not full and mean != any of the
+        // means of the estimated populations and in the premature populations
         // then add point to estimated population
-        int n_estimated_models = 0;
-        int offset = 0;
-        for(auto pop=sub_pops.begin();
-            pop<sub_pops.end(); pop++) {
-
-            v_d best_fit_individual = (*pop)[0];
+        uint32_t n_estimated_models = 0;
+        uint32_t offset = 0;
+        // Precalculate the means of the populations to compare their 
+        // similarity later on
+        m_d means;
+        for(auto const &pop : sub_pops) {
+            means.push_back(get_center(pop));
+        }
+        uint32_t means_idx = 0;
+        v_i means_est_idx;
+        // Build the list of best individuals of each population
+        for(auto const &pop : sub_pops) {
             // Check for similarity in discarded points and estimated_pop
             bool add_this = true;
-            for(auto es=estimated_pops.begin();
-                es<estimated_pops.end(); es++) {
-
-                if(is_similar(*es, best_fit_individual, identity)) {
+            for(auto es : means_est_idx) {
+                if(is_similar(means[es], means[means_idx], cov_)) {
+                    add_this = false;
+                        break;
+                }
+            }
+            
+            if(!add_this) {means_idx++; continue;}
+            for(auto const &ds : discarded_pops_) {
+                if(is_similar(ds, means[means_idx], cov_)) {
                     add_this = false;
                     break;
                 }
             }
-            if(!add_this) continue;
-            for(auto ds=discarded_points.begin();
-                ds<discarded_points.end(); ds++) {
+            if(!add_this) {means_idx++; continue;}
 
-                if(is_similar(*ds, best_fit_individual, identity, ndims)) {
-                    add_this = false;
-                    break;
-                }
-            }
-            if(!add_this) continue;
-
-            std::copy(pop->begin(), pop->end(), estimated_pops.begin()+offset);
+            estimated_pops[offset] = pop;
             n_estimated_models++;
-            offset += sizeof(*pop);
+            means_est_idx.push_back(means_idx);
+            means_idx++;
+            offset += sizeof(pop);
+            // Add the best individual to the premature list to see if
+            // the population is going to be premature
+            premature_list_.emplace_back(1, pop[0][ndims]);
+            
             // Check if estimated_pop is "full" although I am not sure
             // what the maximal size should be... Hence I just leave it be.
             // MAPS usually uses "less than 10" (page 6, Table 1)
             if(n_estimated_models == max_sub_pops_) break;
         }
+        
         while(true) {
-            estimated_pops = processing(estimated_pops);
+            estimated_pops = processing(estimated_pops, ndims);
             // Get best and worst llh from the each population and check if all
             // reach the stopping criterion (best and worst fit in this
             // population are smaller than the tolerance) or if the maximum
@@ -736,20 +866,16 @@ void MAPS::execute_maps(
                 params_best_fit[d] = estimated_pops[0][0][d];
             }
             lh_worstFit_ = lh_bestFit_;
-            for(auto e_iter=estimated_pops.begin();
-                e_iter<estimated_pops.end(); e_iter++) {
-
-                for(m_d::iterator pop_iter=e_iter->begin(); pop_iter<e_iter->end();
-                    pop_iter++) {
-
-                    if(lh_bestFit_ > (*pop_iter)[ndims]) {
+            for(auto const &e : estimated_pops) {
+                for(auto const &pop : e) {
+                    if(lh_bestFit_ > pop[ndims]) {
                         for(uint32_t d=0; d<ndims; d++) {
-                            params_best_fit[d] = (*pop_iter)[d];
+                            params_best_fit[d] = pop[d];
                         }
-                        lh_bestFit_ = (*pop_iter)[ndims];
+                        lh_bestFit_ = pop[ndims];
                     }
-                    if(lh_worstFit_ < (*pop_iter)[ndims]) {
-                        lh_worstFit_ = (*pop_iter)[ndims];
+                    if(lh_worstFit_ < pop[ndims]) {
+                        lh_worstFit_ = pop[ndims];
                     }
                 }
             }
@@ -778,13 +904,13 @@ void MAPS::execute_maps(
  * */
 m_d MAPS::truncatedly_select(
     m_d &pop,
-    uint32_t n
+    uint32_t n,
     uint32_t ndims) {
 
     // Sort points descending of its fitness
-    std::sort(pop.begin(), pop.end(),
-        boost::bind(&v_d(ndims), _1) <
-        boost::bind(&v_d(ndims), _2));
+    std::sort(pop.begin(), pop.end(), 
+        [](const v_d & a, const v_d & b) {
+            return a[a.size()-1] < b[b.size()-1];});
 
     m_d pop_out(n, v_d(n));
     // We truncatedly select R \leq N of them
@@ -809,11 +935,9 @@ m_d MAPS::evolve_population(
     m_d pop,
     uint32_t ndims) {
 
-    m_d new_pop(pop.size(), pop[0].size());
+    m_d new_pop(pop.size(), v_d(pop[0].size()));
 
     // Metropolis Hastings using a normal distribution
-    boost::uniform_real<> uni_dist(0,1);
-    boost::uniform_01<boost::minstd_rand> uf(intgen);
     double variance_2 = 0.4;
     double multiplier = 1.0/(std::sqrt(variance_2*M_PI));
     variance_2 = -1.0/variance_2;
@@ -823,7 +947,7 @@ m_d MAPS::evolve_population(
 
         v_d new_p(ndims+1);
         for(uint32_t i=0; i<ndims; i++) {
-            double value = uf();
+            double value = uf(intgen);
             value = value - (*pop_iter)[i];
             new_p[i] = multiplier * std::exp(value*value*variance_2);
         }
@@ -834,7 +958,7 @@ m_d MAPS::evolve_population(
             result.lh_efficiency += 1;
             continue;
         }
-        if(new_p[ndims] / (*pop_iter)[ndims] > uf()) {
+        if(new_p[ndims] / (*pop_iter)[ndims] > uf(intgen)) {
             new_pop[p] = new_p;
             result.lh_efficiency += 1;
             continue;
