@@ -6,7 +6,6 @@
 #include "../helper/abbreviations.h"
 
 #include <random>
-#include <boost/fusion/include/push_back.hpp>
 #include <lapacke.h>
 #include <cblas.h>
 
@@ -14,18 +13,18 @@ class MAPS : public Minimizer {
 public:
 
     MAPS(double tolerance, uint32_t max_iter, uint32_t min_iter,
-         uint32_t max_points, uint32_t n_start_points=1000,
+         uint32_t max_points=0, uint32_t n_start_points=1000,
          uint32_t size_sub_pop=100, uint32_t max_sub_pops=9,
          uint32_t n_selected=500, uint32_t n_sub_selected=25,
          uint32_t seed=1025, bool dump_points=false);
-    
+
     /// core method: minimizer a given function with given initial conditions
-    MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds, 
+    MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
                              v_d upper_bounds);
 
     // Check if a population is premature and store it to the discarded ones
     // if true
-    bool check_premature(m_d pop, uint32_t idx, uint32_t ndims, 
+    bool check_premature(m_d pop, uint32_t idx, uint32_t ndims,
                          double epsilon=1e-3);
 
     // Construct a histogram in 1D sub-space. The direction is the direction
@@ -64,7 +63,7 @@ public:
     bool is_similar(m_d A, m_d B, m_d & cov, uint32_t ndims, double epsilon=1e-3);
 
     v_d get_center(m_d pop, bool ignore_last_col=true);
-    m_d get_cov(m_d pop, uint32_t ndims, bool ignore_last_col=true, 
+    m_d get_cov(m_d pop, uint32_t ndims, bool ignore_last_col=true,
                 bool real_cov=false);
 
     void execute_maps(uint32_t ndims);
@@ -77,12 +76,11 @@ public:
 
     // Sample with given population.
     m_d evolve_population(m_d pop, uint32_t ndims);
-    
+
 
 private:
-    
+
     m_d discarded_pops_;
-    
     uint32_t n_start_points_, max_sub_pops_;
     uint32_t size_sub_pop_, n_selected_, n_sub_selected_;
     m_d cov_;

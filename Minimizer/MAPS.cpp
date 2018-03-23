@@ -26,19 +26,19 @@ MAPS::MAPS(
     uint32_t n_selected,
     uint32_t n_sub_selected,
     uint32_t seed,
-    bool dump_points) : Minimizer(tolerance, max_iter, min_iter, 
+    bool dump_points) : Minimizer(tolerance, max_iter, min_iter,
                                   max_points, seed, dump_points)
 {
-    n_start_points = n_start_points_;
-    size_sub_pop = size_sub_pop_;
-    max_sub_pops = max_sub_pops_;
-    n_selected = n_selected_;
-    n_sub_selected = n_sub_selected_;
+    n_start_points_ = n_start_points;
+    size_sub_pop_ = size_sub_pop;
+    max_sub_pops_ = max_sub_pops;
+    n_selected_ = n_selected;
+    n_sub_selected_ = n_sub_selected;
 }
 
 /** Check if a population is premature.
- *  If the fit of the best individual didn't change within 1e-4 for ten 
- *  generations, it is considered premature (aka doesn't contain a global 
+ *  If the fit of the best individual didn't change within 1e-4 for ten
+ *  generations, it is considered premature (aka doesn't contain a global
  *  optimum). If it is premature, it is recorded to discarded_pop_.
  *
  *  \param pop      The population to check
@@ -54,25 +54,31 @@ bool MAPS::check_premature(
     uint32_t idx,
     uint32_t ndims,
     double epsilon) {
-    
+
     double best_fit = pop[0][ndims];
     for(auto pop_iter=pop.begin(); pop_iter<pop.end(); ++pop_iter) {
         if(best_fit > (*pop_iter)[ndims]) {
             best_fit = (*pop_iter)[ndims];
         }
     }
-    if(abs(premature_list_[idx].second - best_fit) < epsilon) {
-        if(premature_list_[idx].first == 10) {
-            v_d mean = get_center(pop);
-            discarded_pops_.push_back(mean);
-            return true;
+    // Check first if this population had been stored before.
+    std::cout << "size " << premature_list_.size() << std::endl;
+    if(premature_list_.size() > idx+1) {
+        if(abs(premature_list_[idx].second - best_fit) < epsilon) {
+            if(premature_list_[idx].first == 10) {
+                v_d mean = get_center(pop);
+                discarded_pops_.push_back(mean);
+                return true;
+            } else {
+                premature_list_[idx].first++;
+                return false;
+            }
         } else {
-            premature_list_[idx].first++;
-            return false;
+            premature_list_[idx].first = 1;
+            premature_list_[idx].second = best_fit;
         }
     } else {
-        premature_list_[idx].first = 1;
-        premature_list_[idx].second = best_fit;
+        premature_list_.emplace_back(1, best_fit);
     }
 }
 
@@ -109,12 +115,13 @@ v_i MAPS::make_histogram(
     uint32_t n_bins = SDIV(projected_pop.size(), 5);
     v_i freq(n_bins);
     freq_pop.resize(n_bins);
-    uint32_t width = SDIV(max_value-min_value, n_bins);
+    double width = (max_value-min_value) / (double)n_bins;
     auto not_projected = pop.begin();
     for(auto p=projected_pop.begin(); p<projected_pop.end();
         p++, not_projected++) {
 
-        uint32_t idx = SDIV(*p-min_value, width);
+        uint32_t idx = (*p-min_value)/width;
+        if(idx==n_bins) idx--;
         freq[idx]++;
         freq_pop[idx].insert(freq_pop[idx].end(), not_projected->begin(),
             not_projected->end());
@@ -163,7 +170,11 @@ v_i MAPS::find_higher_bin(
     uint32_t large = 1;
     v_i higher_bins(1);
     for(uint32_t i=1; i<freq.size(); i++) {
+        // std::cout << "freq[" << i << "]=" << freq[i];
+        // std::cout << " freq[large]=" << freq[large];
+        // std::cout << " large=" << large << std::endl;
         if(freq[i] > freq[large]) large = i;
+
         if(EULER_CONST * freq[i] < freq[large]) {
             num++;
             // Line above is also possible
@@ -176,6 +187,8 @@ v_i MAPS::find_higher_bin(
             reset_flag = false;
         }
     }
+    for(auto const & v: higher_bins) std::cout << v << ", ";
+    std::cout << "######################################" << std::endl;
     return higher_bins;
 }
 
@@ -195,10 +208,15 @@ std::vector<m_d> MAPS::confirm_bins(
 
     std::vector<m_d> sub_pops;
     uint32_t n_bins = higher_bins.size();
+    std::cout << "n_bins=" << n_bins << std::endl;
     for(uint32_t i=1; i<n_bins; i++) {
         uint32_t left_frontier = n_bins;
         uint32_t right_frontier = n_bins;
         for(uint32_t j=higher_bins[i]; j>0; j--) {
+            std::cout << "freq[" << j << "]=" << freq[j];
+            std::cout << " freq[higher_bins[" << i << "]]=";
+            std::cout << "freq[" << higher_bins[i] << "]=";
+            std::cout << freq[higher_bins[i]] << std::endl;
             if(EULER_CONST * freq[j] < freq[higher_bins[i]]) {
                 left_frontier = j;
             }
@@ -243,6 +261,9 @@ std::vector<m_d> MAPS::iterative_observation(
     v_i freq = make_histogram(sub_pop, directions, dim, freq_pop);
     v_i higher_bins = find_higher_bin(freq);
     std::vector<m_d> new_sub_pops = confirm_bins(higher_bins, freq, freq_pop);
+    std::cout << "dim=" << dim << " new_sub_pops=" << new_sub_pops.size();
+    std::cout << " higher_bins=" << higher_bins.size() << " freq=";
+    std::cout << freq.size() << std::endl;
     if(dim < ndims) {
         for(auto sub_pop_p=new_sub_pops.begin();
             sub_pop_p<new_sub_pops.end(); sub_pop_p++) {
@@ -250,8 +271,9 @@ std::vector<m_d> MAPS::iterative_observation(
             fine_sub_pop = iterative_observation(*sub_pop_p,
                 directions, dim+1, ndims);
         }
+        return fine_sub_pop;
     }
-    return fine_sub_pop;
+    return new_sub_pops;
 }
 
 /** Given a truncated population, calculate the directions to search
@@ -292,7 +314,10 @@ std::vector<m_d> MAPS::maintaining(
         directions.push_back(*eigen_vec);
     }
     std::vector<m_d> fine_sub_pops = iterative_observation(offspring,
-        directions, 1, ndims);
+        directions, 0, ndims);
+    std::cout << "fine_sub_pops " << fine_sub_pops.size() << std::endl;
+    std::cout << "offspring " << offspring.size() << std::endl;
+    std::cout << "directions " << directions.size() << std::endl;
     return fine_sub_pops;
 
 }
@@ -310,38 +335,40 @@ std::vector<m_d> MAPS::processing(
     std::vector<m_d> estimated_sub_pops,
     uint32_t ndims) {
 
-    for(auto pop=estimated_sub_pops.begin();
-        pop<estimated_sub_pops.end(); pop++) {
+    for(auto &pop: estimated_sub_pops) {
+    // for(auto pop=estimated_sub_pops.begin();
+    //     pop<estimated_sub_pops.end(); pop++) {
 
         m_d tmp_pop;
         // Sample size_sub_pop_ many points
         for(uint32_t i=0; i<n_sub_selected_; i++) {
             double rnd = uf(intgen);
-            uint32_t idx = round(rnd * (pop->size()));
-            tmp_pop.push_back((*pop)[idx]);
+            uint32_t idx = round(rnd * (pop.size()-1));
+            tmp_pop.push_back(pop[idx]);
         }
         // Truncatedly select n_sub_selected_ many points for this
         // population
         m_d selected_pop = truncatedly_select(tmp_pop, n_sub_selected_, ndims);
 
         // Update the parameters with the selected individuals
-        *pop = evolve_population(selected_pop, ndims);
+        pop = evolve_population(selected_pop, ndims);
     }
 
     // Calculate the means of each population first to avoid further calculations
     m_d centers(estimated_sub_pops.size(), v_d(ndims));
-    for(auto pop=estimated_sub_pops.begin(); pop<estimated_sub_pops.end(); 
-        pop++) {
+    for(auto const &pop: estimated_sub_pops) {
+    // for(auto pop=estimated_sub_pops.begin(); pop<estimated_sub_pops.end();
+        // pop++) {
 
-       centers.push_back(get_center(*pop));
+       centers.push_back(get_center(pop));
     }
     std::vector<m_d> final_selected_pops;
     uint32_t idx_current_pop = 0;
     uint32_t idx_premature = 0;
-    
+
     std::vector<std::pair<uint32_t, double>> premature_list_tmp(premature_list_.size());
     std::copy(premature_list_.begin(), premature_list_.end(), premature_list_tmp.begin());
-    
+
     for(auto pop=estimated_sub_pops.begin();
         pop<estimated_sub_pops.end(); ++pop, ++idx_premature, ++idx_current_pop) {
 
@@ -382,10 +409,10 @@ std::vector<m_d> MAPS::processing(
         }
 
         // Check if population is similar with any discarded one
-        for(auto dis_iter=discarded_pops_.begin();
-            dis_iter<discarded_pops_.end(); dis_iter++) {
-
-            if(is_similar(*dis_iter, centers[idx_current_pop], cov_)) {
+        // for(auto dis_iter=discarded_pops_.begin();
+        //     dis_iter<discarded_pops_.end(); dis_iter++) {
+        for(auto const &dis: discarded_pops_) {
+            if(is_similar(dis, centers[idx_current_pop], cov_)) {
                 break_up = true;
                 break;
             }
@@ -460,69 +487,42 @@ void MAPS::pca(
     v_d & eigen_values,
     uint32_t ndims,
     bool real_cov) {
-    /*
-    in.resize(in.size(), ndims);
-    if(real_cov) {
-        // Adjust data s.t. it is centered around 0
-        v_d means(ndims);
-        for(auto v=in.begin(); v<in.end(); v++) {
-            uint32_t i = 0;
-            for(auto e=v.begin(); e<v.end(); e++, i++) {
-                means(i) += *e;
-            }
-        }
-        for(auto e=means.begin(); e<means.end(); e++) {
-            *e /= in.size();
-        }
 
-        for(auto v=in.begin(); v<in.end(); v++) {
-            *v -= means;
-        }
-        // Easier to read but is it also faster than plain for loops?
-        cov = 1/(in.size()-1) * outer_prod(trans<m_d>(in), in);
+    cov = get_cov(in, ndims, true, real_cov);
 
-        // // Calculate the symmetric covariance matrix
-        // for(uint32_t row=0; row<ndims; row++) {
-        //     for(uint32_t col=0; col<ndims; col++) {
-        //         if(row <= col) {
-        //             double cov_v = 0.0;
-        //             for(uint32_t i=0; i<in.size(); i++) {
-        //                 cov_v += in(i, row)*in(i, col);
-        //             }
-        //             cov(row, col) = cov(row, col) = cov_v/in.size();
-        //         }
-        //     }
-        // }
-    } else {
-        if(cov.size() != ndims || cov[0].size() != ndims)
-            cov.resize(ndims, ndims, false);
-        for(uint32_t i=0; i<ndims; i++) {
-            double high = in[0][i];
-            double low = in[0][i];
-            for(uint32_t j=1; j<in.size(); j++) {
-                if(in[j][i] > high) high = in[i][j];
-                if(in[j][i] < low) low = in[i][j];
-            }
-            const double constant = SDIV((high-low), max_sub_pops_);
-            cov[i, i] = constant;
-         }
-    }
     // Calculate the eigenvectors v^-1 C v = D
     // matrix_layout, jobz, uplo, n, a, lda, w
     // Resize if someone forgot to allocate memory.
-    if(eigen_v.size() != ndims || eigen_v[0].size() != ndims)
-        eigen_v.resize(cov.size(), cov[0].size(), false);
-    if(eigen_values.size != ndims) eigen_values.resize(ndims, false);
-    std::copy(cov.begin(), cov.end(), eigen_v.begin());
+    if(eigen_v.size() != ndims || eigen_v[0].size() != ndims) {
+        for(auto &v: eigen_v) {
+            v.resize(ndims);
+        }
+    }
+    if(eigen_values.size() != ndims) {
+        eigen_values.resize(ndims);
+    }
+    eigen_v = cov;
+    char triang = 'U';
+    char eigen = 'V';
+    lapack_int n = eigen_v.size();
+    lapack_int lda = eigen_v.size();
+    v_d flat_eigen_v(eigen_v.size() * eigen_v[0].size());
+
     int info = LAPACKE_dsyev(
         LAPACK_ROW_MAJOR,               // The matrix layout
-        'V',                            // Calculate the eigenvectors too
-        'L',                            // Handle the input matrix as lower triangular matrix
-        eigen_v.size()*in[0].size(),    // Order (size) of the matrix
-        &eigen_v[0],                    // Input matrix and the eigenvectors on output
-        eigen_v.size(),                // Leading order dimension
+        eigen,                          // Calculate the eigenvectors too
+        triang,                         // Store the output matrix as upper triangular matrix
+        n,                              // Order (sqrt(size)) of the matrix
+        &flat_eigen_v[0],               // Input matrix and the eigenvectors on output
+        lda,                            // Leading order dimension
         &eigen_values[0]);              // The eigenvalues on output
-    */
+
+    uint32_t v_size = eigen_v[0].size();
+    for(uint32_t row=0; row<eigen_v.size(); ++row) {
+        for(uint32_t col=0; col<v_size; ++col) {
+            eigen_v[row][col] = flat_eigen_v[row*v_size + col];
+        }
+    }
 }
 
 /** Check if two vectors are similar by calculating the Mahalanobis distance
@@ -560,7 +560,7 @@ bool MAPS::is_similar(
             distance += val*val;
         }
         return (sqrt(distance) < epsilon);
-    } 
+    }
     int info = 0;
     int lda = cov.size();
     int nrhs = 1;
@@ -579,7 +579,7 @@ bool MAPS::is_similar(
             y,            // The right hand side. on exit the solution
             &nrhs,          // Leading dimension of a_b (ldb)
             &info);
-        
+
     if(info < 0) {
         std::cout << "Error in MAPS::is_similar: Factorization of ";
         std::cout << "covariance matrix failed!. Illegal value at ";
@@ -595,7 +595,7 @@ bool MAPS::is_similar(
     for(uint32_t i=0; i<a_b.size(); i++) {
         distance += y[i]*y[i];
     }
-    
+
     return (sqrt(distance) < epsilon);
     /*
     // Factorize cov = L D L*
@@ -607,7 +607,7 @@ bool MAPS::is_similar(
     int lda = cov.size();
     char triang = 'U';
     dpotrf_(&triang,           // Store the upper triangular part
-            &lda,          // The order of cov 
+            &lda,          // The order of cov
             L,             // On out: the upper triangular matrix
             &lda,          // The leading dimension
             &info);
@@ -622,11 +622,11 @@ bool MAPS::is_similar(
         std::cout << abs(info) << " is not positive definite!" << std::endl;
         return false;
     }
-    
+
     // Solve L*y = (a-b)
     v_d y(lda);
-    
-    
+
+
     /* Sigh - lapacke cant find this one...
     dtrsv_(triang,                  // L is an upper triangular matrix
            'N',                  // Do not transpose L
@@ -636,12 +636,12 @@ bool MAPS::is_similar(
            &lda,                 // The leading dimension of L
            y,                    // The output array
            1);                   // The increment for the elements of y
-    / 
+    /
     double distance = 0;
     for(auto val : y) {
         distance += val*val;
     }
-    
+
     return (sqrt(distance) < epsilon);
     */
 }
@@ -736,7 +736,7 @@ m_d MAPS::get_cov(
         for(auto &e : means) {
             e /= pop.size();
         }
-        
+
         for(auto &v : pop) {
             for(uint32_t i=0; i<v.size(); i++) {
                 v[i] -= means[i];
@@ -798,7 +798,7 @@ void MAPS::execute_maps(
 
         // Sort points in each sub_pop descending of its fitness
         for(auto &pop : sub_pops) {
-            std::sort(pop.begin(), pop.end(), 
+            std::sort(pop.begin(), pop.end(),
                 [](const v_d & a, const v_d & b) {
                     return a[a.size()-1] < b[b.size()-1];});
         }
@@ -810,7 +810,7 @@ void MAPS::execute_maps(
         // then add point to estimated population
         uint32_t n_estimated_models = 0;
         uint32_t offset = 0;
-        // Precalculate the means of the populations to compare their 
+        // Precalculate the means of the populations to compare their
         // similarity later on
         m_d means;
         for(auto const &pop : sub_pops) {
@@ -818,6 +818,7 @@ void MAPS::execute_maps(
         }
         uint32_t means_idx = 0;
         v_i means_est_idx;
+        std::cout << "Amount of sub_pops: " << sub_pops.size() << std::endl;
         // Build the list of best individuals of each population
         for(auto const &pop : sub_pops) {
             // Check for similarity in discarded points and estimated_pop
@@ -828,7 +829,7 @@ void MAPS::execute_maps(
                         break;
                 }
             }
-            
+
             if(!add_this) {means_idx++; continue;}
             for(auto const &ds : discarded_pops_) {
                 if(is_similar(ds, means[means_idx], cov_)) {
@@ -846,13 +847,15 @@ void MAPS::execute_maps(
             // Add the best individual to the premature list to see if
             // the population is going to be premature
             premature_list_.emplace_back(1, pop[0][ndims]);
-            
+            std::cout << "emplaced something to premature_list_";
+            std::cout << " size is now " << premature_list_.size() << std::endl;
+
             // Check if estimated_pop is "full" although I am not sure
             // what the maximal size should be... Hence I just leave it be.
             // MAPS usually uses "less than 10" (page 6, Table 1)
             if(n_estimated_models == max_sub_pops_) break;
         }
-        
+
         while(true) {
             estimated_pops = processing(estimated_pops, ndims);
             // Get best and worst llh from the each population and check if all
@@ -888,7 +891,7 @@ void MAPS::execute_maps(
             if(estimated_pops.empty()) break;
         }
     }
-    
+
 }
 
 /** Truncatedly selects n elements from pop and stores them in pop_out. On
@@ -899,7 +902,7 @@ void MAPS::execute_maps(
  *                      than the number of rows in pop.
  *  \param ndims        Dimensionallity of parameter space in terms of
  *                      free parameter for minimization
- * 
+ *
  *  \return             The selected samples.
  * */
 m_d MAPS::truncatedly_select(
@@ -908,7 +911,7 @@ m_d MAPS::truncatedly_select(
     uint32_t ndims) {
 
     // Sort points descending of its fitness
-    std::sort(pop.begin(), pop.end(), 
+    std::sort(pop.begin(), pop.end(),
         [](const v_d & a, const v_d & b) {
             return a[a.size()-1] < b[b.size()-1];});
 
@@ -975,7 +978,7 @@ m_d MAPS::evolve_population(
  *  \param test_func        The function which shall be minimized
  *  \param lower_bounds     The lower bounds for each dimension
  *  \param upper_bounds     The upper bounds for each dimension
- * 
+ *
  *  \return                 The result of the minimization
  * */
 MinimizerResult
@@ -983,10 +986,10 @@ MAPS::Minimize(
     TestFunctions test_func,
     v_d lower_bounds,
     v_d upper_bounds ) {
-    
+
     reset_calls();
     results.clear();
-    
+
     upper_bnds = upper_bounds;
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
@@ -998,11 +1001,11 @@ MAPS::Minimize(
     }
 
     execute_maps(test_func_->get_ndims());
-    
+
     result.minimizer_name = "MAPS";
     result.best_fit = lh_bestFit_;
     result.params_best_fit = params_best_fit;
     result.lh_efficiency /= result.n_lh_calls;
-    
+
     return result;
 }

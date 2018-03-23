@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <string>
-#include <boost/cstdint.hpp>
+
 #include "../helper/abbreviations.h"
 
-// A simple object to store the result of the minimization. 
+// A simple object to store the result of the minimization.
 struct MinimizerResult {
     double best_fit;
     v_d params_best_fit;
