@@ -12,12 +12,12 @@
 
 /** Constructor and destructor **/
 SampleSpace::SampleSpace(
-    uint32_t max_iter, 
+    uint32_t max_iter,
     uint32_t max_points,
     uint32_t seed,
     bool dump_points) : Minimizer(0, max_iter, 0, max_points, seed, dump_points)
 {
-    
+
 }
 
 // SampleSpace::~SampleSpace() {}
@@ -35,7 +35,7 @@ void SampleSpace::sample_space(
     if(dump_points_) {
         std::ofstream ofile((base_dir_+file_name_).c_str(),
             std::ofstream::out  | std::ofstream::app);
-  
+
         for(int j=0; j<nDims; j++) ofile << "Param" << j << "\t";
         ofile << std::endl;
         ofile.close();
@@ -54,10 +54,9 @@ void SampleSpace::sample_space(
             result.best_fit = current_result;
             result.params_best_fit = theta;
         }
-        
+
         if(dump_points_ && (c%max_points_ == 0 || i == max_iter_-1)) {
             int d = 1;
-            
             std::ofstream ofile((base_dir_+file_name_).c_str(),
                 std::ofstream::out  | std::ofstream::app);
             for(v_d::iterator p=results.begin();
@@ -100,7 +99,7 @@ v_d SampleSpace::to_physics(
  *  \param test_func        The function which shall be minimized
  *  \param lower_bounds     The lower bounds for each dimension
  *  \param upper_bounds     The upper bounds for each dimension
- * 
+ *
  *  \return                 The result of the minimization
  * */
 MinimizerResult
@@ -108,7 +107,7 @@ SampleSpace::Minimize(
     TestFunctions test_func,
     v_d lower_bounds,
     v_d upper_bounds ) {
-    
+
     reset_calls();
     results.clear();
     upper_bnds = upper_bounds;

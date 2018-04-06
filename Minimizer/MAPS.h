@@ -8,6 +8,7 @@
 #include <random>
 #include <lapacke.h>
 #include <cblas.h>
+#include <fstream>
 
 class MAPS : public Minimizer {
 public:
@@ -38,7 +39,8 @@ public:
     // some threshold
     v_i find_higher_bin(v_i freq);
     // Calculate the sub populations around the higher bins
-    std::vector<m_d> confirm_bins(v_i higher_bins, v_i freq, m_d freq_pop);
+    std::vector<m_d> confirm_bins(v_i higher_bins, v_i freq, m_d freq_pop,
+                                  uint32_t ndims);
     // Calculate the final sub populations
     std::vector<m_d> iterative_observation(m_d sub_pop, m_d direction,
                                            uint32_t dim, uint32_t ndims);
@@ -85,6 +87,7 @@ private:
     uint32_t size_sub_pop_, n_selected_, n_sub_selected_;
     m_d cov_;
     std::vector<std::pair<uint32_t, double>> premature_list_;
+    double size_factor_;
 };
 
 #endif

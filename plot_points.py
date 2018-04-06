@@ -36,8 +36,8 @@ with open(sys.argv[1], 'r') as f:
         data = line.split()
         if first:
             dim_names = [str(data[i]) for i in dim_idx]
-            first = False                    
-        elif data[0] != "Param0":        
+            first = False
+        elif data[0] != "Param0":
             tmp_llh = float(data[nDims])
             if np.isinf(tmp_llh):
                 tmp_llh = np.finfo(tmp_llh).max
@@ -45,7 +45,7 @@ with open(sys.argv[1], 'r') as f:
             params = [float(data[i]) for i in dim_idx]
             params.append(float(data[nDims]))
             x.append(params)
-            
+
 x = np.asarray(x)
 llh = np.asarray(llh)
 
@@ -53,7 +53,7 @@ if len(x[:,0]) > 3000 and contour:
     step = int((len(x[:,0]) + 3000)/3000)
     x = x[0::step,:]
     llh = llh[0::step]
-    
+
 min_llh = np.min(llh)
 tmp_llh = np.copy(llh)
 mask = np.ma.masked_where(llh == np.finfo(min_llh).max, llh)
@@ -80,12 +80,12 @@ else:
         llh_i = griddata(x[:,0], x[:,1], llh, yi, zi)
         sc = plt.contour(yi,zi,llh_i,15,linewidths=0.5,colors='k')
         sc = plt.contourf(yi,zi,llh_i,15,cmap=cm, vmin=min_llh, vmax=max_llh, levels=levels)
-        # Following line would ploint dots for each point. Use this to show 
+        # Following line would ploint dots for each point. Use this to show
         # how certain minimizers work by plotting every 100th point or so
         #plt.scatter(x[:,0],x[:,1],marker='o',c='b',s=3)
     else:
         sc = ax.scatter(x[:,0], x[:,1], c=llh, cmap=cm, s=3, edgecolors='none')
-    
+
 ax.set_xlabel(dim_names[0])
 ax.set_ylabel(dim_names[1])
     
@@ -94,4 +94,3 @@ fig.colorbar(sc)
 sc.colorbar.set_label('function evaluation')
 plt.savefig(base_dir + sys.argv[2], dpi=600)
 plt.close()
-

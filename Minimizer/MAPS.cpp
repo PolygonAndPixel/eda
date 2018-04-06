@@ -13,6 +13,7 @@
  */
 
 #include "MAPS.h"
+const bool DEBUG (false);
 
 /** Constructor and destructor **/
 MAPS::MAPS(
@@ -34,6 +35,8 @@ MAPS::MAPS(
     max_sub_pops_ = max_sub_pops;
     n_selected_ = n_selected;
     n_sub_selected_ = n_sub_selected;
+    size_factor_ = EULER_CONST;
+    size_factor_ = 1.1;
 }
 
 /** Check if a population is premature.
@@ -62,7 +65,6 @@ bool MAPS::check_premature(
         }
     }
     // Check first if this population had been stored before.
-    std::cout << "size " << premature_list_.size() << std::endl;
     if(premature_list_.size() > idx+1) {
         if(abs(premature_list_[idx].second - best_fit) < epsilon) {
             if(premature_list_[idx].first == 10) {
@@ -170,12 +172,9 @@ v_i MAPS::find_higher_bin(
     uint32_t large = 1;
     v_i higher_bins(1);
     for(uint32_t i=1; i<freq.size(); i++) {
-        // std::cout << "freq[" << i << "]=" << freq[i];
-        // std::cout << " freq[large]=" << freq[large];
-        // std::cout << " large=" << large << std::endl;
         if(freq[i] > freq[large]) large = i;
 
-        if(EULER_CONST * freq[i] < freq[large]) {
+        if(size_factor_ * freq[i] < freq[large]) {
             num++;
             // Line above is also possible
             // higher_bins.insert_element(higher_bins.size(), large);
@@ -187,8 +186,6 @@ v_i MAPS::find_higher_bin(
             reset_flag = false;
         }
     }
-    for(auto const & v: higher_bins) std::cout << v << ", ";
-    std::cout << "######################################" << std::endl;
     return higher_bins;
 }
 
@@ -198,38 +195,47 @@ v_i MAPS::find_higher_bin(
  *                          a threshold
  *  \param freq             The histogram which had been calculated along one
  *                          dimension
+ *  \param freq_pop         The population sorted in its bins. The row is the
+ *                          bin and the vectors are concatenated in each row
  *
- *  \return
+ *  \return                 The populations within the bins that are around
+ *                          higher bins
  * */
 std::vector<m_d> MAPS::confirm_bins(
     v_i higher_bins,
     v_i freq,
-    m_d freq_pop) {
+    m_d freq_pop,
+    uint32_t ndims) {
 
     std::vector<m_d> sub_pops;
     uint32_t n_bins = higher_bins.size();
-    std::cout << "n_bins=" << n_bins << std::endl;
     for(uint32_t i=1; i<n_bins; i++) {
         uint32_t left_frontier = n_bins;
         uint32_t right_frontier = n_bins;
         for(uint32_t j=higher_bins[i]; j>0; j--) {
-            std::cout << "freq[" << j << "]=" << freq[j];
-            std::cout << " freq[higher_bins[" << i << "]]=";
-            std::cout << "freq[" << higher_bins[i] << "]=";
-            std::cout << freq[higher_bins[i]] << std::endl;
-            if(EULER_CONST * freq[j] < freq[higher_bins[i]]) {
+            if(size_factor_ * freq[j] < freq[higher_bins[i]]) {
                 left_frontier = j;
             }
         }
         for(uint32_t j=higher_bins[i]; j<n_bins; j++) {
-            right_frontier = j;
+            if(size_factor_ * freq[j] < freq[higher_bins[i]]) {
+                right_frontier = j;
+            }
         }
         // Form a sub population if and only if a right and left frontier have
         // been found
         if(left_frontier < n_bins && right_frontier < n_bins) {
             m_d tmp_pop;
             for(uint32_t j=left_frontier; j<=right_frontier; j++) {
-                tmp_pop.push_back(freq_pop[j]);
+                uint32_t d = 0;
+                v_d v(ndims+1);
+                for(auto val: freq_pop[j]) {
+                    v[d] = val;
+                    // We also store the likelihood at the end of each vector
+                    // hence the ndims+1
+                    d = (d+1)%(ndims+1);
+                    if(d==0) tmp_pop.push_back(v);
+                }
             }
             sub_pops.push_back(tmp_pop);
         }
@@ -260,16 +266,15 @@ std::vector<m_d> MAPS::iterative_observation(
     std::vector<m_d> fine_sub_pop;
     v_i freq = make_histogram(sub_pop, directions, dim, freq_pop);
     v_i higher_bins = find_higher_bin(freq);
-    std::vector<m_d> new_sub_pops = confirm_bins(higher_bins, freq, freq_pop);
-    std::cout << "dim=" << dim << " new_sub_pops=" << new_sub_pops.size();
-    std::cout << " higher_bins=" << higher_bins.size() << " freq=";
-    std::cout << freq.size() << std::endl;
-    if(dim < ndims) {
-        for(auto sub_pop_p=new_sub_pops.begin();
-            sub_pop_p<new_sub_pops.end(); sub_pop_p++) {
-
-            fine_sub_pop = iterative_observation(*sub_pop_p,
+    std::vector<m_d> new_sub_pops = confirm_bins(higher_bins, freq, freq_pop,
+                                                 ndims);
+    if(dim < ndims-1) {
+        for(auto &sub_pop_p : new_sub_pops) {
+            std::vector<m_d> fine_sub_pop_tmp = iterative_observation(sub_pop_p,
                 directions, dim+1, ndims);
+            for(auto &pop: fine_sub_pop_tmp) {
+                fine_sub_pop.push_back(pop);
+            }
         }
         return fine_sub_pop;
     }
@@ -315,9 +320,6 @@ std::vector<m_d> MAPS::maintaining(
     }
     std::vector<m_d> fine_sub_pops = iterative_observation(offspring,
         directions, 0, ndims);
-    std::cout << "fine_sub_pops " << fine_sub_pops.size() << std::endl;
-    std::cout << "offspring " << offspring.size() << std::endl;
-    std::cout << "directions " << directions.size() << std::endl;
     return fine_sub_pops;
 
 }
@@ -336,9 +338,6 @@ std::vector<m_d> MAPS::processing(
     uint32_t ndims) {
 
     for(auto &pop: estimated_sub_pops) {
-    // for(auto pop=estimated_sub_pops.begin();
-    //     pop<estimated_sub_pops.end(); pop++) {
-
         m_d tmp_pop;
         // Sample size_sub_pop_ many points
         for(uint32_t i=0; i<n_sub_selected_; i++) {
@@ -357,9 +356,6 @@ std::vector<m_d> MAPS::processing(
     // Calculate the means of each population first to avoid further calculations
     m_d centers(estimated_sub_pops.size(), v_d(ndims));
     for(auto const &pop: estimated_sub_pops) {
-    // for(auto pop=estimated_sub_pops.begin(); pop<estimated_sub_pops.end();
-        // pop++) {
-
        centers.push_back(get_center(pop));
     }
     std::vector<m_d> final_selected_pops;
@@ -372,11 +368,16 @@ std::vector<m_d> MAPS::processing(
     for(auto pop=estimated_sub_pops.begin();
         pop<estimated_sub_pops.end(); ++pop, ++idx_premature, ++idx_current_pop) {
 
+        if(DEBUG) {
+            std::cout << "Checking another population" << std::endl;
+        }
         // Check if this population is premature
         // Need to store the value of the best fit and how long it didn't
         // change. If it didn't change within 1e-4 for then generations,
         // it is considered premature.
-        if(check_premature(*pop, idx_premature, ndims)) {
+        if(check_premature(*pop, idx_premature, ndims, precision_criterion_)) {
+            if(DEBUG)
+                std::cout << "This population is premature" << std::endl;
             // Rearrange the list of best fits and generations.
             premature_list_.erase(premature_list_.begin()+idx_premature);
             // Need to reduce the idx because we just erased an element.
@@ -391,9 +392,15 @@ std::vector<m_d> MAPS::processing(
             ++c_iter, ++compare_idx) {
 
             if(compare_idx == idx_current_pop) continue;
-            if(is_similar(*c_iter, centers[idx_current_pop], cov_)) {
+
+            if(is_similar(*c_iter, centers[idx_current_pop], cov_,
+                precision_criterion_)) {
+
                 // Check which one is better
                 if(premature_list_[idx_premature].second < premature_list_tmp[compare_idx].second) {
+                    if(DEBUG) {
+                        std::cout << "This population is similar to another one and inferior" << std::endl;
+                    }
                     break_up = true;
                     break;
 
@@ -412,7 +419,12 @@ std::vector<m_d> MAPS::processing(
         // for(auto dis_iter=discarded_pops_.begin();
         //     dis_iter<discarded_pops_.end(); dis_iter++) {
         for(auto const &dis: discarded_pops_) {
-            if(is_similar(dis, centers[idx_current_pop], cov_)) {
+            if(is_similar(dis, centers[idx_current_pop], cov_,
+                precision_criterion_)) {
+
+                if(DEBUG) {
+                    std::cout << "This population is similar to a discarded one" << std::endl;
+                }
                 break_up = true;
                 break;
             }
@@ -424,7 +436,8 @@ std::vector<m_d> MAPS::processing(
             idx_premature--;
             continue;
         }
-
+        if(DEBUG)
+            std::cout << "Pushing a population\n";
         // Add current population to final one
         final_selected_pops.push_back(*pop);
     }
@@ -597,53 +610,6 @@ bool MAPS::is_similar(
     }
 
     return (sqrt(distance) < epsilon);
-    /*
-    // Factorize cov = L D L*
-    double * cov_pointer = &(cov[0][0]);
-    double * L = new double[cov.size()*cov.size()];
-    std::copy(cov_pointer, cov_pointer+(cov.size()*cov.size()), L);
-    // http://www.netlib.org/lapack/explore-html/d1/d7a/group__double_p_ocomputational_ga2f55f604a6003d03b5cd4a0adcfb74d6.html
-    int info = 0;
-    int lda = cov.size();
-    char triang = 'U';
-    dpotrf_(&triang,           // Store the upper triangular part
-            &lda,          // The order of cov
-            L,             // On out: the upper triangular matrix
-            &lda,          // The leading dimension
-            &info);
-    if(info < 0) {
-        std::cout << "Error in MAPS::is_similar: Factorization of ";
-        std::cout << "covariance matrix failed!. Illegal value at ";
-        std::cout << abs(info) << std::endl;
-        return false;
-    } else if(info > 0) {
-        std::cout << "Error in MAPS::is_similar: Factorization of ";
-        std::cout << "covariance matrix failed!. leading minor of order ";
-        std::cout << abs(info) << " is not positive definite!" << std::endl;
-        return false;
-    }
-
-    // Solve L*y = (a-b)
-    v_d y(lda);
-
-
-    /* Sigh - lapacke cant find this one...
-    dtrsv_(triang,                  // L is an upper triangular matrix
-           'N',                  // Do not transpose L
-           'N',                  // Do not assume L to be unit triangular
-           &lda,                 // Order of L
-           L,                    // The matrix of the system
-           &lda,                 // The leading dimension of L
-           y,                    // The output array
-           1);                   // The increment for the elements of y
-    /
-    double distance = 0;
-    for(auto val : y) {
-        distance += val*val;
-    }
-
-    return (sqrt(distance) < epsilon);
-    */
 }
 
 /** Check if two populations are similar by calculating the Mahalanobis distance
@@ -667,7 +633,7 @@ bool MAPS::is_similar(
 
     v_d a = get_center(A);
     v_d b = get_center(B);
-    return is_similar(a, b, cov, epsilon);
+    return is_similar(a, b, cov, precision_criterion_);
 }
 
 /** Calculates the center of a population.
@@ -756,16 +722,6 @@ m_d MAPS::get_cov(
             }
         }
     } else {
-        // for(uint32_t i=0; i<ndims; i++) {
-        //     double high = pop[0, i];
-        //     double low = pop[0, i];
-        //     for(uint32_t j=1; j<in.size(); j++) {
-        //         if(pop[j, i] > high) high = pop[i, j];
-        //         if(pop[j, i] < low) low = pop[i, j];
-        //     }
-        //     const double constant = SDIV((high-low), max_sub_pops_);
-        //     cov[i, i] = constant;
-        //  }
          return cov_;
     }
     return cov;
@@ -803,12 +759,13 @@ void MAPS::execute_maps(
                     return a[a.size()-1] < b[b.size()-1];});
         }
         // estimated_pops is ES from the paper, page 5
-        std::vector<m_d> estimated_pops(max_sub_pops_, m_d(1, v_d(ndims+1)));
+        std::vector<m_d> estimated_pops;
         // Pick point from the first order on
         // if estimated population is not full and mean != any of the
         // means of the estimated populations and in the premature populations
         // then add point to estimated population
         uint32_t n_estimated_models = 0;
+        // what is offset for?
         uint32_t offset = 0;
         // Precalculate the means of the populations to compare their
         // similarity later on
@@ -818,13 +775,15 @@ void MAPS::execute_maps(
         }
         uint32_t means_idx = 0;
         v_i means_est_idx;
-        std::cout << "Amount of sub_pops: " << sub_pops.size() << std::endl;
+//         std::cout << "Amount of sub_pops: " << sub_pops.size() << std::endl;
         // Build the list of best individuals of each population
         for(auto const &pop : sub_pops) {
             // Check for similarity in discarded points and estimated_pop
             bool add_this = true;
             for(auto es : means_est_idx) {
-                if(is_similar(means[es], means[means_idx], cov_)) {
+                if(is_similar(means[es], means[means_idx], cov_,
+                    precision_criterion_)) {
+
                     add_this = false;
                         break;
                 }
@@ -832,14 +791,17 @@ void MAPS::execute_maps(
 
             if(!add_this) {means_idx++; continue;}
             for(auto const &ds : discarded_pops_) {
-                if(is_similar(ds, means[means_idx], cov_)) {
+                if(is_similar(ds, means[means_idx], cov_,
+                    precision_criterion_)) {
+
                     add_this = false;
                     break;
                 }
             }
             if(!add_this) {means_idx++; continue;}
 
-            estimated_pops[offset] = pop;
+            // formerly offset
+            estimated_pops.push_back(pop);
             n_estimated_models++;
             means_est_idx.push_back(means_idx);
             means_idx++;
@@ -847,23 +809,32 @@ void MAPS::execute_maps(
             // Add the best individual to the premature list to see if
             // the population is going to be premature
             premature_list_.emplace_back(1, pop[0][ndims]);
-            std::cout << "emplaced something to premature_list_";
-            std::cout << " size is now " << premature_list_.size() << std::endl;
 
             // Check if estimated_pop is "full" although I am not sure
             // what the maximal size should be... Hence I just leave it be.
             // MAPS usually uses "less than 10" (page 6, Table 1)
             if(n_estimated_models == max_sub_pops_) break;
         }
-
         while(true) {
+            if(DEBUG)
+                std::cout << "starting processing. " << estimated_pops[0][0].size() << std::endl;
             estimated_pops = processing(estimated_pops, ndims);
+
             // Get best and worst llh from the each population and check if all
             // reach the stopping criterion (best and worst fit in this
             // population are smaller than the tolerance) or if the maximum
             // iterations is reached.
+            // Start over if no population has been found.
             n_iter++;
             if(n_iter == max_iter_ and min_iter_ < n_iter) return;
+            if(estimated_pops.size() == 0) {
+                break;
+            }
+            if(DEBUG) {
+                std::cout << "Now1 " << estimated_pops.size() << std::endl;
+                std::cout << "Now2 " << estimated_pops[0].size() << std::endl;
+                std::cout << "Now3 " << estimated_pops[0][0].size() << std::endl;
+            }
             lh_bestFit_ = estimated_pops[0][0][ndims];
             for(uint32_t d=0; d<ndims; d++) {
                 params_best_fit[d] = estimated_pops[0][0][d];
@@ -941,13 +912,13 @@ m_d MAPS::evolve_population(
     m_d new_pop(pop.size(), v_d(pop[0].size()));
 
     // Metropolis Hastings using a normal distribution
-    double variance_2 = 0.4;
+    // For each point: Sample a new point and take the new one if it satisfies
+    // the Metropolis criterion, else take the old point
+    double variance_2 = 0.5;
     double multiplier = 1.0/(std::sqrt(variance_2*M_PI));
     variance_2 = -1.0/variance_2;
     uint32_t p=0;
-    for(auto pop_iter=pop.begin();
-        pop_iter<pop.end(); pop_iter++, p++) {
-
+    for(auto pop_iter=pop.begin(); pop_iter<pop.end(); pop_iter++, p++) {
         v_d new_p(ndims+1);
         for(uint32_t i=0; i<ndims; i++) {
             double value = uf(intgen);
@@ -959,18 +930,33 @@ m_d MAPS::evolve_population(
         if(new_p[ndims] > (*pop_iter)[ndims]) {
             new_pop[p] = new_p;
             result.lh_efficiency += 1;
+            if(dump_points_) {
+                std::ofstream ofile((base_dir_+file_name_).c_str(),
+                    std::ofstream::out  | std::ofstream::app);
+                for(auto &p: new_p_phys)
+                    ofile << p << "\t";
+                ofile << new_p[ndims] << "\t" << std::endl;
+                ofile.close();
+            }
             continue;
         }
         if(new_p[ndims] / (*pop_iter)[ndims] > uf(intgen)) {
             new_pop[p] = new_p;
             result.lh_efficiency += 1;
+            if(dump_points_) {
+                std::ofstream ofile((base_dir_+file_name_).c_str(),
+                    std::ofstream::out  | std::ofstream::app);
+                for(auto &p: new_p_phys)
+                    ofile << p << "\t";
+                ofile << new_p[ndims] << "\t" << std::endl;
+                ofile.close();
+            }
             continue;
         }
         new_pop[p] = *pop_iter;
     }
     return new_pop;
     /////// End of Metropolis Hastings
-
 }
 
 /** Required Minimize() function for every minimizer. Sets the bounds.
@@ -989,19 +975,30 @@ MAPS::Minimize(
 
     reset_calls();
     results.clear();
+    if(DEBUG)
+        std::setbuf(stdout, NULL);
 
     upper_bnds = upper_bounds;
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
     file_name_ = test_func_->get_name();
+    params_best_fit.resize(test_func_->get_ndims());
     // Build the identity covariance matrix
     cov_ = m_d(test_func_->get_ndims(), v_d(test_func_->get_ndims(), 0));
     for(uint32_t row=0; row<test_func_->get_ndims(); row++) {
         cov_[row][row] = 1;
     }
+    if(dump_points_) {
+        std::ofstream ofile((base_dir_+file_name_).c_str(),
+            std::ofstream::out  | std::ofstream::app);
 
+        for(int j=0; j<test_func_->get_ndims(); j++)
+            ofile << "Param" << j << "\t";
+        ofile << std::endl;
+        ofile.close();
+    }
     execute_maps(test_func_->get_ndims());
-
+    result.function_name = file_name_;
     result.minimizer_name = "MAPS";
     result.best_fit = lh_bestFit_;
     result.params_best_fit = params_best_fit;
