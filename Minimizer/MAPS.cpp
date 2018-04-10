@@ -35,8 +35,8 @@ MAPS::MAPS(
     max_sub_pops_ = max_sub_pops;
     n_selected_ = n_selected;
     n_sub_selected_ = n_sub_selected;
-    size_factor_ = EULER_CONST;
-    size_factor_ = 1.1;
+    size_factor_ = EULER_CONST; // From paper
+    size_factor_ = 1.1;         // Value that gives reasonable results
 }
 
 /** Check if a population is premature.
@@ -59,10 +59,8 @@ bool MAPS::check_premature(
     double epsilon) {
 
     double best_fit = pop[0][ndims];
-    for(auto pop_iter=pop.begin(); pop_iter<pop.end(); ++pop_iter) {
-        if(best_fit > (*pop_iter)[ndims]) {
-            best_fit = (*pop_iter)[ndims];
-        }
+    for(auto &p: pop) {
+        if(best_fit > p[ndims]) best_fit = p[ndims];
     }
     // Check first if this population had been stored before.
     if(premature_list_.size() > idx+1) {
@@ -301,12 +299,8 @@ std::vector<m_d> MAPS::maintaining(
     double eigen_threshold = 0.85; // We want to take the eigenvectors that
                                    // make up 85%, see paper page 4
     double eigen_sum = 0;
+    for(auto &eigen: eigen_values) eigen_sum += abs(eigen);
 
-    for(auto eigen=eigen_values.begin(); eigen<eigen_values.end();
-        eigen++) {
-
-        eigen_sum += abs(*eigen);
-    }
     m_d directions;
     eigen_sum *= eigen_threshold;
     double current_sum = 0;
@@ -397,7 +391,7 @@ std::vector<m_d> MAPS::processing(
                 precision_criterion_)) {
 
                 // Check which one is better
-                if(premature_list_[idx_premature].second < premature_list_tmp[compare_idx].second) {
+                if(premature_list_[idx_premature].second > premature_list_tmp[compare_idx].second) {
                     if(DEBUG) {
                         std::cout << "This population is similar to another one and inferior" << std::endl;
                     }
@@ -485,13 +479,6 @@ v_d MAPS::to_physics(
  *                          with I the identity matrix, h and l the boundaries
  *                          of the parameter space in the current population
  *                          in the current dimension.
- *
- *  \return                 = 0: sucessful
- *                          < 0: if return = -i, the i-th argument had an
- *                               illegal value in the covariance matrix
- *                          > 0: if return = i, the pca failed to converge. i
- *                               diagonal elements of an intermediate
- *                               tridiagonal form  did not converge to zero.
  * */
 void MAPS::pca(
     m_d in,
@@ -738,6 +725,7 @@ void MAPS::execute_maps(
     uint32_t n_iter = 0;
     premature_list_.clear();
     while(true) {
+        n_iter++; // We count the initialization as additional iteration
         m_d init_samples(n_start_points_, v_d(ndims+1));
         for(uint32_t i=0; i<n_start_points_; i++) {
             for(uint32_t j=0; j<ndims; j++) {
@@ -746,7 +734,16 @@ void MAPS::execute_maps(
             init_samples[i][ndims] = get_llh(to_physics(init_samples[i],
                 ndims));
         }
-
+        // if(dump_points_) {
+        //     std::ofstream ofile((base_dir_+file_name_).c_str(),
+        //         std::ofstream::out  | std::ofstream::app);
+        //     for(auto &p: init_samples) {
+        //         for(auto &v: p)
+        //             ofile << v << "\t";
+        //         ofile << std::endl;
+        //     }
+        //     ofile.close();
+        // }
         m_d offspring = truncatedly_select(init_samples, n_selected_, ndims);
 
         // sub_pops is SS from the paper, page 5
@@ -826,7 +823,7 @@ void MAPS::execute_maps(
             // iterations is reached.
             // Start over if no population has been found.
             n_iter++;
-            if(n_iter == max_iter_ and min_iter_ < n_iter) return;
+            if(n_iter >= max_iter_ and min_iter_ < n_iter) return;
             if(estimated_pops.size() == 0) {
                 break;
             }
@@ -915,8 +912,73 @@ m_d MAPS::evolve_population(
     // For each point: Sample a new point and take the new one if it satisfies
     // the Metropolis criterion, else take the old point
     double variance_2 = 0.5;
+    double multiplier = 1.0/(std::sqrt(variance_2*M_PI*2));
+    variance_2 = -1.0/variance_2;
+    uint32_t p=0;
+    for(auto pop_iter=pop.begin(); pop_iter<pop.end(); pop_iter++, p++) {
+        v_d new_p(ndims+1);
+        for(uint32_t i=0; i<ndims; i++) {
+            double value = uf(intgen);
+            value = value - (*pop_iter)[i];
+            new_p[i] = multiplier * std::exp(value*value*variance_2);
+        }
+        v_d new_p_phys = to_physics(new_p, ndims);
+        new_p[ndims] = get_llh(new_p_phys);
+        if(new_p[ndims] < (*pop_iter)[ndims]) {
+            new_pop[p] = new_p;
+            result.lh_efficiency += 1;
+            if(dump_points_) {
+                std::ofstream ofile((base_dir_+file_name_).c_str(),
+                    std::ofstream::out  | std::ofstream::app);
+                for(auto &p: new_p_phys)
+                    ofile << p << "\t";
+                ofile << new_p[ndims] << "\t" << std::endl;
+                ofile.close();
+            }
+            continue;
+        }
+        if((*pop_iter)[ndims] / new_p[ndims] > uf(intgen)) {
+            new_pop[p] = new_p;
+            result.lh_efficiency += 1;
+            if(dump_points_) {
+                std::ofstream ofile((base_dir_+file_name_).c_str(),
+                    std::ofstream::out  | std::ofstream::app);
+                for(auto &p: new_p_phys)
+                    ofile << p << "\t";
+                ofile << new_p[ndims] << "\t" << std::endl;
+                ofile.close();
+            }
+            continue;
+        }
+        new_pop[p] = *pop_iter;
+    }
+    return new_pop;
+
+    /////// End of Metropolis Hastings
+
+    /*
+    // Nested sampling (not finished yet)
+    // Sample a new point within the encapsulating ellipsoid (or use multiple distr. centered at each point)
+    // Accept if it satisfies Metropolis criterium given the worst point of
+    // the population and delete the worst point
+    // Stop if m times in a row nothing had been accepted
+    m_d cov = get_cov(pop, ndims, true, true);
+    double variance_2 = 0.1;
     double multiplier = 1.0/(std::sqrt(variance_2*M_PI));
     variance_2 = -1.0/variance_2;
+    uint32_t n_not_accepted = 0;
+    // The population is already sorted according to its likelihood
+    double worst_llh = pop[pop.size()-1][ndims];
+    while(n_not_accepted < 3) {
+        v_d new_p(ndims+1);
+        // Caclulate a random point inside an ellipsoid by
+        // either rejection sampling (Box-Muller transform) or
+        // using Cholesky decomposition
+        // https://stats.stackexchange.com/questions/120179/generating-data-with-a-given-sample-covariance-matrix?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+        for(uint32_t i=0; i<ndims; i++) {
+            new_p[i] = uf(intgen)*2-1;
+        }
+    }
     uint32_t p=0;
     for(auto pop_iter=pop.begin(); pop_iter<pop.end(); pop_iter++, p++) {
         v_d new_p(ndims+1);
@@ -956,7 +1018,78 @@ m_d MAPS::evolve_population(
         new_pop[p] = *pop_iter;
     }
     return new_pop;
-    /////// End of Metropolis Hastings
+    */
+    /////// End of nested sampling
+
+    // Multivariate sampling (not really)
+    // Idea:
+    // Assign each point a normal distribution
+    // The higher the likelihood, the more weight to its distribution
+    // The higher the likelihood, the smaller its variance (because the
+    // optimum might be near)
+    // Variance starts with the diagonals of the covariance matrix
+    // Scale variance with worst_llh/current_llh
+    m_d cov = get_cov(pop, ndims, true, true);
+    uint32_t n_not_accepted = 0;
+    // The population is already sorted according to its likelihood
+    double worst_llh = pop[pop.size()-1][ndims];
+    double best_llh = pop[0][ndims];
+    v_d variance_base(ndims);
+    for(uint32_t i=0; i<ndims; ++i) {
+        variance_base[i] = cov[i][i];
+    }
+    v_d variance_scale(pop.size());
+    for(uint32_t i=0; i<pop.size(); ++i) {
+        // Works only if all lh have the same sign
+        variance_scale[i] = worst_llh/pop[i][ndims];
+    }
+    while(n_not_accepted < 3) {
+        v_d new_p(ndims+1);
+        double lh_distr = 0;
+        do {
+            for(uint32_t i=0; i<ndims; ++i) {
+                new_p[i] = uf(intgen);
+            }
+            lh_distr = 0;
+            for(uint32_t i=0; i<pop.size(); ++i) {
+                for(uint32_t j=0; j<ndims; ++j) {
+                    double multiplier = 1.0/(std::sqrt(
+                        variance_base[j]*variance_scale[i]*M_PI*2));
+                    double relative_pos = new_p[j] - pop[i][j];
+                    lh_distr += multiplier * std::exp(relative_pos*relative_pos
+                        * -1.0/(variance_base[j]*variance_scale[i]));
+                }
+            }
+            lh_distr /= (pop.size() * ndims);
+        } while(uf(intgen) > lh_distr);
+        v_d new_p_phys = to_physics(new_p, ndims);
+        new_p[ndims] = get_llh(new_p_phys);
+        // Accept only if it is better than the worst lh
+        if(new_p[ndims] < worst_llh) {
+            // Replace the one with the worst llh
+            pop[pop.size()-1] = new_p;
+            // Sort points descending of its fitness
+            std::sort(pop.begin(), pop.end(),
+                [](const v_d & a, const v_d & b) {
+                    return a[a.size()-1] < b[b.size()-1];});
+            worst_llh = pop[pop.size()-1][ndims];
+            n_not_accepted = 0;
+            result.lh_efficiency += 1;
+
+            if(dump_points_) {
+                std::ofstream ofile((base_dir_+file_name_).c_str(),
+                    std::ofstream::out  | std::ofstream::app);
+                for(auto &p: new_p_phys)
+                    ofile << p << "\t";
+                ofile << new_p[ndims] << "\t" << std::endl;
+                ofile.close();
+            }
+        } else {
+            n_not_accepted++;
+        }
+    }
+    return pop;
+/////// End of multivariate sampling (not really)
 }
 
 /** Required Minimize() function for every minimizer. Sets the bounds.

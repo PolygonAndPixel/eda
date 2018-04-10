@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
     v_d lower_bounds(ndims);
     v_d upper_bounds(ndims);
     TestFunctions test_func;
+    MinimizerResult result;
     /*
     // Townsend function
     test_func.set_func("townsend", ndims);
@@ -80,8 +81,7 @@ int main(int argc, char* argv[]) {
     lower_bounds[1] = -6;
     upper_bounds[0] = 6;
     upper_bounds[1] = 6;
-    MinimizerResult result = sampler.Minimize(test_func, lower_bounds,
-        upper_bounds);
+    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
     std::cout << std::endl << "Best fit for " << result.function_name
         << " with " << result.minimizer_name << " is "
         << result.best_fit << std::endl;
@@ -92,8 +92,7 @@ int main(int argc, char* argv[]) {
 
     // Gaussian shell
     test_func.set_func("gaussian_shell", ndims);
-    result = sampler.Minimize(test_func, lower_bounds,
-        upper_bounds);
+    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
     std::cout << std::endl << "Best fit for " << result.function_name
         << " with " << result.minimizer_name << " is "
         << result.best_fit << std::endl;
