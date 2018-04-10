@@ -8,7 +8,7 @@ fortran:
 	cd Minimizer/polychord && $(MAKE)
 
 main: main.cpp
-	$(CXX) $(CXXFLAGS) $(FILES)  -llapack -llapacke -o main
+	$(CXX) $(CXXFLAGS) $(FILES)  -llapack -llapacke -o main.exe
 
 clean:
-	rm -f main
+	rm -f main.exe
