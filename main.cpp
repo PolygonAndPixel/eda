@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
     std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
         << std::endl;
     std::cout << "It had an efficiency of " << result.lh_efficiency
-        << std::endl;
+        << std::endl << std::endl;
 
     // Gaussian shell
     test_func.set_func("gaussian_shell", ndims);
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
     std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
         << std::endl;
     std::cout << "It had an efficiency of " << result.lh_efficiency
-        << std::endl;
+        << std::endl << std::endl;
     /*
     uint32_t n_iterations = 1000000;
     uint32_t max_points = n_iterations/10;

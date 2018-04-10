@@ -36,7 +36,7 @@ MAPS::MAPS(
     n_selected_ = n_selected;
     n_sub_selected_ = n_sub_selected;
     size_factor_ = EULER_CONST; // From paper
-    size_factor_ = 1.1;         // Value that gives reasonable results
+     size_factor_ = 1.5;         // Value that gives reasonable results
 }
 
 /** Check if a population is premature.
@@ -733,6 +733,7 @@ void MAPS::execute_maps(
             }
             init_samples[i][ndims] = get_llh(to_physics(init_samples[i],
                 ndims));
+            n_init_samples++;
         }
         // if(dump_points_) {
         //     std::ofstream ofile((base_dir_+file_name_).c_str(),
@@ -911,19 +912,27 @@ m_d MAPS::evolve_population(
     // Metropolis Hastings using a normal distribution
     // For each point: Sample a new point and take the new one if it satisfies
     // the Metropolis criterion, else take the old point
-    double variance_2 = 0.5;
-    double multiplier = 1.0/(std::sqrt(variance_2*M_PI*2));
-    variance_2 = -1.0/variance_2;
     uint32_t p=0;
+    double standard_deviation = 0.2;
+
     for(auto pop_iter=pop.begin(); pop_iter<pop.end(); pop_iter++, p++) {
         v_d new_p(ndims+1);
         for(uint32_t i=0; i<ndims; i++) {
-            double value = uf(intgen);
-            value = value - (*pop_iter)[i];
-            new_p[i] = multiplier * std::exp(value*value*variance_2);
+            std::normal_distribution<double> distribution((*pop_iter)[i],
+                standard_deviation);
+            do {
+                new_p[i] = distribution(intgen);
+            } while(new_p[i] < 0 || new_p[i] > 1);
         }
         v_d new_p_phys = to_physics(new_p, ndims);
         new_p[ndims] = get_llh(new_p_phys);
+        if(new_p[ndims] > 10000) {
+            std::cout << new_p[ndims] << ", ";
+            for(auto &v: new_p) std::cout << v << ", ";
+            std::cout << "| ";
+            for(auto &v: new_p_phys) std::cout << v << ", ";
+            std::cout << std::endl;
+        }
         if(new_p[ndims] < (*pop_iter)[ndims]) {
             new_pop[p] = new_p;
             result.lh_efficiency += 1;
@@ -1110,7 +1119,7 @@ MAPS::Minimize(
     results.clear();
     if(DEBUG)
         std::setbuf(stdout, NULL);
-
+    n_init_samples = 0;
     upper_bnds = upper_bounds;
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
@@ -1135,7 +1144,8 @@ MAPS::Minimize(
     result.minimizer_name = "MAPS";
     result.best_fit = lh_bestFit_;
     result.params_best_fit = params_best_fit;
-    result.lh_efficiency /= result.n_lh_calls;
+    result.lh_efficiency /= (result.n_lh_calls-n_init_samples);
+    std::cout << "Had to randomly sample " << n_init_samples << " points";
 
     return result;
 }
