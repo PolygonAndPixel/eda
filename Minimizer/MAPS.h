@@ -88,6 +88,7 @@ private:
     m_d cov_;
     std::vector<std::pair<uint32_t, double>> premature_list_;
     double size_factor_;
+    uint32_t n_init_samples;
 };
 
 #endif
