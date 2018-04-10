@@ -1030,7 +1030,7 @@ m_d MAPS::evolve_population(
     */
     /////// End of nested sampling
 
-    // Multivariate sampling (not really)
+    // Multivariate sampling
     // Idea:
     // Assign each point a normal distribution
     // The higher the likelihood, the more weight to its distribution
@@ -1048,9 +1048,13 @@ m_d MAPS::evolve_population(
         variance_base[i] = cov[i][i];
     }
     v_d variance_scale(pop.size());
+    v_d weight(pop.size());
+    double total_weights = 0;
     for(uint32_t i=0; i<pop.size(); ++i) {
         // Works only if all lh have the same sign
-        variance_scale[i] = worst_llh/pop[i][ndims];
+        variance_scale[i] = pop[i][ndims]/worst_llh;
+        weight[i] = worst_llh/pop[i][ndims];
+        total_weights += weight[i];
     }
     while(n_not_accepted < 3) {
         v_d new_p(ndims+1);
@@ -1069,7 +1073,7 @@ m_d MAPS::evolve_population(
                         * -1.0/(variance_base[j]*variance_scale[i]));
                 }
             }
-            lh_distr /= (pop.size() * ndims);
+            lh_distr /= (total_weights * ndims);
         } while(uf(intgen) > lh_distr);
         v_d new_p_phys = to_physics(new_p, ndims);
         new_p[ndims] = get_llh(new_p_phys);
@@ -1098,7 +1102,7 @@ m_d MAPS::evolve_population(
         }
     }
     return pop;
-/////// End of multivariate sampling (not really)
+/////// End of multivariate sampling
 }
 
 /** Required Minimize() function for every minimizer. Sets the bounds.
