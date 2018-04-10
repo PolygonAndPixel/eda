@@ -906,7 +906,7 @@ m_d MAPS::truncatedly_select(
 m_d MAPS::evolve_population(
     m_d pop,
     uint32_t ndims) {
-
+/*
     m_d new_pop(pop.size(), v_d(pop[0].size()));
 
     // Metropolis Hastings using a normal distribution
@@ -962,7 +962,7 @@ m_d MAPS::evolve_population(
         new_pop[p] = *pop_iter;
     }
     return new_pop;
-
+*/
     /////// End of Metropolis Hastings
 
     /*
