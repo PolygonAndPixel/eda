@@ -65,7 +65,6 @@ public:
     bool dump_points_;
     v_d results;
 
-
 private:
 
 

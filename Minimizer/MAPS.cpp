@@ -1117,7 +1117,7 @@ MinimizerResult
 MAPS::Minimize(
     TestFunctions test_func,
     v_d lower_bounds,
-    v_d upper_bounds ) {
+    v_d upper_bounds) {
 
     reset_calls();
     results.clear();
