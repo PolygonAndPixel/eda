@@ -13,11 +13,12 @@
 class PolyChord : public Minimizer {
 public:
 
-    PolyChord(double tolerance, uint32_t max_iter, uint32_t min_iter,
-         uint32_t max_points=0, uint32_t n_start_points=1000,
-         uint32_t size_sub_pop=100, uint32_t max_sub_pops=9,
-         uint32_t n_selected=500, uint32_t n_sub_selected=25,
-         uint32_t seed=1025, bool dump_points=false);
+    PolyChord(double tolerance, uint32_t max_iter=0, uint32_t min_iter=0,
+        uint32_t max_points=0, int n_prior=-1, int n_grade=1, 
+        double *grade_frac=nullptr, uint32_t n_live=250, uint32_t feedback=0, 
+        int max_dead=-1, double boost_posterior=0.0, int num_repeats=-1,
+        bool posteriors=false, bool equals=false, bool cluster_posteriors=false,
+        uint32_t seed=1025, bool dump_points=false);
 
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
@@ -35,12 +36,12 @@ public:
     v_d PolyChord::to_physics(v_d cube, uint32_t ndims);
 
 private:
-    uint32_t nlive_, nprior_, max_ndead_, nGrade_;
+    int n_live_, nprior_, max_ndead_, nGrade_;
     bool posteriors_, equals_, cluster_posteriors_;
     double boost_posterior_, *grade_frac_;
 
     // Various unimportant variables for the minimization routine in fortran.
-    uint32_t feedback_, update_files_, nDerived_;
+    int feedback_, update_files_, nDerived_;
     bool write_resume_, write_paramnames_, read_resume_, write_stats_;
     bool write_live_, write_dead_, write_prior_;
 

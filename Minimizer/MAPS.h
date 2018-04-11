@@ -13,11 +13,11 @@
 class MAPS : public Minimizer {
 public:
 
-    MAPS(double tolerance, uint32_t max_iter, uint32_t min_iter,
-         uint32_t max_points=0, uint32_t n_start_points=1000,
-         uint32_t size_sub_pop=100, uint32_t max_sub_pops=9,
-         uint32_t n_selected=500, uint32_t n_sub_selected=25,
-         uint32_t seed=1025, bool dump_points=false);
+    MAPS(double tolerance, int max_iter, int min_iter,
+         int max_points=0, int n_start_points=1000,
+         int size_sub_pop=100, int max_sub_pops=9,
+         int n_selected=500, int n_sub_selected=25,
+         int seed=1025, bool dump_points=false);
 
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,

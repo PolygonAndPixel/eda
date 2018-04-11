@@ -12,9 +12,9 @@
 
 /** Constructor and destructor **/
 SampleSpace::SampleSpace(
-    uint32_t max_iter,
-    uint32_t max_points,
-    uint32_t seed,
+    int max_iter,
+    int max_points,
+    int seed,
     bool dump_points) : Minimizer(0, max_iter, 0, max_points, seed, dump_points)
 {
 

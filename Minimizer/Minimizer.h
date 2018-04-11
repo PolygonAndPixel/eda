@@ -12,9 +12,8 @@
 
 class Minimizer {
 public:
-    /// constructor for service factory
-    Minimizer(double tolerance, uint32_t max_iter, uint32_t min_iter,
-              uint32_t max_points, uint32_t seed=1025, bool dump_points=false) {
+    Minimizer(double tolerance, int max_iter, int min_iter,
+              int max_points, int seed=1025, bool dump_points=false) {
         precision_criterion_ = tolerance;
         max_iter_ = max_iter;
         min_iter_ = min_iter;
@@ -57,7 +56,7 @@ public:
     v_d params_best_fit;
     double lh_bestFit_, lh_worstFit_;
     double precision_criterion_;
-    uint32_t min_iter_, max_iter_, max_points_;
+    int min_iter_, max_iter_, max_points_;
 
     TestFunctions *test_func_;
     MinimizerResult result;

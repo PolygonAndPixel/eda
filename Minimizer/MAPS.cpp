@@ -18,15 +18,15 @@ const bool DEBUG (false);
 /** Constructor and destructor **/
 MAPS::MAPS(
     double tolerance,
-    uint32_t max_iter,
-    uint32_t min_iter,
-    uint32_t max_points,
-    uint32_t n_start_points,
-    uint32_t size_sub_pop,
-    uint32_t max_sub_pops,
-    uint32_t n_selected,
-    uint32_t n_sub_selected,
-    uint32_t seed,
+    int max_iter,
+    int min_iter,
+    int max_points,
+    int n_start_points,
+    int size_sub_pop,
+    int max_sub_pops,
+    int n_selected,
+    int n_sub_selected,
+    int seed,
     bool dump_points) : Minimizer(tolerance, max_iter, min_iter,
                                   max_points, seed, dump_points)
 {

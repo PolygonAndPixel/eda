@@ -8,7 +8,7 @@
 class SampleSpace : public Minimizer {
 public:
 
-    SampleSpace(uint32_t max_iter,  uint32_t max_points, uint32_t seed=1025,
+    SampleSpace(int max_iter,  int max_points, int seed=1025,
                 bool dump_points=false);
     
     /// core method: minimizer a given function with given initial conditions

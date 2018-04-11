@@ -16,47 +16,54 @@
 /** Constructor and destructor **/
 PolyChord::PolyChord(
     double tolerance,
-    uint32_t max_iter,
-    uint32_t min_iter,
-    uint32_t max_points,
-    int nprior,
-    int nGrade,
+    int max_iter,
+    int min_iter,
+    int max_points,
+    int n_prior,
+    int n_grade,
     double *grade_frac,
-    uint32_t feedback,
-    uint32_t seed,
+    int n_live,
+    int feedback,
+    int max_dead,
+    double boost_posterior,
+    int num_repeats,
+    bool posteriors, 
+    bool equals,
+    bool cluster_posteriors,
+    int seed,
     bool dump_points)
 
     ) : Minimizer(tolerance, max_iter, min_iter,
                   max_points, seed, dump_points)
 {
-    nprior_                 = -1;
-    nGrade_                 = 1;    // The number of grades
-    grade_frac_             = new double[1];
-    grade_frac_[0]          = 1.0;    // The fraction of time spent in each grade
-    // Various variables for the minimization routine in fortran.
-    feedback_ = 0;
-    write_resume_ = false;
-    write_paramnames_ = false;
-    read_resume_ = false;
-    write_stats_ = false;
-    write_live_ = dump_points;
-    write_dead_ = false;
-    write_prior_ = false;
-    update_files_ = -1;
-    nDerived_ = 0;
+    nprior_                 = n_prior;
+    nGrade_                 = n_grade;    // The number of grades
+    grade_frac_             = grade_frac; // The fraction of time spent in each grade
 
-    // GetParameter("Posteriors", posteriors_);
-    // GetParameter("Equally", equals_);
-    // GetParameter("ClusterPosteriors", cluster_posteriors_);
-    // // What factor should we bulk up the posterior points by (using
-    // // inter-chain points)
-    // // set to <=0 to use all of them
-    // GetParameter("BoostPosterior", boost_posterior_);
-    // GetParameter("MaxDead", max_ndead_); // -1 -> no maximum number
-    // GetParameter("NLive", nlive_);
-    // GetParameter("NumRepeats", num_repeats_);
-    // GetParameter("PeriodicParams", periodics_);
-    // GetParameter("ModeSeparatedParams", modeSeparated_);
+    // Various variables for the minimization routine in fortran.
+    n_live_                 = n_live;
+    // The number of slow chords to draw. Default is 5*nDims
+    num_repeats_            = (num_repeats < 0) ? 5*ndims : num_repeats;
+    max_ndead_              = max_dead;     // -1 -> no maximum number
+    // What factor should we bulk up the posterior points by (using
+    // inter-chain points)
+    // set to <=0 to use all of them
+    boost_posterior_        = boost_posterior;
+    // Calculate weighted posteriors
+    posteriors_             = posteriors;
+    // Calculate equally weighted posteriors. Reads and writes a file to disk
+    equals_                 = equals;
+    cluster_posteriors_     = cluster_posteriors;
+    feedback_               = 0;
+    write_resume_           = false;
+    write_paramnames_       = false;
+    read_resume_            = false;
+    write_stats_            = false;
+    write_live_             = dump_points;
+    write_dead_             = false;
+    write_prior_            = false;
+    update_files_           = -1;
+    nDerived_               = 0;
 }
 
 /** Function to map from the unit hypercube to Theta in the physical space.
@@ -236,13 +243,13 @@ PolyChord::Minimize(
 
     // The numbers are the indices of the last argument of each row.
     // It is easier to debug this way.
-    interfaces::polychord_c_interface(nlive_, num_repeats_, nprior_, // 4
+    interfaces::polychord_c_interface(n_live_, num_repeats_, nprior_, // 4
         do_clustering, feedback_, precision_criterion_, max_ndead_, // 8
         boost_posterior_, posteriors_, equals_, cluster_posteriors_, // 12
         write_resume_, write_paramnames_, read_resume_, write_stats_, write_live_, // 17
         write_dead_, write_prior_, update_files_, ndims, nDerived_, // 22
         b_dir, f_root, nGrade_, grade_frac_, // 26
-        &grade_dims, PolyChord::fortran_get_llh, // 28
+        &ndims, PolyChord::fortran_get_llh, // 28
         PolyChord::to_physics, PolyChord::c_dumper,
         static_cast<void*>(this)); // 30
     result.function_name = file_name_;
