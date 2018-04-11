@@ -15,6 +15,16 @@
 
 /** Constructor and destructor **/
 PolyChord::PolyChord(
+    double tolerance,
+    uint32_t max_iter,
+    uint32_t min_iter,
+    uint32_t max_points,
+    int nprior,
+    int nGrade,
+    double *grade_frac,
+    uint32_t feedback,
+    uint32_t seed,
+    bool dump_points)
 
     ) : Minimizer(tolerance, max_iter, min_iter,
                   max_points, seed, dump_points)
@@ -29,18 +39,12 @@ PolyChord::PolyChord(
     write_paramnames_ = false;
     read_resume_ = false;
     write_stats_ = false;
-    write_live_ = false;
+    write_live_ = dump_points;
     write_dead_ = false;
     write_prior_ = false;
     update_files_ = -1;
     nDerived_ = 0;
 
-    miniter_ = -1; // Needed for I3SingleServiceFactory. Not used by PolyChord.
-    setbuf(stdout, NULL);
-    base_dir_ = "/data/user/mhieronymus/polychord_dump/";
-    file_root_ = "";
-
-    // GetParameter("Tolerance", precision_criterion_);
     // GetParameter("Posteriors", posteriors_);
     // GetParameter("Equally", equals_);
     // GetParameter("ClusterPosteriors", cluster_posteriors_);
@@ -238,8 +242,8 @@ PolyChord::Minimize(
         write_resume_, write_paramnames_, read_resume_, write_stats_, write_live_, // 17
         write_dead_, write_prior_, update_files_, ndims, nDerived_, // 22
         b_dir, f_root, nGrade_, grade_frac_, // 26
-        &grade_dims, I3GulliverPolyChord::fct, // 28
-        PolyChord::to_physics, PolyChord::fortran_get_llh,
+        &grade_dims, PolyChord::fortran_get_llh, // 28
+        PolyChord::to_physics, PolyChord::c_dumper,
         static_cast<void*>(this)); // 30
     result.function_name = file_name_;
     result.minimizer_name = "PolyChord";
