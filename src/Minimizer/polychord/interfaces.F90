@@ -43,7 +43,7 @@ contains
             end function prior
         end interface
         interface
-            subroutine dumper(log_Z,log_ZError,ndead,n_llh_calls,n_accepted,RTI,settings,context)
+            subroutine dumper(log_Z,log_ZError,ndead,n_llh_calls, RTI,settings,context)
                 use settings_module, only: program_settings
                 use run_time_module, only: run_time_info
                 import :: dp
@@ -52,7 +52,7 @@ contains
                 real(dp), intent(in), value             :: log_ZError
                 real(dp), intent(in), value             :: ndead
                 real(dp), intent(in), value             :: n_llh_calls
-                real(dp), intent(in), value             :: n_accepted
+                ! real(dp), intent(in), value             :: n_accepted
                 type(run_time_info), intent(in)         :: RTI
                 type(program_settings), intent(in)      :: settings
                 type(c_ptr), intent(in), value          :: context
@@ -66,9 +66,6 @@ contains
         type(program_settings)               :: settings
 
         real(dp), dimension(4) :: output_info
-        write(*,*) "**********************************************************"
-        write(*,*) "Run PolyChord full"
-        flush(6)
 #ifdef MPI
         call initialise_mpi
 #endif
@@ -102,7 +99,7 @@ contains
             end function loglikelihood
         end interface
         interface
-            subroutine dumper(log_Z,log_ZError,ndead,n_llh_calls,n_accpeted,RTI,settings,context)
+            subroutine dumper(log_Z,log_ZError,ndead,n_llh_calls,RTI,settings,context)
                 use settings_module, only: program_settings
                 use run_time_module, only: run_time_info
                 import :: dp
@@ -111,7 +108,7 @@ contains
                 real(dp), intent(in), value             :: log_ZError
                 real(dp), intent(in), value             :: ndead
                 real(dp), intent(in), value             :: n_llh_calls
-                real(dp), intent(in), value             :: n_accpeted
+                ! real(dp), intent(in), value             :: n_accepted
                 type(run_time_info), intent(in)         :: RTI
                 type(program_settings), intent(in)      :: settings
                 type(c_ptr), intent(in), value          :: context

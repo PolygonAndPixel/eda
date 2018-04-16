@@ -351,9 +351,7 @@ module nested_sampling_module
             end do
 
             call update_posteriors(settings,RTI)
-            write(*,*) "Before write_phys_live_points, ", RTI%ncluster
             if(settings%write_live)                    call write_phys_live_points(settings,RTI)
-            write(*,*) "After write_phys_live_points, ", RTI%ncluster
             if(settings%write_stats)                   call write_stats_file(settings,RTI,nlikesum)
             if(settings%equals.or.settings%posteriors) call write_posterior_file(settings,RTI)
             if(settings%write_dead)                    call write_dead_points(settings,RTI)
@@ -368,10 +366,8 @@ module nested_sampling_module
             call calculate_logZ_estimate(RTI,output_info(1),output_info(2))
             output_info(3) = RTI%ndead
             output_info(4) = RTI%nlike(1)
-            write(*,*) "Before dumper, ", RTI%ncluster
             call dumper(output_info(1),output_info(2),output_info(3),&
                 output_info(4),RTI,settings,context)
-            write(*,*) "After dumper, ", RTI%ncluster
             ! ------------------------------------------------------------ !
             call write_final_results(output_info,settings%feedback)        !
             ! ------------------------------------------------------------ !

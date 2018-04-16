@@ -28,7 +28,7 @@ module loglikelihood_c
         end subroutine c_prior
     end interface
     interface
-        subroutine c_dumper(log_Z,log_ZError,ndead,n_llh_calls,n_accepted,live_params,&
+        subroutine c_dumper(log_Z,log_ZError,ndead,n_llh_calls, live_params,&
             n_cluster, llh_best_fit, llh_worst_fit, nPar, context) bind(c)
             use iso_c_binding
             integer(c_int), intent(in), value :: nPar
@@ -36,7 +36,7 @@ module loglikelihood_c
             real(c_double), intent(in), value :: log_ZError
             real(c_double), intent(in), value :: ndead
             real(c_double), intent(in), value :: n_llh_calls
-            real(c_double), intent(in), value :: n_accepted
+            ! real(c_double), intent(in), value :: n_accepted
             real(c_double), intent(in), dimension(nPar) :: live_params
             integer(c_int), intent(in), value :: n_cluster
             real(c_double), intent(in), value :: llh_best_fit
@@ -139,7 +139,7 @@ contains
 
     end function prior
 
-    subroutine dumper(log_Z,log_ZError,ndead,n_llh_calls,n_accepted,RTI,settings,context)
+    subroutine dumper(log_Z,log_ZError,ndead,n_llh_calls, RTI,settings,context)
         use settings_module, only: program_settings
         use run_time_module, only: run_time_info
         implicit none
@@ -147,7 +147,7 @@ contains
         real(dp), intent(in), value             :: log_ZError
         real(dp), intent(in), value             :: ndead
         real(dp), intent(in), value             :: n_llh_calls
-        real(dp), intent(in), value             :: n_accpeted
+        ! real(dp), intent(in), value             :: n_accepted
         type(run_time_info), intent(in)         :: RTI
         type(program_settings), intent(in)      :: settings
         ! real(dp), intent(in),  dimension(:,:,:) :: live_params
@@ -168,6 +168,7 @@ contains
         real(c_double)                                    :: c_log_ZError
         real(c_double)                                    :: c_ndead
         real(c_double)                                    :: c_n_llh_calls
+        ! real(c_double)                                    :: c_n_accepted
         real(c_double), dimension(settings%grade_dims(1)) :: c_live_params
         integer(c_int)                                    :: c_n_cluster
         real(c_double)                                    :: c_llh_best_fit
@@ -214,6 +215,7 @@ contains
         c_n_cluster = RTI%ncluster
         c_llh_best_fit = best_fit
         c_llh_worst_fit = worst_fit
+        ! c_n_accepted = n_accepted
         c_nPar = settings%grade_dims(1)
         write(*,*) "###########################################################"
         write(*,*) "best fit: ", best_fit
@@ -227,7 +229,7 @@ contains
         write(*,*) "settings%l0: ", settings%l0
         write(*,*) "###########################################################"
 
-        call f_dumper_ptr(c_log_Z, c_log_ZError, c_ndead, c_n_llh_calls,&
+        call f_dumper_ptr(c_log_Z, c_log_ZError, c_ndead, c_n_llh_calls, &
             c_live_params, c_n_cluster, c_llh_best_fit, c_llh_worst_fit, c_nPar, &
             context)
     end subroutine dumper

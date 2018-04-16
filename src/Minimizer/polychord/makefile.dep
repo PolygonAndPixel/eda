@@ -1,32 +1,32 @@
 abort.o : \
-	utils.o 
+	utils.o
 
 array_utils.o : \
 	abort.o \
-	utils.o 
+	utils.o
 
 calculate.o : \
 	settings.o \
-	utils.o 
+	utils.o
 
 chordal_sampling.o : \
 	calculate.o \
 	random_utils.o \
 	settings.o \
-	utils.o 
+	utils.o
 
 clustering.o : \
 	calculate.o \
 	run_time_info.o \
 	settings.o \
 	abort.o \
-	utils.o 
+	utils.o
 
 feedback.o : \
 	run_time_info.o \
 	settings.o \
 	read_write.o \
-	utils.o 
+	utils.o
 
 generate.o : \
 	mpi_utils.o \
@@ -39,7 +39,7 @@ generate.o : \
 	run_time_info.o \
 	settings.o \
 	chordal_sampling.o \
-	utils.o 
+	utils.o
 
 ini.o : \
 	array_utils.o \
@@ -48,7 +48,7 @@ ini.o : \
 	params.o \
 	settings.o \
 	priors.o \
-	utils.o 
+	utils.o
 
 interfaces.o : \
 	read_write.o \
@@ -58,11 +58,11 @@ interfaces.o : \
 	nested_sampling.o \
 	random_utils.o \
 	settings.o \
-	utils.o 
+	utils.o
 
 mpi_utils.o : \
 	abort.o \
-	utils.o 
+	utils.o
 
 nested_sampling.o : \
 	generate.o \
@@ -74,21 +74,21 @@ nested_sampling.o : \
 	read_write.o \
 	settings.o \
 	mpi_utils.o \
-	utils.o 
+	utils.o
 
 params.o : \
-	utils.o 
+	utils.o
 
 priors.o : \
 	abort.o \
 	array_utils.o \
 	params.o \
 	settings.o \
-	utils.o 
+	utils.o
 
 random_utils.o : \
 	mpi_utils.o \
-	utils.o 
+	utils.o
 
 read_write.o : \
 	params.o \
@@ -96,17 +96,17 @@ read_write.o : \
 	abort.o \
 	run_time_info.o \
 	settings.o \
-	utils.o 
+	utils.o
 
 run_time_info.o : \
 	calculate.o \
 	random_utils.o \
 	array_utils.o \
 	settings.o \
-	utils.o 
+	utils.o
 
 settings.o : \
 	abort.o \
-	utils.o 
+	utils.o
 
-utils.o : 
+utils.o :

@@ -1,32 +1,45 @@
-# Object files:
-# find all files ending in 90, and change .f90 and .F90 to .o,
-FOBJECTS = $(patsubst %.F90,%.o,$(patsubst %.f90,%.o,$(wildcard *90)))
-FFLAGS = -ffree-line-length-none -cpp -fPIC -O3
-OBJECTS = $(FOBJECTS)
 FC = gfortran
+FFLAGS = -ffree-line-length-none -cpp -fPIC -c
+BUILD = ../../../build
+OBJ_DIR = $(BUILD)/objects
 
-# include the dependencies
-include makefile.dep
+all: build
 
-# The polychord library depends on the objects
-# we should make all the objects and the archive them with AR
-$(LIB_DIR)/libchord.a: $(OBJECTS)
-	$(AR) $@ $^
+.PHONY: all build clean debug release
 
-$(LIB_DIR)/libchord.so: $(OBJECTS)
-	$(LDSHARED) $^ -o $@
+build:
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_DIR)/src
+	@mkdir -p $(OBJ_DIR)/src/Minimizer
+	@mkdir -p $(OBJ_DIR)/src/Minimizer/polychord
+	$(FC) $(FFLAGS) utils.f90
+	$(FC) $(FFLAGS) abort.F90
+	$(FC) $(FFLAGS) array_utils.f90
+	$(FC) $(FFLAGS) settings.f90
+	$(FC) $(FFLAGS) calculate.f90
+	$(FC) $(FFLAGS) mpi_utils.F90
+	$(FC) $(FFLAGS) params.f90
+	$(FC) $(FFLAGS) priors.f90
+	$(FC) $(FFLAGS) random_utils.F90
+	$(FC) $(FFLAGS) run_time_info.f90
+	$(FC) $(FFLAGS) read_write.f90
+	$(FC) $(FFLAGS) ini.f90
+	$(FC) $(FFLAGS) feedback.f90
+	$(FC) $(FFLAGS) clustering.f90
+	$(FC) $(FFLAGS) chordal_sampling.f90
+	$(FC) $(FFLAGS) generate.F90
+	$(FC) $(FFLAGS) nested_sampling.F90
+	$(FC) $(FFLAGS)	loglikelihood_c.F90
+	$(FC) $(FFLAGS) interfaces.F90
+	mv *.o $(OBJ_DIR)/src/Minimizer/polychord
+	mv *.mod $(OBJ_DIR)/src/Minimizer/polychord
 
-# General rule for building object file (.o)  from fortran files (.f90/.F90)
-%.o: %.f90
-	$(FC) $(FFLAGS) -c $<
-%.o: %.F90
-	$(FC) $(FFLAGS) -c $<
+debug: FFLAGS += -DDEBUG -g
+debug: all
 
-# Utility targets
-.PHONY: clean veryclean
+release: FFLAGS += -O3
+release: all
 
 clean:
-	rm -f *.o *.mod *.MOD
-
-veryclean: clean
-	rm -f *~ *.a *.so
+	-@rm -rvf *.o *.mod
+	-@rm -rvf $(OBJ_DIR)/*

@@ -13,6 +13,7 @@ SRC = \
 	$(wildcard src/Minimizer/*.cpp) \
 
 OBJECTS = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
+FOBJECTS = $(OBJ_DIR)/src/Minimizer/polychord/*.o
 
 all: build $(APP_DIR)/$(TARGET)
 
@@ -22,7 +23,7 @@ $(OBJ_DIR)/%.o: %.cpp
 
 $(APP_DIR)/$(TARGET): $(OBJECTS)
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $(APP_DIR)/$(TARGET) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $(APP_DIR)/$(TARGET) $(OBJECTS) $(FOBJECTS) $(LDFLAGS)
 
 
 .PHONY: all build clean debug release
@@ -32,9 +33,7 @@ build:
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)/src
 	@mkdir -p $(OBJ_DIR)/src/Minimizer
-	cd src/Minimizer/polychord && $(MAKE) \
-	&& mv *.o ../../../build/objects/src/Minimizer \
-	&& mv *.mod ../../../build/objects/src/Minimizer
+	cd src/Minimizer/polychord && $(MAKE) release
 
 debug: CXXFLAGS += -DDEBUG -g
 debug: all
@@ -45,4 +44,4 @@ release: all
 clean:
 	cd src/Minimizer/polychord && $(MAKE) clean
 	-@rm -rvf $(OBJ_DIR)/*
-	-@rm -rvf $(APP_DIR)/*
+	-@rm -rvf $(APP_DIR)/$(TARGET)

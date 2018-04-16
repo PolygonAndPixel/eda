@@ -158,7 +158,7 @@ void PolyChord::c_dumper(
     void *misc)
 {
 
-    printf("Finished PoyChord with following paramters:\n"
+    printf("\nFinished PoyChord with following paramters:\n"
            "log_evidence = %f\n"
            "error_log_evidence = %f\n"
            "ndead = %f\n"
@@ -174,12 +174,15 @@ void PolyChord::c_dumper(
     }
     printf("------\n");
     PolyChord *pBase = static_cast<PolyChord*>(misc);
-    pBase->result.params_best_fit.clear();
+    pBase->result.params_best_fit.resize(2);
+    printf("But why? %i\n", pBase->result.params_best_fit.size());
     for(uint32_t i=0; i<n_dims; i++) {
         pBase->result.params_best_fit[i] = live_params[i];
+        printf("But why??%i\n", i);
     }
 
     pBase->result.best_fit  = llh_best_fit;
+    printf("Seriously!\n");
     std::cout << "n_lh_calls according to PolyChord: " << n_likelihood_calls;
     std::cout << " and according to my code: " << pBase->result.n_lh_calls;
     std::cout << std::endl;
@@ -233,6 +236,7 @@ PolyChord::Minimize(
     test_func_ = &test_func;
     file_name_ = test_func_->get_name();
     params_best_fit.resize(test_func_->get_ndims());
+
     if(dump_points_) {
         std::ofstream ofile((base_dir_+file_name_).c_str(),
             std::ofstream::out  | std::ofstream::app);
