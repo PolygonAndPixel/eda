@@ -10,6 +10,21 @@
 #include "likelihood/TestFunctions.h"
 #include "Minimizer/MinimizerResult.h"
 
+void print_result(
+    MinimizerResult &result) {
+
+    std::cout << std::endl << "Best fit for " << result.function_name
+        << " with " << result.minimizer_name << " is "
+        << result.best_fit << std::endl;
+    std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
+        << std::endl;
+    std::cout << "It had an efficiency of " << result.lh_efficiency
+        << std::endl;
+    std::cout << "Found parameters are ";
+    for(auto &v: result.params_best_fit) std::cout << v << ", ";
+    std::cout << std::endl << std::endl;
+}
+
 void run_tests(
     Minimizer &sampler) {
 
@@ -25,85 +40,45 @@ void run_tests(
     lower_bounds[1] = -6;
     upper_bounds[0] = 6;
     upper_bounds[1] = 6;
+    std::cout << "Running Himmelblau" << std::endl;
     result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    std::cout << std::endl << "Best fit for " << result.function_name
-        << " with " << result.minimizer_name << " is "
-        << result.best_fit << std::endl;
-    std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
-        << std::endl;
-    std::cout << "It had an efficiency of " << result.lh_efficiency
-        << std::endl << std::endl;
-    //
-    // // Gaussian shell
-    // test_func.set_func("gaussian_shell", ndims);
-    // result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    // std::cout << std::endl << "Best fit for " << result.function_name
-    //     << " with " << result.minimizer_name << " is "
-    //     << result.best_fit << std::endl;
-    // std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
-    //     << std::endl;
-    // std::cout << "It had an efficiency of " << result.lh_efficiency
-    //     << std::endl << std::endl;
-    //
-    // // Townsend function
-    // test_func.set_func("townsend", ndims);
-    // lower_bounds[0] = -2.25;
-    // lower_bounds[1] = -2.5;
-    // upper_bounds[0] = 2.5;
-    // upper_bounds[1] = 1.75;
-    // result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    // std::cout << std::endl << "Best fit for " << result.function_name
-    //     << " with " << result.minimizer_name << " is "
-    //     << result.best_fit << std::endl;
-    // std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
-    //     << std::endl;
-    // std::cout << "It had an efficiency of " << result.lh_efficiency
-    //     << std::endl;
-    //
-    // // Rosenbrock function
-    // test_func.set_func("rosenbrock", ndims);
-    // lower_bounds[0] = -2;
-    // lower_bounds[1] = -1;
-    // upper_bounds[0] = 2;
-    // upper_bounds[1] = 3;
-    // result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    // std::cout << std::endl << "Best fit for " << result.function_name
-    //     << " with " << result.minimizer_name << " is "
-    //     << result.best_fit << std::endl;
-    // std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
-    //     << std::endl;
-    // std::cout << "It had an efficiency of " << result.lh_efficiency
-    //     << std::endl;
-    //
-    // // Eggholder function
-    // test_func.set_func("eggholder", ndims);
-    // lower_bounds[0] = -512;
-    // lower_bounds[1] = -512;
-    // upper_bounds[0] = 512;
-    // upper_bounds[1] = 512;
-    // result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    // std::cout << std::endl << "Best fit for " << result.function_name
-    //     << " with " << result.minimizer_name << " is "
-    //     << result.best_fit << std::endl;
-    // std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
-    //     << std::endl;
-    // std::cout << "It had an efficiency of " << result.lh_efficiency
-    //     << std::endl;
-    //
-    // // Himmelblau's function
-    // test_func.set_func("himmelblau", ndims);
-    // lower_bounds[0] = -6;
-    // lower_bounds[1] = -6;
-    // upper_bounds[0] = 6;
-    // upper_bounds[1] = 6;
-    // result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    // std::cout << std::endl << "Best fit for " << result.function_name
-    //     << " with " << result.minimizer_name << " is "
-    //     << result.best_fit << std::endl;
-    // std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
-    //     << std::endl;
-    // std::cout << "It had an efficiency of " << result.lh_efficiency
-    //     << std::endl;
+    print_result(result);
+
+    // Townsend function
+    test_func.set_func("townsend", ndims);
+    lower_bounds[0] = -2.25;
+    lower_bounds[1] = -2.5;
+    upper_bounds[0] = 2.5;
+    upper_bounds[1] = 1.75;
+    std::cout << "Running Townsend" << std::endl;
+    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+    print_result(result);
+
+    // Rosenbrock function
+    test_func.set_func("rosenbrock", ndims);
+    lower_bounds[0] = -2;
+    lower_bounds[1] = -1;
+    upper_bounds[0] = 2;
+    upper_bounds[1] = 3;
+    std::cout << "Running Rosenbrock" << std::endl;
+    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+    print_result(result);
+
+    // Eggholder function
+    test_func.set_func("eggholder", ndims);
+    lower_bounds[0] = -512;
+    lower_bounds[1] = -512;
+    upper_bounds[0] = 512;
+    upper_bounds[1] = 512;
+    std::cout << "Running Eggholder" << std::endl;
+    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+    print_result(result);
+
+    // Gaussian shell
+    test_func.set_func("gaussian_shell", ndims);
+    std::cout << "Running Gaussian Shell" << std::endl;
+    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+    print_result(result);
 }
 
 int main(int argc, char* argv[]) {

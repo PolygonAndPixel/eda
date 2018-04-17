@@ -110,15 +110,8 @@ contains
         real(dp), intent(in), value             :: log_ZError
         real(dp), intent(in), value             :: ndead
         real(dp), intent(in), value             :: n_llh_calls
-        ! real(dp), intent(in), value             :: n_accepted
         type(run_time_info), intent(in)         :: RTI
         type(program_settings), intent(in)      :: settings
-        ! real(dp), intent(in),  dimension(:,:,:) :: live_params
-        ! integer, intent(in), dimension(:)       :: n_live
-        ! integer, intent(in), value              :: n_cluster
-        ! real(dp), intent(in),  dimension(:)     :: llh_bestFits
-        ! integer, intent(in), value              :: nPar
-        ! integer,allocatable, dimension(:)       :: idx_min
         type(c_ptr), intent(in), value          :: context
 
         real(dp)                                           :: best_fit
@@ -150,7 +143,6 @@ contains
         c_llh_worst_fit = worst_fit
         c_n_accepted = RTI%n_accepted
         c_nPar = settings%grade_dims(1)
-        write(*,*) RTI%n_accepted
 
         call f_dumper_ptr(c_log_Z, c_log_ZError, c_ndead, c_n_llh_calls, c_n_accepted, &
             c_live_params, c_n_cluster, c_llh_best_fit, c_llh_worst_fit, c_nPar, &

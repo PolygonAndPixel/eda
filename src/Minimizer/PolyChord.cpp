@@ -158,29 +158,13 @@ void PolyChord::c_dumper(
     int n_dims,
     void *misc)
 {
-
-    printf("\nFinished PoyChord with following paramters:\n"
-           "log_evidence = %f\n"
-           "error_log_evidence = %f\n"
-           "ndead = %f\n"
-           "n_likelihood_calls = \t%f\n"
-           "n_accepted = \t\t\t%f\n"
-           "n_cluster = %d\n"
-           "best_llh = %f\n"
-           "n_dims = %d\n", log_evidence, error_log_evidence, ndead,
-           n_likelihood_calls, n_accepted, n_cluster, llh_best_fit, n_dims);
-
-
     PolyChord *pBase = static_cast<PolyChord*>(misc);
     pBase->result.params_best_fit.resize(n_dims);
     for(uint32_t i=0; i<n_dims; i++) {
         pBase->result.params_best_fit[i] = live_params[i];
     }
 
-    pBase->result.best_fit  = llh_best_fit;
-    std::cout << "n_lh_calls according to PolyChord: " << n_likelihood_calls;
-    std::cout << " and accepted: " << n_accepted;
-    std::cout << std::endl;
+    pBase->result.best_fit  = -llh_best_fit;
     pBase->result.lh_efficiency = n_accepted/n_likelihood_calls;
 }
 
