@@ -13,7 +13,7 @@
  */
 
 #include "Minimizer/MAPS.h"
-const bool DEBUG (false);
+const bool DEBUG_FLAG (false);
 
 /** Constructor and destructor **/
 MAPS::MAPS(
@@ -362,7 +362,7 @@ std::vector<m_d> MAPS::processing(
     for(auto pop=estimated_sub_pops.begin();
         pop<estimated_sub_pops.end(); ++pop, ++idx_premature, ++idx_current_pop) {
 
-        if(DEBUG) {
+        if(DEBUG_FLAG) {
             std::cout << "Checking another population" << std::endl;
         }
         // Check if this population is premature
@@ -370,7 +370,7 @@ std::vector<m_d> MAPS::processing(
         // change. If it didn't change within 1e-4 for then generations,
         // it is considered premature.
         if(check_premature(*pop, idx_premature, ndims, precision_criterion_)) {
-            if(DEBUG)
+            if(DEBUG_FLAG)
                 std::cout << "This population is premature" << std::endl;
             // Rearrange the list of best fits and generations.
             premature_list_.erase(premature_list_.begin()+idx_premature);
@@ -392,7 +392,7 @@ std::vector<m_d> MAPS::processing(
 
                 // Check which one is better
                 if(premature_list_[idx_premature].second > premature_list_tmp[compare_idx].second) {
-                    if(DEBUG) {
+                    if(DEBUG_FLAG) {
                         std::cout << "This population is similar to another one and inferior" << std::endl;
                     }
                     break_up = true;
@@ -416,7 +416,7 @@ std::vector<m_d> MAPS::processing(
             if(is_similar(dis, centers[idx_current_pop], cov_,
                 precision_criterion_)) {
 
-                if(DEBUG) {
+                if(DEBUG_FLAG) {
                     std::cout << "This population is similar to a discarded one" << std::endl;
                 }
                 break_up = true;
@@ -430,7 +430,7 @@ std::vector<m_d> MAPS::processing(
             idx_premature--;
             continue;
         }
-        if(DEBUG)
+        if(DEBUG_FLAG)
             std::cout << "Pushing a population\n";
         // Add current population to final one
         final_selected_pops.push_back(*pop);
@@ -814,7 +814,7 @@ void MAPS::execute_maps(
             if(n_estimated_models == max_sub_pops_) break;
         }
         while(true) {
-            if(DEBUG)
+            if(DEBUG_FLAG)
                 std::cout << "starting processing. " << estimated_pops[0][0].size() << std::endl;
             estimated_pops = processing(estimated_pops, ndims);
 
@@ -828,7 +828,7 @@ void MAPS::execute_maps(
             if(estimated_pops.size() == 0) {
                 break;
             }
-            if(DEBUG) {
+            if(DEBUG_FLAG) {
                 std::cout << "Now1 " << estimated_pops.size() << std::endl;
                 std::cout << "Now2 " << estimated_pops[0].size() << std::endl;
                 std::cout << "Now3 " << estimated_pops[0][0].size() << std::endl;
@@ -1121,7 +1121,7 @@ MAPS::Minimize(
 
     reset_calls();
     results.clear();
-    if(DEBUG)
+    if(DEBUG_FLAG)
         std::setbuf(stdout, NULL);
     n_init_samples = 0;
     upper_bnds = upper_bounds;

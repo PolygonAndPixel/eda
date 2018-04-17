@@ -161,7 +161,7 @@ module generate_module
 
                 ! Compute physical coordinates, likelihoods and derived parameters
                 time0 = time()
-                call calculate_point( loglikelihood, prior, live_point, settings, nlike, context)
+                call calculate_point( loglikelihood, prior, live_point, settings, nlike, RTI,context)
                 time1 = time()
 
                 ! If its valid, and we need more points, add it to the array
@@ -362,7 +362,7 @@ module generate_module
         ! Calculate a slow likelihood
         do
             live_point(settings%h0:settings%h1) = random_reals(settings%nDims)
-            call calculate_point( loglikelihood, prior, live_point, settings, nlike, context)
+            call calculate_point( loglikelihood, prior, live_point, settings, nlike, RTI, context)
             if (live_point(settings%l0)> logzero) exit
         end do
 
@@ -384,7 +384,7 @@ module generate_module
                 live_point(h0:h1) = random_reals(h1-h0+1)
 
                 time0 = time()
-                call calculate_point( loglikelihood, prior, live_point, settings, nlike, context)
+                call calculate_point( loglikelihood, prior, live_point, settings, nlike, RTI, context)
                 time1 = time()
 
                 if(live_point(settings%l0)>logzero) then
@@ -526,7 +526,8 @@ module generate_module
                     nhat(i_dim) = 1d0
 
                     time0 = time()
-                    live_point = slice_sample(loglikelihood,prior,logzero,nhat,live_point,1d0,settings,nlikes(i_grade),context)
+                    live_point = slice_sample(loglikelihood,prior,logzero,nhat,&
+                        live_point,1d0,settings,nlikes(i_grade),RTI,context)
                     time1 = time()
                     times(i_grade) = times(i_grade) + time1 - time0
                 end do
@@ -597,7 +598,9 @@ module generate_module
                             nhat(i_dim) = 1d0
 
                             time0 = time()
-                            live_point = slice_sample(loglikelihood,prior,logzero,nhat,live_point,1d0,settings,nlikes(i_grade),context)
+                            live_point = slice_sample(loglikelihood,prior,&
+                                logzero,nhat,live_point,1d0,settings,&
+                                nlikes(i_grade),RTI,context)
                             time1 = time()
                             times(i_grade) = times(i_grade) + time1 - time0
                         end do

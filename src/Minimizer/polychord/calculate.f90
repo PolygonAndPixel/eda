@@ -1,12 +1,14 @@
 module calculate_module
     use utils_module, only: dp
     use iso_c_binding, only: c_ptr
+    use run_time_type_module
     implicit none
     contains
 
-    subroutine calculate_point(loglikelihood,prior,point,settings,nlike,context)
+    subroutine calculate_point(loglikelihood,prior,point,settings,nlike,RTI,context)
         use settings_module, only: program_settings
         use utils_module, only: logzero
+
         implicit none
         interface
             function loglikelihood(theta,phi,context)
@@ -30,6 +32,8 @@ module calculate_module
             end function
         end interface
 
+        type(run_time_info), intent(inout) :: RTI
+
         ! integer, optional :: context
         type(c_ptr), intent(in), value    :: context
 
@@ -50,13 +54,18 @@ module calculate_module
         else
             theta = prior(cube,context)
             logL  = loglikelihood(theta,phi,context)
+            RTI%n_accepted = RTI%n_accepted+1
+            nlike = nlike+1
         end if
-
-        if(logL>logzero) nlike = nlike+1
 
         point(settings%p0:settings%p1) = theta
         point(settings%d0:settings%d1) = phi
         point(settings%l0) = logL
+        if (logL > RTI%best_fit) then
+            RTI%best_fit = logL
+            RTI%params_best_fit = theta
+        endif
+
 
     end subroutine calculate_point
 

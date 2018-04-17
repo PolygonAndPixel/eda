@@ -35,7 +35,7 @@ build:
 	@mkdir -p $(OBJ_DIR)/src/Minimizer
 	cd src/Minimizer/polychord && $(MAKE) release
 
-debug: CXXFLAGS += -DDEBUG -g
+debug: CXXFLAGS += -g
 debug: all
 
 release: CXXFLAGS += -O3

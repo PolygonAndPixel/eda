@@ -6,6 +6,7 @@
  * */
 
 #include "likelihood/TestFunctions.h"
+#include <iostream>
 
 TestFunctions::TestFunctions() {
 

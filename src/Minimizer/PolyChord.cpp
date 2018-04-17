@@ -122,7 +122,8 @@ double PolyChord::fortran_get_llh(
     PolyChord *pBase = static_cast<PolyChord*>(misc);
     pBase->result.n_lh_calls++;
     double llh = pBase->test_func_->get_lh(v_d(theta, theta+n_dims));
-    return llh;
+    // PolyChord maximizes, hence we take the negative result
+    return -llh;
 }
 
 /** Dumps information about the minimization at the end.
@@ -162,32 +163,24 @@ void PolyChord::c_dumper(
            "log_evidence = %f\n"
            "error_log_evidence = %f\n"
            "ndead = %f\n"
-           "n_likelihood_calls = %f\n"
+           "n_likelihood_calls = \t%f\n"
+           "n_accepted = \t\t\t%f\n"
            "n_cluster = %d\n"
            "best_llh = %f\n"
-           "worst_llh = %f\n"
            "n_dims = %d\n", log_evidence, error_log_evidence, ndead,
-           n_likelihood_calls, n_cluster, llh_best_fit, llh_worst_fit, n_dims);
+           n_likelihood_calls, n_accepted, n_cluster, llh_best_fit, n_dims);
 
-    for(int i=0; i<n_dims; i++) {
-        printf("%f, ",live_params[i] );
-    }
-    printf("------\n");
+
     PolyChord *pBase = static_cast<PolyChord*>(misc);
-    pBase->result.params_best_fit.resize(2);
-    printf("But why? %i\n", pBase->result.params_best_fit.size());
+    pBase->result.params_best_fit.resize(n_dims);
     for(uint32_t i=0; i<n_dims; i++) {
         pBase->result.params_best_fit[i] = live_params[i];
-        printf("But why??%i\n", i);
     }
 
     pBase->result.best_fit  = llh_best_fit;
-    printf("Seriously!\n");
     std::cout << "n_lh_calls according to PolyChord: " << n_likelihood_calls;
-    std::cout << " and according to my code: " << pBase->result.n_lh_calls;
+    std::cout << " and accepted: " << n_accepted;
     std::cout << std::endl;
-    pBase->result.n_lh_calls = n_likelihood_calls;
-    pBase->lh_worstFit_ = llh_worst_fit;
     pBase->result.lh_efficiency = n_accepted/n_likelihood_calls;
 }
 

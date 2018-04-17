@@ -1,113 +1,13 @@
 module run_time_module
     use utils_module, only: dp
+    use run_time_type_module
     implicit none
-
-    !> The run time information.
-    !!
-    !! This is what needs to be saved in order to resume a run.
-    !! Bundling these all into the same type enables easy passing of data 
-    !! from one fuction to another
-    type run_time_info
-
-        !> Number of dead points
-        integer :: ndead
-
-        !> The number currently evolving clusters
-        integer :: ncluster
-        !> The number of dead clusters
-        integer :: ncluster_dead
-
-        !> Total number of likelihood calls
-        integer,allocatable,dimension(:) :: nlike
-
-        !> The number of repeats within each parameter speed to do
-        integer,allocatable, dimension(:)           :: num_repeats
-
-        !> The number of live points in each cluster
-        integer, allocatable, dimension(:) :: nlive 
-        !> The number of phantom points in each cluster
-        integer, allocatable, dimension(:) :: nphantom
-        !> The number of weighted posterior points in each cluster
-        integer, allocatable, dimension(:) :: nposterior
-        !> The number of equally weighted posterior points in each cluster
-        integer, allocatable, dimension(:) :: nequals
-
-
-        integer, allocatable, dimension(:) :: nposterior_dead
-        integer                            :: nposterior_global
-        integer, allocatable, dimension(:) :: nequals_dead
-        integer                            :: nequals_global
-
-        !> Live points
-        real(dp), allocatable, dimension(:,:,:) :: live
-        !> Phantom points
-        real(dp), allocatable, dimension(:,:,:) :: phantom
-        !> Posterior stack
-        real(dp), allocatable, dimension(:,:,:) :: posterior_stack
-        !> The number of posterior points in each cluster in the posterior stack
-        integer, allocatable, dimension(:) :: nposterior_stack
-
-
-        !> weighted posterior points
-        real(dp), allocatable, dimension(:,:,:) :: posterior
-        real(dp), allocatable, dimension(:,:,:) :: posterior_dead
-        real(dp), allocatable, dimension(:,:)   :: posterior_global
-
-        !> Equally weighted posterior points
-        real(dp), allocatable, dimension(:,:,:) :: equals
-        real(dp), allocatable, dimension(:,:,:) :: equals_dead
-        real(dp), allocatable, dimension(:,:)   :: equals_global
-
-        !> Pure nested sampling points
-        real(dp), allocatable, dimension(:,:)   :: dead
-
-        !> Covariance Matrices
-        real(dp), allocatable, dimension(:,:,:) :: covmat
-        !> Cholesky decompositions
-        real(dp), allocatable, dimension(:,:,:) :: cholesky
-
-
-        !> Global evidence estimate
-        real(dp) :: logZ
-        !> Global evidence^2 estimate
-        real(dp) :: logZ2
-
-
-        !> Local volume estimate
-        real(dp), allocatable, dimension(:)   :: logXp
-        !> global evidence volume cross correlation
-        real(dp), allocatable, dimension(:)   :: logZXp
-        !> Local evidence estimate
-        real(dp), allocatable, dimension(:)   :: logZp
-        real(dp), allocatable, dimension(:)   :: logZp_dead
-        !> Local evidence^2 estimate 
-        real(dp), allocatable, dimension(:)   :: logZp2
-        real(dp), allocatable, dimension(:)   :: logZp2_dead
-        !> local evidence volume cross correlation
-        real(dp), allocatable, dimension(:)   :: logZpXp
-        !> local volume cross correlation
-        real(dp), allocatable, dimension(:,:) :: logXpXq
-
-        !> Minimum loglikelihoods
-        real(dp), allocatable, dimension(:) :: logLp
-        !> The minimum loglikelihood point within each cluster
-        integer,allocatable, dimension(:)           :: i
-
-        !> Maximum weight
-        real(dp), allocatable, dimension(:) :: maxlogweight
-        real(dp), allocatable, dimension(:) :: maxlogweight_dead
-        real(dp)                            :: maxlogweight_global
-
-        !> what to thin the posterior by
-        real(dp) :: thin_posterior
-
-    end type run_time_info
 
     contains
 
     !> This is a self explanatory subroutine.
     !!
-    !! It allocates the arrays for a single cluster 
+    !! It allocates the arrays for a single cluster
     subroutine initialise_run_time_info(settings,RTI)
         use utils_module,    only: logzero,identity_matrix
         use settings_module, only: program_settings
@@ -154,7 +54,8 @@ module run_time_module
             RTI%cholesky(settings%nDims,settings%nDims,1),              &
             RTI%covmat(settings%nDims,settings%nDims,1),                &
             RTI%num_repeats(size(settings%grade_dims)),                 &
-            RTI%nlike(size(settings%grade_dims))                        &
+            RTI%nlike(size(settings%grade_dims)),                       &
+            RTI%params_best_fit(size(settings%grade_dims))             &
             )
 
         ! All evidences set to logzero
@@ -180,6 +81,7 @@ module run_time_module
 
         !No likelihood calls
         RTI%nlike=0
+        RTI%n_accepted = 0
 
         !No dead points
         RTI%ndead=0
@@ -190,6 +92,7 @@ module run_time_module
 
         ! Loglikelihoods at zero
         RTI%logLp = logzero
+        RTI%best_fit = logzero
         ! First position default lowest
         RTI%i     = 0
 
@@ -295,7 +198,7 @@ module run_time_module
     !!
     !! It places these new clusters at the end of the active array, and deletes the old cluster
     !!
-    subroutine add_cluster(settings,RTI,p,cluster_list,num_new_clusters) 
+    subroutine add_cluster(settings,RTI,p,cluster_list,num_new_clusters)
         use settings_module, only: program_settings
         use utils_module, only: logsumexp,logaddexp
         use array_module, only: reallocate,add_point
@@ -354,11 +257,11 @@ module run_time_module
 
         ! 1) Save the old points as necessary
         old_live  = RTI%live(:,:RTI%nlive(p),p)                 ! Save the old live points
-        old_nlive = RTI%nlive(p)                                ! Save the old number of live points 
+        old_nlive = RTI%nlive(p)                                ! Save the old number of live points
         old_posterior = RTI%posterior(:,:RTI%nposterior(p),p)   ! Save the old posterior points
-        old_nposterior = RTI%nposterior(p)                      ! Save the old number of posterior points  
+        old_nposterior = RTI%nposterior(p)                      ! Save the old number of posterior points
         old_equals = RTI%equals(:,:RTI%nequals(p),p)            ! Save the old equals points
-        old_nequals = RTI%nequals(p)                            ! Save the old number of equals points  
+        old_nequals = RTI%nequals(p)                            ! Save the old number of equals points
         old_phantom = RTI%phantom                               ! Save the old phantom points
         old_nphantom= RTI%nphantom                              ! Save the old numbers of phantom points
         old_maxlogweight = RTI%maxlogweight(p)                  ! save the old max log weight for the relevant cluster
@@ -399,7 +302,7 @@ module run_time_module
         call reallocate(RTI%cholesky, new_size3=RTI%ncluster, save_indices3=old_save,target_indices3=old_target)
         call reallocate(RTI%covmat,   new_size3=RTI%ncluster, save_indices3=old_save,target_indices3=old_target)
 
-        ! Reallocate the evidence arrays 
+        ! Reallocate the evidence arrays
         call reallocate(RTI%logXp,   RTI%ncluster,old_save,old_target)
         call reallocate(RTI%logZXp,  RTI%ncluster,old_save,old_target)
         call reallocate(RTI%logZp,   RTI%ncluster,old_save,old_target)
@@ -407,10 +310,10 @@ module run_time_module
         call reallocate(RTI%logZpXp, RTI%ncluster,old_save,old_target)
         call reallocate(RTI%logXpXq, RTI%ncluster,RTI%ncluster,old_save,old_save,old_target,old_target)
 
-        call reallocate(RTI%logLp,   RTI%ncluster,old_save,old_target) 
+        call reallocate(RTI%logLp,   RTI%ncluster,old_save,old_target)
         call reallocate(RTI%i,       RTI%ncluster,old_save,old_target)
 
-        call reallocate(RTI%maxlogweight,   RTI%ncluster,old_save,old_target) 
+        call reallocate(RTI%maxlogweight,   RTI%ncluster,old_save,old_target)
 
 
         ! 3) Assign the new live points to their new clusters
@@ -422,7 +325,7 @@ module run_time_module
         end do
 
         ! Find the new minimum loglikelihoods
-        call find_min_loglikelihoods(settings,RTI) 
+        call find_min_loglikelihoods(settings,RTI)
 
         ! 4) Reassign the posterior points
         RTI%nposterior_stack(new_target) = 0
@@ -436,7 +339,7 @@ module run_time_module
         RTI%maxlogweight(new_target) = old_maxlogweight
 
 
-        ! 4) Reassign all the phantom points 
+        ! 4) Reassign all the phantom points
         RTI%nphantom = 0
         do i_cluster=1,size(old_nphantom)
             do i_phantom=1,old_nphantom(i_cluster)
@@ -463,11 +366,11 @@ module run_time_module
         ! Initialise the new volumes
         RTI%logXp(new_target) = logXp + logni - logn
         ! Initialise the new global evidence -local volume cross correlation
-        RTI%logZXp(new_target) = logZXp + logni - logn 
-        ! Initialise local evidences 
-        RTI%logZp(new_target) = logZp + logni - logn 
+        RTI%logZXp(new_target) = logZXp + logni - logn
+        ! Initialise local evidences
+        RTI%logZp(new_target) = logZp + logni - logn
         RTI%logZp2(new_target) = logZp2 + logni + logni1 - logn - logn1
-        RTI%logZpXp(new_target) = logZpXp + logni + logni1 - logn - logn1 
+        RTI%logZpXp(new_target) = logZpXp + logni + logni1 - logn - logn1
 
 
         ! Initialise the volume cross correlations
@@ -499,7 +402,7 @@ module run_time_module
 
     end subroutine add_cluster
 
-    function delete_cluster(settings,RTI) 
+    function delete_cluster(settings,RTI)
         use settings_module, only: program_settings
         use array_module, only: reallocate
         implicit none
@@ -526,7 +429,7 @@ module run_time_module
             delete_cluster=.true.
 
             ! Update the posterior arrays
-            call update_posteriors(settings,RTI) 
+            call update_posteriors(settings,RTI)
 
             p=minloc(RTI%nlive,RTI%nlive==0)
 
@@ -575,7 +478,7 @@ module run_time_module
             call reallocate(RTI%cholesky, new_size3=RTI%ncluster, save_indices3=indices)
             call reallocate(RTI%covmat,   new_size3=RTI%ncluster, save_indices3=indices)
 
-            ! Reallocate the evidence arrays 
+            ! Reallocate the evidence arrays
             call reallocate(RTI%logXp,   new_size1=RTI%ncluster,save_indices1=indices)
             call reallocate(RTI%logZXp,  new_size1=RTI%ncluster,save_indices1=indices)
             call reallocate(RTI%logZp,   new_size1=RTI%ncluster,save_indices1=indices)
@@ -583,10 +486,10 @@ module run_time_module
             call reallocate(RTI%logZpXp, new_size1=RTI%ncluster,save_indices1=indices)
             call reallocate(RTI%logXpXq, new_size1=RTI%ncluster,new_size2=RTI%ncluster,save_indices1=indices,save_indices2=indices)
 
-            call reallocate(RTI%logLp,   new_size1=RTI%ncluster,save_indices1=indices) 
+            call reallocate(RTI%logLp,   new_size1=RTI%ncluster,save_indices1=indices)
             call reallocate(RTI%i,       new_size1=RTI%ncluster,save_indices1=indices)
 
-            call reallocate(RTI%maxlogweight,   new_size1=RTI%ncluster,save_indices1=indices) 
+            call reallocate(RTI%maxlogweight,   new_size1=RTI%ncluster,save_indices1=indices)
         end if
 
 
@@ -612,7 +515,7 @@ module run_time_module
                 / (RTI%nlive(i_cluster) + RTI%nphantom(i_cluster) )
 
             ! Calculate the covariance by using a matrix multiplication
-            RTI%covmat(:,:,i_cluster) =( & 
+            RTI%covmat(:,:,i_cluster) =( &
                 matmul(&
                 RTI%live(settings%h0:settings%h1,:RTI%nlive(i_cluster),i_cluster) &
                 - spread(mean,dim=2,ncopies=RTI%nlive(i_cluster)) , &
@@ -626,7 +529,7 @@ module run_time_module
                 transpose( RTI%phantom(settings%h0:settings%h1,:RTI%nphantom(i_cluster),i_cluster) &
                 - spread(mean,dim=2,ncopies=RTI%nphantom(i_cluster)) ) &
                 ) &
-                )/ (RTI%nlive(i_cluster) + RTI%nphantom(i_cluster) ) 
+                )/ (RTI%nlive(i_cluster) + RTI%nphantom(i_cluster) )
 
             ! Calculate the cholesky decomposition
             RTI%cholesky(:,:,i_cluster) = calc_cholesky(RTI%covmat(:,:,i_cluster))
@@ -637,13 +540,13 @@ module run_time_module
 
 
 
-    !> Calculate unbiased evidence estimates and errors. 
+    !> Calculate unbiased evidence estimates and errors.
     !!
     !! The evidences generated by nested sampling are distributed according to a log-normal distribution:
     !! http://en.wikipedia.org/wiki/Log-normal_distribution
     !!
     !! What we accumulate in the routine update_evidence is log(<Z>), and log(<Z^2>).
-    !! What we want is <log(Z)>,and 
+    !! What we want is <log(Z)>,and
     subroutine calculate_logZ_estimate(RTI,logZ,varlogZ,logZp,varlogZp,logZp_dead,varlogZp_dead)
         use utils_module, only: logzero
         implicit none
@@ -730,7 +633,7 @@ module run_time_module
         real(dp) :: logL ! loglikelihood bound
 
         integer :: i_baby ! point iterator
-        
+
 
         ! The loglikelihood contour is defined by the cluster it belongs to
         logL = RTI%logLp(cluster_add)
@@ -796,7 +699,7 @@ module run_time_module
         RTI%maxlogweight(cluster_del) = max(RTI%maxlogweight(cluster_del),posterior_point(settings%pos_w)+posterior_point(settings%pos_l))
         RTI%maxlogweight_global=max(RTI%maxlogweight_global,RTI%maxlogweight(cluster_del))
 
-    end subroutine delete_outermost_point 
+    end subroutine delete_outermost_point
 
 
     subroutine clean_phantoms(settings,RTI)
@@ -812,7 +715,7 @@ module run_time_module
 
         real(dp),dimension(settings%nTotal) :: deleted_point   ! point we have just deleted
         real(dp),dimension(settings%nposterior) :: posterior_point   ! temporary posterior point
-        
+
         integer :: i_cluster  ! cluster iterator
         integer :: i_phantom  ! phantom iterator
         integer :: i_stack(1) ! phantom iterator
@@ -869,7 +772,7 @@ module run_time_module
         implicit none
         type(program_settings), intent(in) :: settings !> Program settings
         type(run_time_info),intent(inout)  :: RTI      !> Run time information
-        
+
         integer :: i_cluster     ! cluster iterator
 
         ! Iterate through each cluster
@@ -883,7 +786,7 @@ module run_time_module
                 RTI%logLp(i_cluster) = loginf
             else
                 ! Find the likelihood of the lowest point in this cluster
-                RTI%logLp(i_cluster) = RTI%live(settings%l0,RTI%i(i_cluster),i_cluster) 
+                RTI%logLp(i_cluster) = RTI%live(settings%l0,RTI%i(i_cluster),i_cluster)
             end if
 
         end do
@@ -952,12 +855,12 @@ module run_time_module
 
 
         ! Add in the phantoms from the stack (used to do this at every iteration, but this was the computational bottleneck)
-        call clean_phantoms(settings,RTI) 
+        call clean_phantoms(settings,RTI)
 
         if(settings%equals) then
             ! Clean the global equally weighted posteriors
             i_post=1
-            do while(i_post<=RTI%nequals_global) 
+            do while(i_post<=RTI%nequals_global)
                 ! We don't need to bother with points that have a weight equal to
                 ! the max weight, these are automatically accepted
                 if(RTI%equals_global(settings%p_w,i_post)<RTI%maxlogweight_global) then
@@ -983,7 +886,7 @@ module run_time_module
                 ! strip out old posterior points from equals
                 do i_cluster=1,RTI%ncluster
                     i_post=1
-                    do while(i_post<=RTI%nequals(i_cluster)) 
+                    do while(i_post<=RTI%nequals(i_cluster))
                         ! We don't need to bother with points that have a weight equal to
                         ! the max weight, these are automatically accepted
                         if(RTI%equals(settings%p_w,i_post,i_cluster)<RTI%maxlogweight(i_cluster)) then
@@ -992,7 +895,7 @@ module run_time_module
                             if(bernoulli_trial( exp(RTI%equals(settings%p_w,i_post,i_cluster)-RTI%maxlogweight(i_cluster)) )) then
                                 ! If accepted, then their new probability is maxlogweight (for
                                 ! the next round of stripping)
-                                RTI%equals(settings%p_w,i_post,i_cluster) = RTI%maxlogweight(i_cluster) 
+                                RTI%equals(settings%p_w,i_post,i_cluster) = RTI%maxlogweight(i_cluster)
                                 ! move on to the next point
                                 i_post=i_post+1
                             else

@@ -6,9 +6,10 @@ module chordal_module
     contains
 
     function SliceSampling(loglikelihood,prior,settings,logL,seed_point,&
-            cholesky,nlike,num_repeats,context)  result(baby_points)
+            cholesky,nlike,num_repeats,RTI,context)  result(baby_points)
         use settings_module, only: program_settings
         use random_module, only: random_orthonormal_basis,random_real
+        use run_time_type_module
 
         implicit none
         interface
@@ -32,6 +33,8 @@ module chordal_module
                 type(c_ptr), intent(in), value    :: context
             end function
         end interface
+
+        type(run_time_info), intent(inout) :: RTI
 
         ! Pointer to a C++ class
         ! integer, optional :: context
@@ -95,7 +98,7 @@ module chordal_module
 
             ! Generate a new random point along the chord defined by the previous point and nhat
             baby_points(:,i_babies) = slice_sample(loglikelihood,prior,logL,&
-                nhat, previous_point, w, settings,nlike(speeds(i_babies)), context)
+                nhat, previous_point, w, settings,nlike(speeds(i_babies)), RTI, context)
 
             ! Save this for the next loop
             previous_point = baby_points(:,i_babies)
@@ -173,11 +176,12 @@ module chordal_module
     !!
     !! Each seed point x0 contains an initial estimate of the width w.
     !!
-    function slice_sample(loglikelihood,prior,logL,nhat,x0,w,S,n,context) result(baby_point)
+    function slice_sample(loglikelihood,prior,logL,nhat,x0,w,S,n,RTI,context) result(baby_point)
         use settings_module, only: program_settings
         use utils_module,  only: logzero, distance
         use random_module, only: random_real
         use calculate_module, only: calculate_point
+        use run_time_type_module
         implicit none
         interface
             function loglikelihood(theta,phi,context)
@@ -200,6 +204,8 @@ module chordal_module
                 type(c_ptr), intent(in), value    :: context
             end function
         end interface
+
+        type(run_time_info), intent(inout) :: RTI
 
         ! Pointer to a C++ class
         ! integer, optional :: context
@@ -237,15 +243,14 @@ module chordal_module
         R(S%h0:S%h1) = x0(S%h0:S%h1) + (1-temp_random) * w * nhat
 
         ! Calculate initial likelihoods
-        call calculate_point(loglikelihood,prior,R,S,n,context)
-        call calculate_point(loglikelihood,prior,L,S,n,context)
-
+        call calculate_point(loglikelihood,prior,R,S,n,RTI,context)
+        call calculate_point(loglikelihood,prior,L,S,n,RTI,context)
         ! expand R until it's outside the likelihood region
         i_step=0
         do while( R(S%l0) >= logL .and. R(S%l0) > logzero )
             i_step=i_step+1
             R(S%h0:S%h1) = x0(S%h0:S%h1) + nhat * w * i_step
-            call calculate_point(loglikelihood,prior,R,S,n,context)
+            call calculate_point(loglikelihood,prior,R,S,n,RTI,context)
         end do
         if(i_step>100) write(*,'(" too many R steps (",I10,")")') i_step
 
@@ -254,22 +259,27 @@ module chordal_module
         do while(L(S%l0) >= logL      .and. L(S%l0) > logzero )
             i_step=i_step+1
             L(S%h0:S%h1) = x0(S%h0:S%h1) - nhat * w * i_step
-            call calculate_point(loglikelihood,prior,L,S,n,context)
+            call calculate_point(loglikelihood,prior,L,S,n,RTI,context)
         end do
         if(i_step>100) write(*,'(" too many L steps (",I10,")")') i_step
 
         ! Sample within this bound
         i_step=0
-        baby_point = find_positive_within(L,R)
+        baby_point = find_positive_within(L,R,RTI)
 
         contains
 
-        recursive function find_positive_within(L,R) result(x1)
+        recursive function find_positive_within(L,R,RTI) result(x1)
+            use run_time_type_module
+
             implicit none
+            integer :: tmp_n
             !> The upper bound
             real(dp), intent(inout), dimension(S%nTotal)   :: R
             !> The lower bound
             real(dp), intent(inout), dimension(S%nTotal)   :: L
+
+            type(run_time_info), intent(inout) :: RTI
 
             ! The output finish point
             real(dp),    dimension(S%nTotal)   :: x1
@@ -290,14 +300,14 @@ module chordal_module
             x0Rd= distance(x0(S%h0:S%h1),R(S%h0:S%h1))
 
             ! Draw a random point within L and R
+            tmp_n = n
             x1(S%h0:S%h1) = x0(S%h0:S%h1)+ (random_real() * (x0Rd+x0Ld) - x0Ld) * nhat
-
             ! calculate the likelihood
-            call calculate_point(loglikelihood,prior,x1,S,n,context)
+            call calculate_point(loglikelihood,prior,x1,S,n,RTI,context)
 
             ! If we're not within the likelihood bound then we need to sample further
             if( x1(S%l0) < logL .or. x1(S%l0) <= logzero ) then
-
+                if(tmp_n < n) RTI%n_accepted = RTI%n_accepted-1
                 if ( dot_product(x1(S%h0:S%h1)-x0(S%h0:S%h1),nhat) > 0d0 ) then
                     ! If x1 is on the R side of x0, then
                     ! contract R
@@ -309,7 +319,7 @@ module chordal_module
                 end if
 
                 ! Call the function again
-                x1 = find_positive_within(L,R)
+                x1 = find_positive_within(L,R,RTI)
 
             end if
             ! otherwise x1 is returned
