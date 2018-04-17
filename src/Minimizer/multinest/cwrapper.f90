@@ -62,23 +62,23 @@ module cnested
 
 
 	subroutine dumper_f(nSamples,nlive,nPar,physLive,posterior,&
-        paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context_pass)
+        paramConstr,maxLogLike,logZ,INSlogZ,logZerr,n_accepted,context_pass)
 	use iso_c_binding, only: c_double, c_f_procpointer
 
 	implicit none
 
-	integer          :: nSamples, nlive, nPar, context_pass
+	integer          :: nSamples, nlive, nPar, context_pass, n_accepted
 	double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
 	double precision :: maxLogLike, logZ, INSlogZ, logZerr
 
 	interface
 		subroutine dumper_proto(nSamples,nlive,nPar,physLive,posterior,&
-            paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context)
+            paramConstr,maxLogLike,logZ,INSlogZ,logZerr,n_accepted,context)
 		use iso_c_binding, only: c_int, c_double, c_ptr
 
 		implicit none
 
-		integer(c_int), intent(in), value :: nSamples, nlive, nPar
+		integer(c_int), intent(in), value :: nSamples, nlive, nPar, n_accepted
 		real(c_double), intent(in) :: physLive(nlive,nPar+1), posterior(nSamples,nPar+2),paramConstr(4*nPar)
 		real(c_double), intent(in), value :: maxLogLike, logZ, INSlogZ, logZerr
 		integer(c_int), intent(in), value :: context
@@ -95,7 +95,7 @@ module cnested
 	! context_c = transfer(context_pass,context_c)
 
 	call dumper_c(nSamples,nlive,nPar,physLive,posterior,&
-        paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context_pass)
+        paramConstr,maxLogLike,logZ,INSlogZ,logZerr,n_accepted,context_pass)
 
 	end subroutine dumper_f
 

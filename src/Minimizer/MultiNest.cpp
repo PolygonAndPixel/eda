@@ -96,23 +96,25 @@ void MultiNest::c_dumper(
     double &log_z,
     double &ins_log_z,
     double &log_z_err,
+    int &n_accepted,
     void *misc)
 {
     MultiNest *multiBase = static_cast<MultiNest*>(misc);
     multiBase->result.params_best_fit.resize(n_dims);
-    for(uint32_t i=0; i<n_dims; i++) {
-        multiBase->result.params_best_fit[i] = param_constr[0][2*n_dims + i];
+    v_d cube(n_dims);
+    for(uint32_t i=0; i<n_dims; ++i) {
+        cube[i] = param_constr[0][2*n_dims + i];
     }
-    int n_accepted = 1;
+    multiBase->result.params_best_fit = multiBase->to_physics(cube, n_dims);
+
     double worst_fit = llh_best_fit;
     for(int k=0; k<n_live; k++) {
         if (worst_fit > phys_live[0][n_dims*n_live + k]) {
             worst_fit = phys_live[0][n_dims*n_live + k];
         }
     }
-    int n_likelihood_calls = 1;
     multiBase->result.best_fit  = llh_best_fit;
-    multiBase->result.lh_efficiency = (double) n_accepted / (double) n_likelihood_calls;
+    multiBase->result.lh_efficiency = (double) n_accepted / (double) multiBase->result.n_lh_calls;
 }
 
 /** Function to map from the unit hypercube to Theta in the physical space.

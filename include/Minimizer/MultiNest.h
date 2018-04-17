@@ -26,7 +26,7 @@ public:
     static void c_dumper(int &n_samples, int &n_live, int &n_dims,
         double **phys_live, double **posterior, double **param_constr,
         double &llh_best_fit, double &log_z, double &ins_log_z,
-        double &log_z_err, void *misc);
+        double &log_z_err, int &n_accepted, void *misc);
     v_d to_physics(v_d cube, uint32_t n_dims);
 
 private:

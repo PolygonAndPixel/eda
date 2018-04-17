@@ -69,7 +69,8 @@ contains
 
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
+                paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted,context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
 			double precision maxLogLike, logZ, INSlogZ, logZerr
@@ -249,7 +250,7 @@ contains
 
 	implicit none
 
-	integer context
+	integer context, n_accepted
 	double precision, allocatable :: p(:,:), phyP(:,:) !live points
 	double precision, allocatable :: l(:) !log-likelihood
 	double precision vnow1!current vol
@@ -269,14 +270,15 @@ contains
 
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
+                paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted, context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
 			double precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 
-
+    n_accepted = 0
 	allocate( p(ndims,nlive+1), phyP(totPar,nlive+1), l(nlive+1) )
 
 	if(my_rank==0) then
@@ -347,7 +349,7 @@ contains
 	if(genLive) then
 		if(my_rank==0 .and. fback) write(*,*) 'generating live points'
 
-		call gen_initial_live(p,phyP,l,loglike,dumper,context)
+		call gen_initial_live(p,phyP,l,loglike,dumper,n_accepted,context)
 
 		if(my_rank==0 .and. .not.bogus) then
 			globff=nlive
@@ -360,7 +362,7 @@ contains
 	call MPI_BARRIER(MPI_COMM_WORLD,errcode)
 #endif
 
-	if( .not.bogus ) call clusteredNest(p,phyP,l,loglike,dumper,context)
+	if( .not.bogus ) call clusteredNest(p,phyP,l,loglike,dumper,n_accepted,context)
 
 	if( my_rank==0 ) then
 		if( .not.bogus ) then
@@ -379,11 +381,11 @@ contains
 
 !----------------------------------------------------------------------
 
-  subroutine gen_initial_live(p,phyP,l,loglike,dumper,context)
+  subroutine gen_initial_live(p,phyP,l,loglike,dumper,n_accepted,context)
 
 	implicit none
 
-    	integer i,j,iostatus,idum,k,m,nptPerProc,nGen,nstart,nend,context
+    	integer i,j,iostatus,idum,k,m,nptPerProc,nGen,nstart,nend,context,n_accepted
     	double precision, allocatable :: pnewP(:,:), phyPnewP(:,:), lnewP(:)
     	double precision p(ndims,nlive+1), phyP(totPar,nlive+1), l(nlive+1)
     	integer id
@@ -403,7 +405,8 @@ contains
 
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
+                paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted,context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
 			double precision maxLogLike, logZ, INSlogZ, logZerr
@@ -635,14 +638,14 @@ contains
 
 !----------------------------------------------------------------------
 
-  subroutine clusteredNest(p,phyP,l,loglike,dumper,context)
+  subroutine clusteredNest(p,phyP,l,loglike,dumper,n_accepted,context)
 
 	implicit none
 
 
 	!input variables
 
-	integer context
+	integer context, n_accepted
 	double precision p(ndims,nlive+1) !live points
 	double precision phyP(totPar,nlive+1) !physical live points
 	double precision l(nlive+1) !log-likelihood
@@ -735,7 +738,8 @@ contains
 
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
+                paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted,context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
 			double precision maxLogLike, logZ, INSlogZ, logZerr
@@ -1123,7 +1127,7 @@ contains
 
 				call pos_samp(Ztol,globff,broot,nlive,ndims,nCdims,totPar,multimodal,outfile,gZ,ginfo,ic_n,ic_Z(1:ic_n), &
 				ic_info(1:ic_n),ic_reme(1:ic_n),ic_vnow(1:ic_n),ic_npt(1:ic_n),ic_nBrnch(1:ic_n),ic_brnch(1:ic_n,:,1),phyP(:,1:nlive), &
-				l(1:nlive),evDataAll,IS,IS_Z,dumper,context)
+				l(1:nlive),evDataAll,IS,IS_Z,dumper,n_accepted, context)
 
 				!if done then add in the contribution to the global evidence from live points
 				j=0
@@ -1849,6 +1853,7 @@ contains
 								i3 = IS_counter(1)	!no. of points in IS_allpts array
 								do i2 = 1, mpi_nthreads
 									if( lnewa(nd,i2)>logZero ) then
+
 										IS_counter(1) = IS_counter(1)+1					!total no. of points collected so far
 										IS_allpts(IS_counter(1),1:ndims) = pnewa(nd,i2,1:ndims)		!point
 										IS_allpts(IS_counter(1),ndims+1) = lnewa(nd,i2)			!likelihood
@@ -1867,29 +1872,30 @@ contains
 
 						if(my_rank==0) then
 							!now check if any of them is a good one
-	                        			do i=rIdx(nd),mpi_nthreads
-	                        				numlike=numlike+1
-	                        				if(lnewa(nd,i)>lowlike) then
-									pnew(:)=pnewa(nd,i,:)
-	                                    				phyPnew(:)=phyPnewa(nd,i,:)
-	                                    				lnew=lnewa(nd,i)
-	                                    				acpt=.true.
-	                                    				!leftover points?
-	                                    				if(i==mpi_nthreads) then
-	                                    					remain(nd)=.false.
-	                                          				rIdx(nd)=1
-									else
-	                                    					remain(nd)=.true.
-	                                    					rIdx(nd)=i+1
-									endif
-	                                    				exit
-								endif
-	                              				if(i==mpi_nthreads) then
-	                                    				remain(nd)=.false.
-									rIdx(nd)=1
-								endif
-							enddo
+                			do i=rIdx(nd),mpi_nthreads
+                				numlike=numlike+1
+                				if(lnewa(nd,i)>lowlike) then
+                                   pnew(:)=pnewa(nd,i,:)
+                    				phyPnew(:)=phyPnewa(nd,i,:)
+                    				lnew=lnewa(nd,i)
+                    				acpt=.true.
+                                    n_accepted = n_accepted+1
+                    				!leftover points?
+                    				if(i==mpi_nthreads) then
+                    					remain(nd)=.false.
+                          				rIdx(nd)=1
+                                  else
+                    					remain(nd)=.true.
+                    					rIdx(nd)=i+1
+                                endif
+		    	                exit
+                       endif
+          				if(i==mpi_nthreads) then
+            				remain(nd)=.false.
+	                      rIdx(nd)=1
 						endif
+					enddo
+				endif
 
 #ifdef MPI
 						call MPI_BARRIER(MPI_COMM_WORLD,errcode)
@@ -2071,11 +2077,13 @@ contains
 	            									urv=ranmarNS(0)
 											if(urv<=(1.d0/dble(j))) then
 	           	 									acpt=.true.
+                                                    n_accepted = n_accepted+1
 											else
 												acpt=.false.
 											endif
 										else
 											acpt=.true.
+                                            n_accepted = n_accepted+1
 										endif
 
 										!point accepted
@@ -2498,7 +2506,7 @@ contains
 
 					if(mod(sff,updInt*10)==0 .or. ic_done(0)) call pos_samp(Ztol,globff,broot,nlive,ndims,nCdims,totPar, &
 					multimodal,outfile,gZ,ginfo,ic_n,ic_Z(1:ic_n),ic_info(1:ic_n),ic_reme(1:ic_n),ic_vnow(1:ic_n),ic_npt(1:ic_n), &
-					ic_nBrnch(1:ic_n),ic_brnch(1:ic_n,:,1),phyP(:,1:nlive),l(1:nlive),evDataAll,IS,IS_Z,dumper,context)
+					ic_nBrnch(1:ic_n),ic_brnch(1:ic_n,:,1),phyP(:,1:nlive),l(1:nlive),evDataAll,IS,IS_Z,dumper,n_accepted,context)
 				endif
 			endif
 
