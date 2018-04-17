@@ -30,7 +30,7 @@
 *.exe
 *.out
 *.app
-main
+build/apps/eda
 
 # Outputs
 output/*
