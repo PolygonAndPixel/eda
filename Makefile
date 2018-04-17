@@ -1,6 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++11
 LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -lpthread -llapack -llapacke -lgfortran
+FFLAG =
 
 BUILD = build
 OBJ_DIR = $(BUILD)/objects
@@ -13,7 +14,7 @@ SRC = \
 	$(wildcard src/Minimizer/*.cpp) \
 
 OBJECTS = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
-FOBJECTS = $(OBJ_DIR)/src/Minimizer/polychord/*.o
+FOBJECTS = $(OBJ_DIR)/src/Minimizer/polychord/*.o $(OBJ_DIR)/src/Minimizer/multinest/*.o
 
 all: build $(APP_DIR)/$(TARGET)
 
@@ -33,12 +34,15 @@ build:
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)/src
 	@mkdir -p $(OBJ_DIR)/src/Minimizer
-	cd src/Minimizer/polychord && $(MAKE) release
+	cd src/Minimizer/polychord && $(MAKE) $(FFLAG)
+	cd src/Minimizer/multinest && $(MAKE) $(FFLAG)
 
 debug: CXXFLAGS += -g
+debug: FFLAG += debug
 debug: all
 
 release: CXXFLAGS += -O3
+release: FFLAG += release
 release: all
 
 clean:

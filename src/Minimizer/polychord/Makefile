@@ -34,8 +34,6 @@ build:
 	$(FC) $(FFLAGS) nested_sampling.F90 -o $(TARGET_DIR)/nested_sampling.o
 	$(FC) $(FFLAGS)	loglikelihood_c.F90 -o $(TARGET_DIR)/loglikelihood_c.o
 	$(FC) $(FFLAGS) interfaces.F90 -o $(TARGET_DIR)/interfaces.o
-	# mv *.o $(OBJ_DIR)/src/Minimizer/polychord
-	# mv *.mod $(OBJ_DIR)/src/Minimizer/polychord
 	rm *.mod
 
 debug: FFLAGS += -DDEBUG -g

@@ -25,7 +25,6 @@ public:
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
                              v_d upper_bounds);
 
-    void execute_polychord(uint32_t n_dims);
     static void fortran_to_physics(double *cube, double *theta, int n_dims,
         void *misc);
     static double fortran_get_llh(double *theta, int n_dims, double *phi,

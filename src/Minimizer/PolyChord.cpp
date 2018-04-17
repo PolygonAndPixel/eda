@@ -138,12 +138,7 @@ double PolyChord::fortran_get_llh(
  *  \param nPar                     Number of parameters
  *  \param misc                     Any other stuff user wants to hand over to fct
  *                                  (structure of function parameters determined by
- *                                  PolyChord requirements). For Gulliver, this is
- *                                  always an I3GulliverPolyChord object that contains
- *                                  all necessary informations about how to convert
- *                                  the standard PolyChord parameter ranges ([0,1])
- *                                  into physical ranges for the llh function
- *                                  (e.g. for millipede).
+ *                                  PolyChord requirements).
  * */
 void PolyChord::c_dumper(
     double log_evidence,
