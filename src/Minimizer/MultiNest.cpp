@@ -37,6 +37,7 @@ MultiNest::MultiNest(
     feedback_interval_      = feedback_interval;
     max_modes_              = max_modes;
     feedback_               = feedback;
+    logZero_                = -std::numeric_limits<double>::max();
 
 }
 

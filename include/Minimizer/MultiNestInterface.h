@@ -62,9 +62,14 @@ namespace nested
 			void *context, int &root_len);
 	}
 
-	static void run(bool IS, bool mmodal, bool ceff, int nlive, double tol, double efr, int ndims, int nPar, int nClsPar, int maxModes,
-		int updInt, double Ztol, const std::string & root, int seed, int *pWrap, bool fb, bool resume, bool outfile,
-		bool initMPI, double logZero, int maxiter, void (*LogLike)(double *Cube, int &n_dim, int &n_par, double &lnew, void *),
+	static void run(bool IS, bool mmodal, bool ceff, int nlive, double tol,
+        double efr, int ndims, int nPar,
+        int nClsPar,
+        int maxModes, int updInt,
+        double Ztol, const std::string & root, int seed,
+        int *pWrap, bool fb, bool resume,
+        bool outfile, bool initMPI, double logZero, int maxiter,
+        void (*LogLike)(double *Cube, int &n_dim, int &n_par, double &lnew, void *),
 		void (*dumper)(int &, int &, int &, double **, double **, double **, double &, double &, double &, double &, void *), void *context)
 	{
 		char t_root[100];
