@@ -7,6 +7,7 @@
 #include "Minimizer/MAPS.h"
 #include "Minimizer/PolyChord.h"
 #include "Minimizer/Minimizer.h"
+#include "Minimizer/MultiNest.h"
 #include "likelihood/TestFunctions.h"
 #include "Minimizer/MinimizerResult.h"
 
@@ -120,6 +121,17 @@ int main(int argc, char* argv[]) {
 
         PolyChord sampler(tolerance);
         std::string path = "../../output/PolyChord";
+        sampler.set_output(path);
+        run_tests(sampler);
+    }
+
+    if(strcmp(instr, "multi") == 0) {
+
+        /////// MultiNest
+        double tolerance = 1e-4;
+
+        MultiNest sampler(tolerance);
+        std::string path = "../../output/MultiNest";
         sampler.set_output(path);
         run_tests(sampler);
     }
