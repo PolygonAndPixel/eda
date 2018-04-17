@@ -1,5 +1,5 @@
 # Estimation of Distribution Algorithms
-I am testing different kinds of EDA methods for usage in multimodal, non-convex, non-smooth likelihood (or "energy") surfaces. The interface of the minimizers is based on
+This package uses different kinds of EDA methods for usage in multimodal, non-convex, non-smooth likelihood (or "energy") surfaces. The interface of the minimizers is based on
 [IceTray](http://software.icecube.wisc.edu/) used by [IceCube](https://icecube.wisc.edu/).
 This package allows you to get a feeling how different algorithms work, how
 many function evaluations they need and how efficient those are under different
@@ -10,13 +10,6 @@ computation time). A good estimation of the integral of the function is desirabl
 but not the main goal. Finding the parameters with the highest likelihood is
 the main target here.
 
-## Usage
-Compile using `make release` at root. Go to `build/apps` and execute `eda` using
-one of the following parameters:
- - poly (run [PolyChord](https://arxiv.org/abs/1506.00171) with every test function)
- - maps (run [MAPS](https://pdfs.semanticscholar.org/3261/1cd9eaa917d5bdcccd688799768afbd63579.pdf) with every test function)
- - sample (sample the whole space for every test function)
-
 ## Prerequisites
  - [OpenBlas](https://www.openblas.net/)
  - [Lapack](http://www.netlib.org/lapack/)
@@ -24,6 +17,15 @@ one of the following parameters:
  - [gfortran](https://gcc.gnu.org/fortran/) (or any other Fortran compiler. Just change the flag in the corresponding makefiles within the folder `src/Minimzer/*/`)
 You may want to change the links in the Makefile at root for your libraries.
 
+## Usage
+Compile using `make release` at root. Go to `build/apps` and execute `eda` using
+one of the following parameters:
+ - poly (run [PolyChord](https://arxiv.org/abs/1506.00171) with every test function)
+ - maps (run [MAPS](https://pdfs.semanticscholar.org/3261/1cd9eaa917d5bdcccd688799768afbd63579.pdf) with every test function)
+ - sample (sample the whole space for every test function)
+ - multi (run [MultiNest](https://ccpforge.cse.rl.ac.uk/gf/project/multinest/) with every test function)
+
 ## Known Problems
 PolyChord currently uses the same parameters for all functions. This leads to
 a very long run on gaussian shells.
+A similar problem occurs for MultiNest where it does not find the shells.
