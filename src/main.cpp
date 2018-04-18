@@ -1,6 +1,4 @@
-#include <boost/cstdint.hpp>
 #include <iostream>
-#include <string>
 
 #include "helper/abbreviations.h"
 #include "Minimizer/SampleSpace.h"
@@ -27,7 +25,8 @@ void print_result(
 }
 
 void run_tests(
-    Minimizer &sampler) {
+    Minimizer &sampler,
+    std::string &func_name) {
 
     uint32_t ndims = 2;
     v_d lower_bounds(ndims);
@@ -35,69 +34,89 @@ void run_tests(
     TestFunctions test_func;
     MinimizerResult result;
 
-    // Himmelblau's function
-    test_func.set_func("himmelblau", ndims);
-    lower_bounds[0] = -6;
-    lower_bounds[1] = -6;
-    upper_bounds[0] = 6;
-    upper_bounds[1] = 6;
-    std::cout << "Running Himmelblau" << std::endl;
-    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    print_result(result);
+    if(func_name == HIMMEL || func_name == ALL) {
+        // Himmelblau's function
+        test_func.set_func(HIMMEL, ndims);
+        lower_bounds[0] = -6;
+        lower_bounds[1] = -6;
+        upper_bounds[0] = 6;
+        upper_bounds[1] = 6;
+        std::cout << "Running " << HIMMEL << std::endl;
+        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+        print_result(result);
+    }
 
-    // Townsend function
-    test_func.set_func("townsend", ndims);
-    lower_bounds[0] = -2.25;
-    lower_bounds[1] = -2.5;
-    upper_bounds[0] = 2.5;
-    upper_bounds[1] = 1.75;
-    std::cout << "Running Townsend" << std::endl;
-    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    print_result(result);
+    if(func_name == TOWN || func_name == ALL) {
+        // Townsend function
+        test_func.set_func(TOWN, ndims);
+        lower_bounds[0] = -2.25;
+        lower_bounds[1] = -2.5;
+        upper_bounds[0] = 2.5;
+        upper_bounds[1] = 1.75;
+        std::cout << "Running " << TOWN << std::endl;
+        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+        print_result(result);
+    }
 
-    // Rosenbrock function
-    test_func.set_func("rosenbrock", ndims);
-    lower_bounds[0] = -2;
-    lower_bounds[1] = -1;
-    upper_bounds[0] = 2;
-    upper_bounds[1] = 3;
-    std::cout << "Running Rosenbrock" << std::endl;
-    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    print_result(result);
+    if(func_name == ROSEN || func_name == ALL) {
+        // Rosenbrock function
+        test_func.set_func(ROSEN, ndims);
+        lower_bounds[0] = -2;
+        lower_bounds[1] = -1;
+        upper_bounds[0] = 2;
+        upper_bounds[1] = 3;
+        std::cout << "Running " << ROSEN << std::endl;
+        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+        print_result(result);
+    }
 
-    // Eggholder function
-    test_func.set_func("eggholder", ndims);
-    lower_bounds[0] = -512;
-    lower_bounds[1] = -512;
-    upper_bounds[0] = 512;
-    upper_bounds[1] = 512;
-    std::cout << "Running Eggholder" << std::endl;
-    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    print_result(result);
+    if(func_name == EGG || func_name == ALL) {
+        // Eggholder function
+        test_func.set_func(EGG, ndims);
+        lower_bounds[0] = -512;
+        lower_bounds[1] = -512;
+        upper_bounds[0] = 512;
+        upper_bounds[1] = 512;
+        std::cout << "Running " << EGG << std::endl;
+        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+        print_result(result);
+    }
 
-    // Gaussian shell
-    test_func.set_func("gaussian_shell", ndims);
-    std::cout << "Running Gaussian Shell" << std::endl;
-    result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-    print_result(result);
+    if(func_name == GAUSS || func_name == ALL) {
+        // Gaussian shell
+        test_func.set_func(GAUSS, ndims);
+        std::cout << "Running " << GAUSS << std::endl;
+        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+        print_result(result);
+    }
 }
 
 int main(int argc, char* argv[]) {
 
-    char *instr = nullptr;
-    if(argc > 1) {
+    std::string instr;
+    std::string testf;
+    if(argc > 2) {
         instr = argv[1];
+        testf = argv[2];
     } else {
         std::cout << "Please enter an argument which minimizer to use\n";
         std::cout << "Possible arguments are:\n";
-        std::cout << "maps     Using MAPS\n";
-        std::cout << "poly     Using PolyChord\n";
-        std::cout << "sample   Using SampleSpace to sample the function\n";
-        std::cout << "multi    Using MultiNest\n";
+        std::cout << MAPSNAME   << "     Using MAPS\n";
+        std::cout << POLY       << "     Using PolyChord\n";
+        std::cout << SAMPLE     << "   Using SampleSpace to sample the function\n";
+        std::cout << MULTI      << "    Using MultiNest\n";
+        std::cout << "also enter which test function to use\n";
+        std::cout << "Possible arguments are:\n";
+        std::cout << HIMMEL << std::endl;
+        std::cout << TOWN << std::endl;
+        std::cout << ROSEN << std::endl;
+        std::cout << EGG << std::endl;
+        std::cout << GAUSS << std::endl;
+        std::cout << ALL << std::endl;
         return 1;
     }
 
-    if(strcmp(instr, "maps") == 0) {
+    if(instr == MAPSNAME) {
 
         /////// MAPS
         double tolerance = 1e-4;
@@ -111,32 +130,32 @@ int main(int argc, char* argv[]) {
                      size_sub_pop, 9, n_selected);
         std::string path = "../../output/MAPS/";
         sampler.set_output(path);
-        run_tests(sampler);
+        run_tests(sampler, testf);
     }
 
-    if(strcmp(instr, "poly") == 0) {
+    if(instr == POLY) {
 
         /////// PolyChord
         double tolerance = 1e-4;
 
         PolyChord sampler(tolerance);
-        std::string path = "../../output/PolyChord";
+        std::string path = "../../output/PolyChord/";
         sampler.set_output(path);
-        run_tests(sampler);
+        run_tests(sampler, testf);
     }
 
-    if(strcmp(instr, "multi") == 0) {
+    if(instr == MULTI) {
 
         /////// MultiNest
         double tolerance = 1e-4;
 
         MultiNest sampler(tolerance);
-        std::string path = "../../output/MultiNest";
+        std::string path = "../../output/MultiNest/";
         sampler.set_output(path);
-        run_tests(sampler);
+        run_tests(sampler, testf);
     }
 
-    if(strcmp(instr, "sample") == 0) {
+    if(instr == SAMPLE) {
 
         /////// SampleSpace
         // Parameters for sampling the space
@@ -145,9 +164,9 @@ int main(int argc, char* argv[]) {
         uint32_t seed = 1025;
 
         SampleSpace sampler(n_iterations, max_points, seed, true);
-        std::string path = "../../output/SampleSpace";
+        std::string path = "../../output/SampleSpace/";
         sampler.set_output(path);
-        run_tests(sampler);
+        run_tests(sampler, testf);
     }
 
     return 0;

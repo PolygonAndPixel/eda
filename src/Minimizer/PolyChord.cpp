@@ -209,15 +209,6 @@ PolyChord::Minimize(
     file_name_ = test_func_->get_name();
     params_best_fit.resize(test_func_->get_ndims());
 
-    if(dump_points_) {
-        std::ofstream ofile((base_dir_+file_name_).c_str(),
-            std::ofstream::out  | std::ofstream::app);
-
-        for(int j=0; j<test_func_->get_ndims(); j++)
-            ofile << "Param" << j << "\t";
-        ofile << std::endl;
-        ofile.close();
-    }
     int n_dims = test_func_->get_ndims();
     int num_repeats = (num_repeats_ < 0) ? 5*n_dims : num_repeats_;
     /// run Fortran routines for minimization
@@ -228,6 +219,7 @@ PolyChord::Minimize(
     b_dir[base_dir_.size()] = '\0';
     std::copy(file_name_.begin(), file_name_.end(), f_root);
     f_root[file_name_.size()] = '\0';
+    write_live_ = dump_points_;
 
     // The numbers are the indices of the last argument of each row.
     // It is easier to debug this way.

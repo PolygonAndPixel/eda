@@ -27,19 +27,19 @@ TestFunctions::TestFunctions(
     uint32_t ndims) {
 
     name = func_name;
-    if(func_name == "eggholder") {
+    if(func_name == EGG) {
         lh_p = &TestFunctions::eggholder;
         ndims_ = 2;
     }
-    else if(func_name == "townsend") {
+    else if(func_name == TOWN) {
         lh_p = &TestFunctions::townsend;
         ndims_ = 2;
     }
-        else if(func_name == "rosenbrock") {
+        else if(func_name == ROSEN) {
         lh_p = &TestFunctions::rosenbrock;
         ndims_ = ndims;
     }
-    else if(func_name == "himmelblau") {
+    else if(func_name == HIMMEL) {
         lh_p = &TestFunctions::himmelblau;
         ndims_ = 2;
     }
@@ -227,19 +227,19 @@ void TestFunctions::set_func(
     uint32_t ndims) {
 
     name = func_name;
-    if(func_name == "eggholder") {
+    if(func_name == EGG) {
         lh_p = &TestFunctions::eggholder;
         ndims_ = 2;
     }
-    else if(func_name == "townsend") {
+    else if(func_name == TOWN) {
         lh_p = &TestFunctions::townsend;
         ndims_ = 2;
     }
-        else if(func_name == "rosenbrock") {
+        else if(func_name == ROSEN) {
         lh_p = &TestFunctions::rosenbrock;
         ndims_ = ndims;
     }
-    else if(func_name == "himmelblau") {
+    else if(func_name == HIMMEL) {
         lh_p = &TestFunctions::himmelblau;
         ndims_ = 2;
     }

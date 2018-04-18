@@ -66,6 +66,7 @@ void MultiNest::fortran_get_llh(
     multiBase->result.n_lh_calls++;
     llh = multiBase->test_func_->get_lh(
         multiBase->to_physics(v_d(cube, cube+n_dims), n_dims));
+
     // MultiNest maximizes, hence we take the negative value.
     llh *= -1;
 }
@@ -160,25 +161,17 @@ MultiNest::Minimize(
     upper_bnds = upper_bounds;
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
-    file_name_ = test_func_->get_name();
+    file_name_ = test_func_->get_name() + "_";
     params_best_fit.resize(test_func_->get_ndims());
 
-    if(dump_points_) {
-        std::ofstream ofile((base_dir_+file_name_).c_str(),
-            std::ofstream::out  | std::ofstream::app);
-
-        for(int j=0; j<test_func_->get_ndims(); j++)
-            ofile << "Param" << j << "\t";
-        ofile << std::endl;
-        ofile.close();
-    }
+    writefiles_ = dump_points_;
     int n_dims = test_func_->get_ndims();
     /// run Fortran routines for minimization
     // Hack to pass a string to fortran.
-    char *b_dir = new char[base_dir_.size()+1];
-    char *f_root = new char[file_name_.size()+1];
+    char *b_dir = new char[base_dir_.size()+file_name_.size()+1];
     std::copy(base_dir_.begin(), base_dir_.end(), b_dir);
-    b_dir[base_dir_.size()] = '\0';
+    std::copy(file_name_.begin(), file_name_.end(), b_dir+base_dir_.size());
+    b_dir[base_dir_.size()+file_name_.size()] = '\0';
 
     int pWrap[n_dims];
     // We don't use peridodicity
