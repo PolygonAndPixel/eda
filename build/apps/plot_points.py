@@ -20,24 +20,20 @@ text = ""
 for i in range(5, len(sys.argv)):
     text = text + " " + sys.argv[i]
 print("Title of graph is {}".format(text))
-base_dir = "output/"
+base_dir = "../../output/"
 if three_d:
     base_dir += "3D/"
 if contour:
     base_dir += "Contour/"
 
 x = []
-dim_idx = list(range(2))
+dim_idx = list(range(nDims))
 dim_names = []
 llh = []
 with open(sys.argv[1], 'r') as f:
-    first = True
     for line in f:
         data = line.split()
-        if first:
-            dim_names = [str(data[i]) for i in dim_idx]
-            first = False
-        elif data[0] != "Param0":
+        try:
             tmp_llh = float(data[nDims])
             if np.isinf(tmp_llh):
                 tmp_llh = np.finfo(tmp_llh).max
@@ -45,7 +41,13 @@ with open(sys.argv[1], 'r') as f:
             params = [float(data[i]) for i in dim_idx]
             params.append(float(data[nDims]))
             x.append(params)
-
+        except:
+            dim_names = [str(data[i]) for i in dim_idx]
+            first = False
+# The fortran code does not deliver param names. Hence we just add them like this
+if len(dim_names) == 0:
+    for i in range(nDims):
+        dim_names.append("Param " + str(i))
 x = np.asarray(x)
 llh = np.asarray(llh)
 
