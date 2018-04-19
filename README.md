@@ -18,14 +18,16 @@ the main target here.
 You may want to change the links in the Makefile at root for your libraries.
 
 ## Usage
-Compile using `make release` at root. Go to `build/apps` and execute `eda` using
-one of the following parameters:
- - poly (run [PolyChord](https://arxiv.org/abs/1506.00171) with every test function)
- - maps (run [MAPS](https://pdfs.semanticscholar.org/3261/1cd9eaa917d5bdcccd688799768afbd63579.pdf) with every test function)
- - sample (sample the whole space for every test function)
- - multi (run [MultiNest](https://ccpforge.cse.rl.ac.uk/gf/project/multinest/) with every test function)
+Compile using `make release` at root. Go to `build/apps` and execute `eda`
+with the first parameter the path to your minimizer configuration file
+(examples can be found at `../../xml/Minimizer/`) and the second argument
+is the path to your likelihood configuration file (examples can be found at
+`../../xml/likelihood/`. You may delete all the configurations in that file
+for the functions you don't want to use).
 
 ## Known Problems
-PolyChord currently uses the same parameters for all functions. This leads to
-a very long run on gaussian shells.
+PolyChord currently uses the unfortunate parameters for gaussian shells.
+This leads to a very long run.
 A similar problem occurs for MultiNest where it does not find the shells.
+You may increase the number of live points in the configuration file to
+overcome this problem.
