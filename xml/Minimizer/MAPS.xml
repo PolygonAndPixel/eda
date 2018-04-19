@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Minimizer
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="MAPS_schema.xsd">
+    <name>maps</name>
+    <tolerance>1e-4</tolerance>
+    <max_iter>4096</max_iter>
+    <min_iter>1024</min_iter>
+    <max_points>0</max_points>
+    <seed>1025</seed>
+    <dump_points>false</dump_points>
+
+    <n_start_points>1000</n_start_points>
+    <size_sub_pop>100</size_sub_pop>
+    <max_sub_pops>9</max_sub_pops>
+    <n_selected>500</n_selected>
+    <n_sub_selected>25</n_sub_selected>
+</Minimizer>

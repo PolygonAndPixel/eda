@@ -19,7 +19,11 @@ public:
         double *grade_frac=nullptr, int n_live=250, int feedback=0,
         int max_dead=-1, double boost_posterior=0.0, int num_repeats=-1,
         bool posteriors=false, bool equals=false, bool cluster_posteriors=false,
-        bool do_clustering=true, uint32_t seed=1025, bool dump_points=false);
+        bool do_clustering=true, int seed=1025, bool dump_points=false);
+
+    virtual std::unique_ptr<Minimizer> clone() const override {
+        return std::make_unique<PolyChord>(*this);
+    }
 
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,

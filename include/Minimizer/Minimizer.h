@@ -6,6 +6,8 @@
 #include <boost/random.hpp>
 #include <boost/nondet_random.hpp>
 
+#include <memory>
+
 #include "helper/abbreviations.h"
 #include "MinimizerResult.h"
 #include "likelihood/TestFunctions.h"
@@ -31,6 +33,8 @@ public:
     void set_bounds(v_d upper, v_d lower) {upper_bnds=upper; lower_bnds=lower;};
 
     void set_output(std::string path) {base_dir_ = path; dump_points_ = true;};
+
+    virtual std::unique_ptr<Minimizer> clone() const = 0;
 
     /// core method: minimizer a given function with given initial conditions
     virtual MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,

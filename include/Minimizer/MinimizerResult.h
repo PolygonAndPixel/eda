@@ -14,6 +14,8 @@ struct MinimizerResult {
     double lh_efficiency;
     std::string minimizer_name;
     std::string function_name;
+    double run_time; // Not used yet. Could store the execution time in s.
+    int runs;        // Not used yet. Could store the amount of runs for benchmarks.
 };
 
 #endif

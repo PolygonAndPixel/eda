@@ -1,13 +1,16 @@
-#include <iostream>
+/* Run and compare different algorithms to estimate a distribution or to
+ * find a maximum/minimum for functions, that take lots of time to evaluate
+ * (not for the test functions proposed here though) and that are not smooth
+ * (i.e. not everywhere differentiable), that have degeneracies or are not
+ * convex. In short: find a maximum/minimum for ill-posed functions and
+ * as a bonus provide an estimation of the density (e.g. for error calculations).
+ *
+ * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
+ * */
 
-#include "helper/abbreviations.h"
-#include "Minimizer/SampleSpace.h"
-#include "Minimizer/MAPS.h"
-#include "Minimizer/PolyChord.h"
-#include "Minimizer/Minimizer.h"
-#include "Minimizer/MultiNest.h"
-#include "likelihood/TestFunctions.h"
-#include "Minimizer/MinimizerResult.h"
+#include "helper/read_xml.h"
+
+#include <iostream>
 
 void print_result(
     MinimizerResult &result) {
@@ -24,70 +27,22 @@ void print_result(
     std::cout << std::endl << std::endl;
 }
 
-void run_tests(
-    Minimizer &sampler,
-    std::string &func_name) {
+std::vector<MinimizerResult> run_tests(
+    Minimizer &minimizer,
+    std::string &func_path) {
 
-    uint32_t ndims = 2;
-    v_d lower_bounds(ndims);
-    v_d upper_bounds(ndims);
-    TestFunctions test_func;
-    MinimizerResult result;
+    m_d lower_bounds;
+    m_d upper_bounds;
+    std::vector<TestFunctions> test_funcs;
+    load_likelihood_xml(func_path, test_funcs, lower_bounds, upper_bounds);
 
-    if(func_name == HIMMEL || func_name == ALL) {
-        // Himmelblau's function
-        test_func.set_func(HIMMEL, ndims);
-        lower_bounds[0] = -6;
-        lower_bounds[1] = -6;
-        upper_bounds[0] = 6;
-        upper_bounds[1] = 6;
-        std::cout << "Running " << HIMMEL << std::endl;
-        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
+    std::vector<MinimizerResult> results;
+    for(uint32_t i=0; i<test_funcs.size(); ++i) {
+        std::cout << "Running " << test_funcs[i].get_name() << std::endl;
+        MinimizerResult result = minimizer.Minimize(test_funcs[i],
+            lower_bounds[i], upper_bounds[i]);
         print_result(result);
-    }
-
-    if(func_name == TOWN || func_name == ALL) {
-        // Townsend function
-        test_func.set_func(TOWN, ndims);
-        lower_bounds[0] = -2.25;
-        lower_bounds[1] = -2.5;
-        upper_bounds[0] = 2.5;
-        upper_bounds[1] = 1.75;
-        std::cout << "Running " << TOWN << std::endl;
-        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-        print_result(result);
-    }
-
-    if(func_name == ROSEN || func_name == ALL) {
-        // Rosenbrock function
-        test_func.set_func(ROSEN, ndims);
-        lower_bounds[0] = -2;
-        lower_bounds[1] = -1;
-        upper_bounds[0] = 2;
-        upper_bounds[1] = 3;
-        std::cout << "Running " << ROSEN << std::endl;
-        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-        print_result(result);
-    }
-
-    if(func_name == EGG || func_name == ALL) {
-        // Eggholder function
-        test_func.set_func(EGG, ndims);
-        lower_bounds[0] = -512;
-        lower_bounds[1] = -512;
-        upper_bounds[0] = 512;
-        upper_bounds[1] = 512;
-        std::cout << "Running " << EGG << std::endl;
-        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-        print_result(result);
-    }
-
-    if(func_name == GAUSS || func_name == ALL) {
-        // Gaussian shell
-        test_func.set_func(GAUSS, ndims);
-        std::cout << "Running " << GAUSS << std::endl;
-        result = sampler.Minimize(test_func, lower_bounds, upper_bounds);
-        print_result(result);
+        results.push_back(result);
     }
 }
 
@@ -100,74 +55,17 @@ int main(int argc, char* argv[]) {
         testf = argv[2];
     } else {
         std::cout << "Please enter an argument which minimizer to use\n";
-        std::cout << "Possible arguments are:\n";
-        std::cout << MAPSNAME   << "     Using MAPS\n";
-        std::cout << POLY       << "     Using PolyChord\n";
-        std::cout << SAMPLE     << "   Using SampleSpace to sample the function\n";
-        std::cout << MULTI      << "    Using MultiNest\n";
-        std::cout << "also enter which test function to use\n";
-        std::cout << "Possible arguments are:\n";
-        std::cout << HIMMEL << std::endl;
-        std::cout << TOWN << std::endl;
-        std::cout << ROSEN << std::endl;
-        std::cout << EGG << std::endl;
-        std::cout << GAUSS << std::endl;
-        std::cout << ALL << std::endl;
+        std::cout << "The first argument should point to your configuration"
+            << " file in ../../xml/Minimizer/\n";
+        std::cout << "The second argument should point to your likelihood"
+            << " configuration in ../../xml/likelihood/\n";
         return 1;
     }
-
-    if(instr == MAPSNAME) {
-
-        /////// MAPS
-        double tolerance = 1e-4;
-        uint32_t max_iter = 1<<12;
-        uint32_t min_iter = 1<<10;
-        uint32_t n_start_points = 1000;
-        uint32_t size_sub_pop = n_start_points/10;
-        uint32_t n_selected = n_start_points/2;
-
-        MAPS sampler(tolerance, max_iter, min_iter, 0, n_start_points,
-                     size_sub_pop, 9, n_selected);
-        std::string path = "../../output/MAPS/";
-        sampler.set_output(path);
-        run_tests(sampler, testf);
-    }
-
-    if(instr == POLY) {
-
-        /////// PolyChord
-        double tolerance = 1e-4;
-
-        PolyChord sampler(tolerance);
-        std::string path = "../../output/PolyChord/";
-        sampler.set_output(path);
-        run_tests(sampler, testf);
-    }
-
-    if(instr == MULTI) {
-
-        /////// MultiNest
-        double tolerance = 1e-4;
-
-        MultiNest sampler(tolerance);
-        std::string path = "../../output/MultiNest/";
-        sampler.set_output(path);
-        run_tests(sampler, testf);
-    }
-
-    if(instr == SAMPLE) {
-
-        /////// SampleSpace
-        // Parameters for sampling the space
-        uint32_t n_iterations = 1000000;
-        uint32_t max_points = n_iterations/10;
-        uint32_t seed = 1025;
-
-        SampleSpace sampler(n_iterations, max_points, seed, true);
-        std::string path = "../../output/SampleSpace/";
-        sampler.set_output(path);
-        run_tests(sampler, testf);
-    }
+    // We could basically load different minimizers by looping over
+    // configuration files and execute every one of them.
+    Minimizer *minimizer = load_minimizer_xml(instr).release();
+    // Do whatever you feel like with the result.
+    std::vector<MinimizerResult> results = run_tests(*minimizer, testf);
 
     return 0;
 }

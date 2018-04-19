@@ -14,7 +14,11 @@ public:
     MultiNest(double tolerance, int max_iter=0, bool ins=false,
         bool mode_separation=true, bool const_eff=false, int n_live=500,
         double efficiency=0.5, int feedback_interval=10, int max_modes=10,
-        bool feedback=false, uint32_t seed=1025, bool dump_points=false);
+        bool feedback=false, int seed=1025, bool dump_points=false);
+
+    virtual std::unique_ptr<Minimizer> clone() const override {
+        return std::make_unique<MultiNest>(*this);
+    }
 
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
