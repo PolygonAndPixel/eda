@@ -30,7 +30,7 @@ PolyChord::PolyChord(
     bool equals,
     bool cluster_posteriors,
     bool do_clustering,
-    uint32_t seed,
+    int seed,
     bool dump_points) : Minimizer(tolerance, max_iter, min_iter, max_points,
         seed, dump_points)
 {

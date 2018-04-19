@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="minimizer">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- General parameters for all minimizer -->
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="tolerance" type="xs:double"/>
+                <xs:element name="max_iter" type="xs:integer"/>
+                <xs:element name="min_iter" type="xs:integer"/>
+                <xs:element name="max_points" type="xs:integer"/>
+                <xs:element name="seed" type="xs:integer"/>
+                <xs:element name="dump_points" type="xs:boolean"/>
+                <!-- Now the PolyChord specific parameters -->
+                <xs:element name="n_prior" type="xs:integer"/>
+                <xs:element name="n_grade" type="xs:integer"/>
+                <xs:element name="grade_frac" type="xs:string"/>
+                <xs:element name="n_live" type="xs:integer"/>
+                <xs:element name="feedback" type="xs:integer"/>
+                <xs:element name="max_dead" type="xs:integer"/>
+                <xs:element name="boost_posterior" type="xs:double"/>
+                <xs:element name="num_repeats" type="xs:integer"/>
+                <xs:element name="posteriors" type="xs:boolean"/>
+                <xs:element name="equals" type="xs:boolean"/>
+                <xs:element name="cluster_posteriors" type="xs:boolean"/>
+                <xs:element name="do_clustering" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

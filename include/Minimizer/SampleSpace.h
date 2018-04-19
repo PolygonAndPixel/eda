@@ -11,6 +11,10 @@ public:
     SampleSpace(int max_iter,  int max_points, int seed=1025,
                 bool dump_points=false);
 
+    virtual std::unique_ptr<Minimizer> clone() const override {
+        return std::make_unique<SampleSpace>(*this);
+    }
+
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
                              v_d upper_bounds);

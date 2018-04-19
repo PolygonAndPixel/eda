@@ -24,7 +24,7 @@ MultiNest::MultiNest(
     int feedback_interval,
     int max_modes,
     bool feedback,
-    uint32_t seed,
+    int seed,
     bool dump_points) : Minimizer(tolerance, max_iter, 0, 0, seed, dump_points)
 {
     // Various variables for the minimization routine in fortran.

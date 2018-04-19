@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<likelihoods
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="likelihoods_schema.xsd">
+    <likelihood>
+        <function_name>himmelblau</function_name>
+        <lower_bounds>-6 -6</lower_bounds>
+        <upper_bounds>6 6</upper_bounds>
+    </likelihood>
+
+    <likelihood>
+        <function_name>townsend</function_name>
+        <lower_bounds>-2.25 -2.5</lower_bounds>
+        <upper_bounds>2.5 1.75</upper_bounds>
+    </likelihood>
+
+    <likelihood>
+        <function_name>rosenbrock</function_name>
+        <lower_bounds>-2 -1</lower_bounds>
+        <upper_bounds>2 3</upper_bounds>
+    </likelihood>
+
+    <likelihood>
+        <function_name>eggholder</function_name>
+        <lower_bounds>-512 -512</lower_bounds>
+        <upper_bounds>512 512</upper_bounds>
+    </likelihood>
+
+    <likelihood>
+        <function_name>gaussian_shell</function_name>
+        <lower_bounds>-6 -6 -6</lower_bounds>
+        <upper_bounds>6 6</upper_bounds>
+    </likelihood>
+</likelihoods>
