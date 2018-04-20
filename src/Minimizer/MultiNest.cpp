@@ -33,11 +33,12 @@ MultiNest::MultiNest(
     ins_                    = ins;
     mode_separation_        = mode_separation;
     const_eff_              = const_eff;
-    enlargement_             = efficiency;
+    enlargement_             = enlargement;
     feedback_interval_      = feedback_interval;
     max_modes_              = max_modes;
     feedback_               = feedback;
     logZero_                = -std::numeric_limits<double>::max();
+    base_dir_               = "tmp"; // temporary files are written here
 
 }
 

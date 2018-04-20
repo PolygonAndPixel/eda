@@ -38,7 +38,8 @@ PolyChord::PolyChord(
     nGrade_                 = (n_grade>0) ? n_grade : 1; // The number of grades
     // The fraction of time spent in each grade
     if(grade_frac) {
-        grade_frac_         = grade_frac;
+        grade_frac_         = new double[nGrade_];
+        for(uint32_t i=0; i<nGrade_; ++i) grade_frac_[i] = grade_frac[i];
     } else {
         grade_frac_         = new double[nGrade_];
         for(uint32_t i=0; i<nGrade_; ++i) grade_frac_[i] = 1.0;
@@ -70,6 +71,7 @@ PolyChord::PolyChord(
     write_prior_            = false;
     update_files_           = -1;
     nDerived_               = 0;
+    base_dir_               = "tmp"; // temporary files are written here
 }
 
 /** Function to map from the unit hypercube to Theta in the physical space.

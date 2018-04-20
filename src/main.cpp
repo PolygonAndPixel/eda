@@ -44,6 +44,7 @@ std::vector<MinimizerResult> run_tests(
         print_result(result);
         results.push_back(result);
     }
+    return results;
 }
 
 int main(int argc, char* argv[]) {

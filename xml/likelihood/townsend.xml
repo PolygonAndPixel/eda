@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<likelihoods
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="likelihoods_schema.xsd">
+    <likelihood>
+        <function_name>townsend</function_name>
+        <lower_bounds>-2.25 -2.5</lower_bounds>
+        <upper_bounds>2.5 1.75</upper_bounds>
+    </likelihood>
+</likelihoods>

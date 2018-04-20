@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="minimzers">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOcccurs=0 maxOccurs="unbounded" ref="maps"/>
+                <xs:element minOcccurs=0 maxOccurs="unbounded" ref="poly"/>
+                <xs:element minOcccurs=0 maxOccurs="unbounded" ref="multi"/>
+                <xs:element minOcccurs=0 maxOccurs="unbounded" ref="sample"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="maps" minOcccurs=0 maxOccurs="unbounded">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- General parameters -->
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="tolerance" type="xs:double"/>
+                <xs:element name="max_iter" type="xs:integer"/>
+                <xs:element name="min_iter" type="xs:integer"/>
+                <xs:element name="max_points" type="xs:integer"/>
+                <xs:element name="seed" type="xs:integer"/>
+                <xs:element name="dump_points" type="xs:boolean"/>
+                <!-- Now the MAPS specific parameters -->
+                <xs:element name="n_start_points" type="xs:integer"/>
+                <xs:element name="size_sub_pop" type="xs:integer"/>
+                <xs:element name="max_sub_pops" type="xs:integer"/>
+                <xs:element name="n_sub_selected" type="xs:integer"/>
+                <xs:element name="size_factor" type="xs:double"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="multi" minOcccurs=0 maxOccurs="unbounded">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- General parameters -->
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="tolerance" type="xs:double"/>
+                <xs:element name="max_iter" type="xs:integer"/>
+                <xs:element name="seed" type="xs:integer"/>
+                <xs:element name="dump_points" type="xs:boolean"/>
+                <!-- Now the MultiNest specific parameters -->
+                <xs:element name="ins" type="xs:boolean"/>
+                <xs:element name="mode_separation" type="xs:boolean"/>
+                <xs:element name="const_eff" type="boolean"/>
+                <xs:element name="n_live" type="xs:integer"/>
+                <xs:element name="enlargement" type="xs:double"/>
+                <xs:element name="feedback_interval" type="xs:integer"/>
+                <xs:element name="max_modes" type="xs:integer"/>
+                <xs:element name="feedback" type="xs:boolean"/>>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="poly" minOcccurs=0 maxOccurs="unbounded">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- General parameters -->
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="tolerance" type="xs:double"/>
+                <xs:element name="max_iter" type="xs:integer"/>
+                <xs:element name="min_iter" type="xs:integer"/>
+                <xs:element name="max_points" type="xs:integer"/>
+                <xs:element name="seed" type="xs:integer"/>
+                <xs:element name="dump_points" type="xs:boolean"/>
+                <!-- Now the PolyChord specific parameters -->
+                <xs:element name="n_prior" type="xs:integer"/>
+                <xs:element name="n_grade" type="xs:integer"/>
+                <xs:element name="grade_frac" type="xs:string"/>
+                <xs:element name="n_live" type="xs:integer"/>
+                <xs:element name="feedback" type="xs:integer"/>
+                <xs:element name="max_dead" type="xs:integer"/>
+                <xs:element name="boost_posterior" type="xs:double"/>
+                <xs:element name="num_repeats" type="xs:integer"/>
+                <xs:element name="posteriors" type="xs:boolean"/>
+                <xs:element name="equals" type="xs:boolean"/>
+                <xs:element name="cluster_posteriors" type="xs:boolean"/>
+                <xs:element name="do_clustering" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="sample" minOcccurs=0 maxOccurs="unbounded">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- General parameters -->
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="max_iter" type="xs:integer"/>
+                <xs:element name="max_points" type="xs:integer"/>
+                <xs:element name="seed" type="xs:integer"/>
+                <xs:element name="dump_points" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

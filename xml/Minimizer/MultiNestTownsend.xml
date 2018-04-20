@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Minimizer
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="MultiNestSchema.xsd">
+    <name>multi</name>
+    <tolerance>1e-3</tolerance>
+    <max_iter>0</max_iter>
+    <seed>1025</seed>
+    <dump_points>false</dump_points>
+
+    <ins>false</ins>
+    <mode_separation>true</mode_separation>
+    <const_eff>false</const_eff>
+    <n_live>2000</n_live>
+    <enlargement>0.5</enlargement>
+    <feedback_interval>1000</feedback_interval>
+    <max_modes>10</max_modes>
+    <feedback>false</feedback>
+</Minimizer>

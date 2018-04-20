@@ -35,7 +35,6 @@ std::unique_ptr<Minimizer> load_minimizer_xml(
     boost::property_tree::ptree pt;
     boost::property_tree::xml_parser::read_xml(xml_file, pt);
     std::string name = pt.get<std::string>("Minimizer.name");
-
     // Load specific values depending on the method
     if(name == MAPSNAME) {
         double tolerance    = pt.get<double>("Minimizer.tolerance");
@@ -85,7 +84,6 @@ std::unique_ptr<Minimizer> load_minimizer_xml(
         bool equals             = pt.get<bool>("Minimizer.equals");
         bool cluster_posteriors = pt.get<bool>("Minimizer.cluster_posteriors");
         bool do_clustering      = pt.get<bool>("Minimizer.do_clustering");
-
         PolyChord minimizer(tolerance, max_iter, min_iter, max_points,
             n_prior, n_grade, grade_frac.data(), n_live, feedback, max_dead,
             boost_posterior, num_repeats, posteriors, equals,
@@ -99,7 +97,6 @@ std::unique_ptr<Minimizer> load_minimizer_xml(
     if(name == MULTI) {
         double tolerance    = pt.get<double>("Minimizer.tolerance");
         int max_iter        = pt.get<int>("Minimizer.max_iter");
-        int max_points      = pt.get<int>("Minimizer.max_points");
         int seed            = pt.get<int>("Minimizer.seed");
         bool dump_points    = pt.get<bool>("Minimizer.dump_points");
 
