@@ -18,7 +18,7 @@
                 <xs:element name="mode_separation" type="xs:boolean"/>
                 <xs:element name="const_eff" type="boolean"/>
                 <xs:element name="n_live" type="xs:integer"/>
-                <xs:element name="efficiency" type="xs:double"/>
+                <xs:element name="enlargement" type="xs:double"/>
                 <xs:element name="feedback_interval" type="xs:integer"/>
                 <xs:element name="max_modes" type="xs:integer"/>
                 <xs:element name="feedback" type="xs:boolean"/>>

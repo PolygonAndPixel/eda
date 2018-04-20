@@ -13,7 +13,7 @@ xsi:schemaLocation="MultiNestSchema.xsd">
     <mode_separation>true</mode_separation>
     <const_eff>false</const_eff>
     <n_live>500</n_live>
-    <efficiency>0.5</efficiency>
+    <enlargement>0.5</enlargement>
     <feedback_interval>10</feedback_interval>
     <max_modes>10</max_modes>
     <feedback>false</feedback>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Minimizer
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="MultiNestSchema.xsd">
+    <!-- This is based on the eggbox settings from
+    'PolyChord: next-generation nested sampling'
+    * W.J. Handley, M.P. Hobson, A.N. Lasenby. May 2015 15 pp.
+    * https://arxiv.org/abs/1506.00171
+    * DOI: 10.1093/mnras/stv1911
+    and
+    'MultiNest: an efficient and robust Bayesian inference tool for
+    cosmology and particle physics'
+    F. Feroz, M. P. Hobson and M. Bridges
+    https://arxiv.org/abs/0809.3437
+    DOI: 10.1111/j.1365-2966.2009.14548.x
+    -->
+    <name>multi</name>
+    <tolerance>1e-3</tolerance>
+    <max_iter>0</max_iter>
+    <seed>1025</seed>
+    <dump_points>false</dump_points>
+
+    <ins>false</ins>
+    <mode_separation>true</mode_separation>
+    <const_eff>false</const_eff>
+    <n_live>2000</n_live>
+    <enlargement>0.5</enlargement>
+    <feedback_interval>1000</feedback_interval>
+    <max_modes>10</max_modes>
+    <feedback>false</feedback>
+</Minimizer>

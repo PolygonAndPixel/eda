@@ -13,7 +13,7 @@ public:
 
     MultiNest(double tolerance, int max_iter=0, bool ins=false,
         bool mode_separation=true, bool const_eff=false, int n_live=500,
-        double efficiency=0.5, int feedback_interval=10, int max_modes=10,
+        double enlargement=0.5, int feedback_interval=10, int max_modes=10,
         bool feedback=false, int seed=1025, bool dump_points=false);
 
     virtual std::unique_ptr<Minimizer> clone() const override {
@@ -36,7 +36,7 @@ public:
 private:
     int n_live_, max_modes_, feedback_, seed_;
     bool ins_, mode_separation_, const_eff_, mmodal_;
-    double efficiency_;
+    double enlargement_;
 
     // Various unimportant variables for the minimization routine in fortran.
     int feedback_interval_, resume_, init_mpi_;

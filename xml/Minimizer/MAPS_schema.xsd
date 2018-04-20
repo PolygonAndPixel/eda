@@ -17,6 +17,7 @@
                 <xs:element name="size_sub_pop" type="xs:integer"/>
                 <xs:element name="max_sub_pops" type="xs:integer"/>
                 <xs:element name="n_sub_selected" type="xs:integer"/>
+                <xs:element name="size_factor" type="xs:double"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

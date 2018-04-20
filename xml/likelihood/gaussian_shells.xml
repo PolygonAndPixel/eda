@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<likelihoods
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="likelihoods_schema.xsd">
+
+    <!-- This is based on the gaussian_shells settings from
+    'PolyChord: next-generation nested sampling'
+    * W.J. Handley, M.P. Hobson, A.N. Lasenby. May 2015 15 pp.
+    * https://arxiv.org/abs/1506.00171
+    * DOI: 10.1093/mnras/stv1911 -->
+    <likelihood>
+        <function_name>gaussian_shell</function_name>
+        <!-- 30 dimensions -->
+        <lower_bounds>-6 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5 -2.5</lower_bounds>
+        <upper_bounds>6 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5 2.5</upper_bounds>
+    </likelihood>
+</likelihoods>

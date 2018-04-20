@@ -29,7 +29,7 @@ xsi:schemaLocation="likelihoods_schema.xsd">
 
     <likelihood>
         <function_name>gaussian_shell</function_name>
-        <lower_bounds>-6 -6 -6</lower_bounds>
+        <lower_bounds>-6 -6</lower_bounds>
         <upper_bounds>6 6</upper_bounds>
     </likelihood>
 </likelihoods>

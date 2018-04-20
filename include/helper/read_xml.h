@@ -22,8 +22,6 @@
 
 #include <memory>
 
-
-
 /** Load a configuration file for a minimizer, create it with the configuration
  *  and return the object.
  *
@@ -47,14 +45,14 @@ std::unique_ptr<Minimizer> load_minimizer_xml(
         int seed            = pt.get<int>("Minimizer.seed");
         bool dump_points    = pt.get<bool>("Minimizer.dump_points");
 
-
         int n_start_points      = pt.get<int>("Minimizer.n_start_points");
         int size_sub_pop        = pt.get<int>("Minimizer.size_sub_pop");
         int max_sub_pops        = pt.get<int>("Minimizer.max_sub_pops");
         int n_selected          = pt.get<int>("Minimizer.n_selected");
         int n_sub_selected      = pt.get<int>("Minimizer.n_sub_selected");
+        double size_factor      = pt.get<double>("Minimizer.size_factor");
         MAPS minimizer(tolerance, max_iter, min_iter, max_points,
-            n_start_points, size_sub_pop, max_sub_pops, n_selected,
+            n_start_points, size_sub_pop, max_sub_pops, n_selected, size_factor,
             seed, dump_points);
         std::string path = "../../output/MAPS/";
         if(dump_points) minimizer.set_output(path);
@@ -109,13 +107,13 @@ std::unique_ptr<Minimizer> load_minimizer_xml(
         bool mode_separation    = pt.get<bool>("Minimizer.mode_separation");
         bool const_eff          = pt.get<bool>("Minimizer.const_eff");
         int n_live              = pt.get<int>("Minimizer.n_live");
-        double efficiency       = pt.get<double>("Minimizer.efficiency");
+        double enlargement       = pt.get<double>("Minimizer.enlargement");
         int feedback_interval   = pt.get<int>("Minimizer.feedback_interval");
         int max_modes           = pt.get<int>("Minimizer.max_modes");
         bool feedback           = pt.get<bool>("Minimizer.feedback");
 
         MultiNest minimizer(tolerance, max_iter, ins, mode_separation,
-            const_eff, n_live, efficiency, feedback_interval, max_modes,
+            const_eff, n_live, enlargement, feedback_interval, max_modes,
             feedback, seed, dump_points);
 
         std::string path = "../../output/MultiNest/";

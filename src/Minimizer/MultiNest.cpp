@@ -20,7 +20,7 @@ MultiNest::MultiNest(
     bool mode_separation,
     bool const_eff,
     int n_live,
-    double efficiency,
+    double enlargement,
     int feedback_interval,
     int max_modes,
     bool feedback,
@@ -33,7 +33,7 @@ MultiNest::MultiNest(
     ins_                    = ins;
     mode_separation_        = mode_separation;
     const_eff_              = const_eff;
-    efficiency_             = efficiency;
+    enlargement_             = efficiency;
     feedback_interval_      = feedback_interval;
     max_modes_              = max_modes;
     feedback_               = feedback;
@@ -180,7 +180,7 @@ MultiNest::Minimize(
     }
     double Ztol = -1E90;
     nested::run(ins_, mmodal_, const_eff_, n_live_, precision_criterion_, //5
-        efficiency_,  n_dims, n_dims, // 8
+        enlargement_,  n_dims, n_dims, // 8
         n_dims, // Number of parameters on which clustering should be done
         max_modes_, feedback_interval_, // 11
         Ztol, b_dir, seed_, // 14

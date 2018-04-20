@@ -26,6 +26,7 @@ MAPS::MAPS(
     int max_sub_pops,
     int n_selected,
     int n_sub_selected,
+    double size_factor,
     int seed,
     bool dump_points) : Minimizer(tolerance, max_iter, min_iter,
                                   max_points, seed, dump_points)
@@ -35,8 +36,7 @@ MAPS::MAPS(
     max_sub_pops_ = max_sub_pops;
     n_selected_ = n_selected;
     n_sub_selected_ = n_sub_selected;
-    size_factor_ = EULER_CONST; // From paper
-     size_factor_ = 1.5;         // Value that gives reasonable results
+    size_factor_ = size_factor;
 }
 
 /** Check if a population is premature.

@@ -3,17 +3,29 @@
 xmlns="https://www.w3schools.com"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="MAPS_schema.xsd">
+    <!-- This is based on
+    'Improving Estimation of Distribution Algorithm on Multimodal
+    Problems by Detecting Promising Areas'
+    Peng Yang, Ke Tang and Xiaofen Lu
+    http://ieeexplore.ieee.org/abstract/document/6899662/
+    10.1109/TCYB.2014.2352411 -->
     <name>maps</name>
-    <tolerance>1e-4</tolerance>
-    <max_iter>4096</max_iter>
+    <tolerance>1e-3</tolerance>
+    <max_iter>500000</max_iter>
     <min_iter>1024</min_iter>
     <max_points>0</max_points>
     <seed>1025</seed>
     <dump_points>false</dump_points>
-
+    <!-- N -->
     <n_start_points>1000</n_start_points>
+    <!-- N_sub -->
     <size_sub_pop>100</size_sub_pop>
-    <max_sub_pops>9</max_sub_pops>
+    <!-- E_sub -->
+    <max_sub_pops>10</max_sub_pops>
+    <!-- R -->
     <n_selected>500</n_selected>
+    <!-- R_sub -->
     <n_sub_selected>25</n_sub_selected>
+    <!-- \mu, also referred to as e -->
+    <size_factor>2.718281828459045</size_factor>
 </Minimizer>
