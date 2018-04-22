@@ -54,6 +54,8 @@ public:
     /// Transform point from hypercube to physical space
     virtual v_d to_physics(v_d cube, uint32_t nDims) = 0;
 
+    virtual std::string get_name() = 0;
+
     std::mt19937 intgen;
     std::uniform_real_distribution<> uf;
     v_d upper_bnds, lower_bnds;
@@ -67,9 +69,6 @@ public:
     std::string base_dir_, file_name_;
     bool dump_points_;
     v_d results;
-
-private:
-
 
 };
 

@@ -42,6 +42,14 @@ MultiNest::MultiNest(
 
 }
 
+/** Return the name of this class.
+ *
+ *  \return     Name of this class.
+ */
+std::string MultiNest::get_name() {
+    return ("MultiNest");
+}
+
 /** Function that shall be minimized. This is the actual function that is seen
  *  by the MultiNest Fortran code which itself refers to a Minimizer
  *  Object to evaluate the llh.
@@ -115,7 +123,8 @@ void MultiNest::c_dumper(
             worst_fit = phys_live[0][n_dims*n_live + k];
         }
     }
-    multiBase->result.best_fit  = llh_best_fit;
+    worst_fit = -worst_fit;
+    multiBase->result.best_fit  = -llh_best_fit;
     multiBase->result.lh_efficiency = (double) n_accepted / (double) multiBase->result.n_lh_calls;
 }
 

@@ -38,7 +38,8 @@ std::vector<MinimizerResult> run_tests(
 
     std::vector<MinimizerResult> results;
     for(uint32_t i=0; i<test_funcs.size(); ++i) {
-        std::cout << "Running " << test_funcs[i].get_name() << std::endl;
+        std::cout << "Running " << test_funcs[i].get_name()
+        << " with " << minimizer.get_name() << std::endl;
         MinimizerResult result = minimizer.Minimize(test_funcs[i],
             lower_bounds[i], upper_bounds[i]);
         print_result(result);
@@ -64,9 +65,12 @@ int main(int argc, char* argv[]) {
     }
     // We could basically load different minimizers by looping over
     // configuration files and execute every one of them.
-    Minimizer *minimizer = load_minimizer_xml(instr).release();
-    // Do whatever you feel like with the result.
-    std::vector<MinimizerResult> results = run_tests(*minimizer, testf);
+    std::vector<std::unique_ptr<Minimizer>> minimizers;
+    load_minimizer_xml(instr, minimizers);
+    for(auto &minimizer: minimizers) {
+        // Do whatever you feel like with the result.
+        std::vector<MinimizerResult> results = run_tests(*minimizer, testf);
+    }
 
     return 0;
 }

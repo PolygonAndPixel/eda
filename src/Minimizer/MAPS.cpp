@@ -13,7 +13,7 @@
  */
 
 #include "Minimizer/MAPS.h"
-const bool DEBUG_FLAG (false);
+const bool DEBUG_FLAG (true);
 
 /** Constructor and destructor **/
 MAPS::MAPS(
@@ -37,6 +37,14 @@ MAPS::MAPS(
     n_selected_ = n_selected;
     n_sub_selected_ = n_sub_selected;
     size_factor_ = size_factor;
+}
+
+/** Return the name of this class.
+ *
+ *  \return     Name of this class.
+ */
+std::string MAPS::get_name() {
+    return ("MAPS (Maintaining and Processing Sub-models)");
 }
 
 /** Check if a population is premature.
@@ -815,7 +823,7 @@ void MAPS::execute_maps(
         }
         while(true) {
             if(DEBUG_FLAG)
-                std::cout << "starting processing. " << estimated_pops[0][0].size() << std::endl;
+                std::cout << "starting processing. " << std::endl;
             estimated_pops = processing(estimated_pops, ndims);
 
             // Get best and worst llh from the each population and check if all
@@ -829,9 +837,10 @@ void MAPS::execute_maps(
                 break;
             }
             if(DEBUG_FLAG) {
-                std::cout << "Now1 " << estimated_pops.size() << std::endl;
-                std::cout << "Now2 " << estimated_pops[0].size() << std::endl;
-                std::cout << "Now3 " << estimated_pops[0][0].size() << std::endl;
+                std::cout << std::flush;
+                std::cout << "Now1 " << estimated_pops.size() << std::endl << std::flush;
+                std::cout << "Now2 " << estimated_pops[0].size() << std::endl << std::flush;
+                std::cout << "Now3 " << estimated_pops[0][0].size() << std::endl << std::flush;
             }
             lh_bestFit_ = estimated_pops[0][0][ndims];
             for(uint32_t d=0; d<ndims; d++) {
@@ -1088,6 +1097,11 @@ m_d MAPS::evolve_population(
             worst_llh = pop[pop.size()-1][ndims];
             n_not_accepted = 0;
             result.lh_efficiency += 1;
+            std::cout << "new point: ";
+            for(const auto &v: new_p) {
+                std::cout << v << ", ";
+            }
+            std::cout << std::endl;
 
             if(dump_points_) {
                 std::ofstream ofile((base_dir_+file_name_).c_str(),

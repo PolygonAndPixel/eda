@@ -20,6 +20,8 @@ public:
         return std::make_unique<MultiNest>(*this);
     }
 
+    std::string get_name();
+
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
                              v_d upper_bounds);

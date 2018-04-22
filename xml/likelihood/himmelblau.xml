@@ -3,12 +3,6 @@
 xmlns="https://www.w3schools.com"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="likelihoods_schema.xsd">
-
-    <!-- This is based on the Himmelblau settings from
-    'PolyChord: next-generation nested sampling'
-    * W.J. Handley, M.P. Hobson, A.N. Lasenby. May 2015 15 pp.
-    * https://arxiv.org/abs/1506.00171
-    * DOI: 10.1093/mnras/stv1911 -->
     <likelihood>
         <function_name>himmelblau</function_name>
         <lower_bounds>-5 -5</lower_bounds>

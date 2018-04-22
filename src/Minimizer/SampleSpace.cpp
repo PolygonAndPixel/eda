@@ -73,6 +73,14 @@ void SampleSpace::sample_space(
     result.lh_efficiency = 1;
 }
 
+/** Return the name of this class.
+ *
+ *  \return     Name of this class.
+ */
+std::string SampleSpace::get_name() {
+    return ("SampleSpace (sampling the space randomly)");
+}
+
 /** Function to map from the unit hypercube to Theta in the physical space.
  *
  * \param cube              Hypercube coordinates of point that

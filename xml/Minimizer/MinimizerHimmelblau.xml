@@ -13,7 +13,7 @@ xsi:schemaLocation="MinimizerSchema.xsd">
         10.1109/TCYB.2014.2352411 -->
         <name>maps</name>
         <tolerance>1e-3</tolerance>
-        <max_iter>500000</max_iter>
+        <max_iter>5000</max_iter>
         <min_iter>1024</min_iter>
         <max_points>0</max_points>
         <seed>1025</seed>
@@ -29,7 +29,7 @@ xsi:schemaLocation="MinimizerSchema.xsd">
         <!-- R_sub -->
         <n_sub_selected>25</n_sub_selected>
         <!-- \mu, also referred to as e -->
-        <size_factor>2.718281828459045</size_factor>
+        <size_factor>1.5</size_factor>
     </maps>
 
     <multi>

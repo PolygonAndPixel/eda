@@ -19,9 +19,11 @@ public:
          int n_selected=500, int n_sub_selected=25, double size_factor=1.5,
          int seed=1025, bool dump_points=false);
 
-     virtual std::unique_ptr<Minimizer> clone() const override {
-         return std::make_unique<MAPS>(*this);
-     }
+    virtual std::unique_ptr<Minimizer> clone() const override {
+        return std::make_unique<MAPS>(*this);
+    }
+
+    std::string get_name();
 
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,

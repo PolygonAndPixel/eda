@@ -74,6 +74,14 @@ PolyChord::PolyChord(
     base_dir_               = "tmp"; // temporary files are written here
 }
 
+/** Return the name of this class.
+ *
+ *  \return     Name of this class.
+ */
+std::string PolyChord::get_name() {
+    return ("PolyChord");
+}
+
 /** Function to map from the unit hypercube to Theta in the physical space.
  *
  *  \param cube             Hypercube coordinates of point that
