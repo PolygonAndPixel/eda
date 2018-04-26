@@ -187,7 +187,7 @@ double TestFunctions::himmelblau(
 double TestFunctions::gauss_shell(
     v_d theta) {
 
-    double factor = 1/sqrt(2*M_PI*shell_width*shell_width);
+    double factor = 1.0/sqrt(2*M_PI*shell_width*shell_width);
 
     double left = (theta[0]-2.5)*(theta[0]-2.5);
     double right = (theta[0]+2.5)*(theta[0]+2.5);
@@ -207,8 +207,7 @@ double TestFunctions::gauss_shell(
     right /= 2 * shell_width*shell_width;
     right = factor * exp(-right);
 
-    if(isinf(log(left + right))) return 0;
-    return log(left + right);
+    return -(left + right);
 }
 
 /** Change the used function and the number of dimensions.
