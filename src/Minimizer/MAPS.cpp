@@ -628,7 +628,7 @@ bool MAPS::is_similar(
 
     v_d a = get_center(A);
     v_d b = get_center(B);
-    return is_similar(a, b, cov, precision_criterion_);
+    return is_similar(a, b, cov, epsilon);
 }
 
 /** Calculates the center of a population.
