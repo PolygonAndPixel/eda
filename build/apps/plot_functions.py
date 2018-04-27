@@ -58,10 +58,8 @@ def gauss_shell(x):
 	right = right/(2 * shell_width*shell_width)
 	right = factor * np.exp(-right)
 
-	#if np.isinf(np.log(left + right)):
-	#	return 0
 	return -(left + right)
-	
+
 
 cm = plt.cm.get_cmap('jet_r')
 nDims = 2
@@ -135,23 +133,16 @@ if three_d:
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
 	if contour:
-
-		# llh_i = griddata(x[:,0], x[:,1], llh, x[:,0], x[:,1])
 		sc = plt.contour(x_i,y_i,llh,15,linewidths=0.5,colors='k')
-		sc = plt.contourf(x_i,y_i,llh,15,cmap=cm, vmin=min_llh, vmax=max_llh, levels=levels)
+		sc = plt.contourf(x_i,y_i,llh,15,cmap=cm, vmin=min_llh, vmax=max_llh)
 	else:
 		sc = ax.scatter(x[:,0], x[:,1], llh, 'r', c=llh, cmap=cm, s=2, edgecolors='none')
 	ax.invert_zaxis()
 else:
 	fig, ax = plt.subplots()
 	if contour:
-		# yi = np.linspace(np.min(x[:,0]), np.max(x[:,0]), len(x[:,0])/10)
-		# zi = np.linspace(np.min(x[:,1]), np.max(x[:,1]), len(x[:,1])/10)
-		# llh_i = griddata(x[:,0], x[:,1], llh, x[:,0], x[:,1])
 		sc = plt.contour(x_i,y_i,llh,15,linewidths=0.5,colors='k')
 		sc = plt.contourf(x_i,y_i,llh,15,cmap=cm, vmin=min_llh, vmax=max_llh, levels=levels)
-		# Following line would ploint dots for each point. Use this to show
-		# how certain minimizers work by plotting every 100th point or so
 		#plt.scatter(x[:,0],x[:,1],marker='o',c='b',s=3)
 	else:
 		sc = ax.scatter(x[:,0], x[:,1], c=llh, cmap=cm, s=2, edgecolors='none')

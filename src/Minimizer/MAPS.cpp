@@ -13,7 +13,7 @@
  */
 
 #include "Minimizer/MAPS.h"
-const bool DEBUG_FLAG (true);
+const bool DEBUG_FLAG (false);
 
 /** Constructor and destructor **/
 MAPS::MAPS(

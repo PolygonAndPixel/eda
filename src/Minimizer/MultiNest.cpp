@@ -173,6 +173,7 @@ MultiNest::Minimize(
     test_func_ = &test_func;
     file_name_ = test_func_->get_name() + "_";
     params_best_fit.resize(test_func_->get_ndims());
+	seed_ = intgen()%30081; // Specified by MultiNest
 
     writefiles_ = dump_points_;
     int n_dims = test_func_->get_ndims();

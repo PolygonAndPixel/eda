@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
 
     std::string instr;
     std::string testf;
+	uint32_t n_runs = 1;
     if(argc > 2) {
         instr = argv[1];
         testf = argv[2];
@@ -61,16 +62,36 @@ int main(int argc, char* argv[]) {
             << " file in ../../xml/Minimizer/\n";
         std::cout << "The second argument should point to your likelihood"
             << " configuration in ../../xml/likelihood/\n";
+		std::cout << "An optional third argument can be used for the number "
+			<< "of times you want to execute the algorithm\n";
         return 1;
     }
+	if(argc > 3) {
+		n_runs = atoi(argv[3]);
+	}
     // We could basically load different minimizers by looping over
     // configuration files and execute every one of them.
     std::vector<std::unique_ptr<Minimizer>> minimizers;
     load_minimizer_xml(instr, minimizers);
-    for(auto &minimizer: minimizers) {
-        // Do whatever you feel like with the result.
-        std::vector<MinimizerResult> results = run_tests(*minimizer, testf);
-    }
+
+	for(uint32_t i=0; i<n_runs; ++i) {
+	    for(auto &minimizer: minimizers) {
+	        // Do whatever you feel like with the result.
+	        std::vector<MinimizerResult> results = run_tests(*minimizer, testf);
+			for(auto &r: results) {
+				std::string filename = r.function_name + "_" + r.minimizer_name;
+				std::ofstream ofile(filename.c_str(),
+					std::ofstream::out  | std::ofstream::app);
+				ofile << r.lh_efficiency << "\t" << r.n_lh_calls << "\t" << r.best_fit
+					<< "\t" << "0\t";
+				for(auto &p: r.params_best_fit) {
+					ofile << p << "\t";
+				}
+				ofile << "\n";
+				ofile.close();
+			}
+	    }
+	}
 
     return 0;
 }
