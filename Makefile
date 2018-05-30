@@ -10,6 +10,7 @@ TARGET = eda
 INCLUDE = -I /opt/OpenBLAS/include/ -Iinclude
 SRC = \
 	$(wildcard src/*.cpp) \
+	$(wildcard src/IceCubeToy/*.cpp) \
 	$(wildcard src/likelihood/*.cpp) \
 	$(wildcard src/Minimizer/*.cpp) \
 

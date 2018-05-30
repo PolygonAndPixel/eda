@@ -32,4 +32,10 @@ xsi:schemaLocation="likelihoods_schema.xsd">
         <lower_bounds>-6 -6</lower_bounds>
         <upper_bounds>6 6</upper_bounds>
     </likelihood>
+
+    <likelihood>
+        <function_name>icecube</function_name>
+        <lower_bounds>0 -42 -10 -100 0 0 0</lower_bounds>
+        <upper_bounds>70 0 0 100 6 6 1000</upper_bounds>
+    </likelihood>
 </likelihoods>

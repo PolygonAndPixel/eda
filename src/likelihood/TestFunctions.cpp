@@ -24,7 +24,10 @@ TestFunctions::TestFunctions() {
 
 TestFunctions::TestFunctions(
     std::string func_name,
-    uint32_t ndims) {
+    uint32_t ndims,
+    uint32_t n_x,
+    uint32_t n_y,
+    uint32_t n_z) {
 
     name = func_name;
     if(func_name == EGG) {
@@ -42,6 +45,38 @@ TestFunctions::TestFunctions(
     else if(func_name == HIMMEL) {
         lh_p = &TestFunctions::himmelblau;
         ndims_ = 2;
+    }
+    else if(func_name == ICECUBE) {
+        // Generate detector
+        uint32_t dist_xy = 50;
+        uint32_t dist_z = 15;
+
+        v_d dummy;
+        v_d dummy2;
+        std::mt19937 intgen(1025);
+        std::normal_distribution<double> nf(0.2, 0.03);
+        for(uint32_t i=0; i<n_x; i++) {
+            for(uint32_t j=0; j<n_y; j++) {
+                for(uint32_t k=0; k<n_z; k++) {
+                    double x = (i-0.5*(n_x-1)) * dist_xy;
+                    double y = (j-0.5*(n_y-1)) * dist_xy;
+                    double z = (k-0.5*(n_z-1)) * dist_z;
+                    DOM dom(x, y, z, 0.4+nf(intgen));
+                    pulse_map.add_DOM(dom, dummy, dummy2);
+                }
+            }
+        }
+        // Generate track (single event)
+        length = 5.0;
+        seg_length = 5.0;
+        Track track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, 5.0, 5.0);
+        // Generate data
+        track.fill_PulseMap(pulse_map);
+        pulse_map.add_noise();
+        lh_p = &TestFunctions::icecube;
+        // x, y, z, t, theta, phi, energy
+        ndims_ = 7;
+
     }
     else {
         lh_p = &TestFunctions::gauss_shell;
@@ -210,6 +245,45 @@ double TestFunctions::gauss_shell(
     return -(left + right);
 }
 
+/** Calculate the negative log-likelihood by evaluating the
+ *  likelihood of a neutrino event within an IceCube dummy detector with
+ *  only one event modelled after Millipede.
+ *
+ *  \param theta    Physical parameters of point that shall be evaluated.
+ *
+ *  \return         Likelihood
+ * */
+double TestFunctions::icecube(
+    v_d theta) {
+
+    double llh = 0.0;
+    DOM dom;
+    v_d charges;
+    v_d times;
+    Track test_track(theta[0], theta[1], theta[2], theta[3], theta[4],
+        theta[5], length, seg_length);
+    while(pulse_map.get_next(dom, charges, times)) {
+        double p_time_sum = 0.0;
+        ESource source;
+        while(test_track.get_next_source(source)) {
+            double delta_r = dist(source.get_pos(), dom.get_pos());
+            if(!charges.empty()) {
+                for(uint32_t i=0; i<times.size(); i++) {
+                    double delta_time = times[i] - source.get_time();
+                    p_time_sum += hit_prob(delta_r, delta_time);
+                }
+            }
+            llh -= hit_charge(delta_r);
+        }
+        if(!charges.empty()) {
+            double charge_sum = 0.0;
+            for(auto &i: charges) charge_sum += i;
+            llh += charge_sum * log(p_time_sum + 0.3/80.0);
+        }
+    }
+    return (-1.0)*llh;
+}
+
 /** Change the used function and the number of dimensions.
  *
  *  \param func_name    The name of the desired function. Options are:
@@ -217,13 +291,17 @@ double TestFunctions::gauss_shell(
  *                      town:       townsend function
  *                      rosenbrock: rosenbrock function
  *                      himmelblau: himmelblau's function
+ *                      icecube:    IceCube toy model
  *                      else just use gaussian shell function
  *  \param ndims        The number of dimension.
  *
  * */
 void TestFunctions::set_func(
     std::string func_name,
-    uint32_t ndims) {
+    uint32_t ndims,
+    uint32_t n_x,
+    uint32_t n_y,
+    uint32_t n_z) {
 
     name = func_name;
     if(func_name == EGG) {
@@ -241,6 +319,37 @@ void TestFunctions::set_func(
     else if(func_name == HIMMEL) {
         lh_p = &TestFunctions::himmelblau;
         ndims_ = 2;
+    }
+    else if(func_name == ICECUBE) {
+        // Generate detector
+        uint32_t dist_xy = 50;
+        uint32_t dist_z = 15;
+
+        v_d dummy;
+        v_d dummy2;
+        std::mt19937 intgen(1025);
+        std::normal_distribution<double> nf(0.2, 0.03);
+        for(uint32_t i=0; i<n_x; i++) {
+            for(uint32_t j=0; j<n_y; j++) {
+                for(uint32_t k=0; k<n_z; k++) {
+                    double x = (i-0.5*(n_x-1)) * dist_xy;
+                    double y = (j-0.5*(n_y-1)) * dist_xy;
+                    double z = (k-0.5*(n_z-1)) * dist_z;
+                    DOM dom(x, y, z, 0.4+nf(intgen));
+                    pulse_map.add_DOM(dom, dummy, dummy2);
+                }
+            }
+        }
+        // Generate track (single event)
+        length = 5.0;
+        seg_length = 5.0;
+        Track track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, 5.0, 5.0);
+        // Generate data
+        track.fill_PulseMap(pulse_map);
+        pulse_map.add_noise();
+        lh_p = &TestFunctions::icecube;
+        // x, y, z, t, theta, phi, energy
+        ndims_ = 7;
     }
     else {
         lh_p = &TestFunctions::gauss_shell;
