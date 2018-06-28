@@ -45,14 +45,14 @@ bool PulseMap::get_next(
     v_d &charge,
     v_d &time) {
 
-    if(index == DOMS.size()-1) {
+    if(index == DOMS.size()) {
         index = 0;
         return false;
     }
-    index++;
     dom = DOMS[index];
     charge = charges[index];
     time = times[index];
+    index++;
     return true;
 }
 

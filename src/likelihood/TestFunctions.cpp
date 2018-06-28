@@ -6,7 +6,6 @@
  * */
 
 #include "likelihood/TestFunctions.h"
-#include <iostream>
 
 TestFunctions::TestFunctions() {
 
@@ -261,10 +260,11 @@ double TestFunctions::icecube(
     v_d charges;
     v_d times;
     Track test_track(theta[0], theta[1], theta[2], theta[3], theta[4],
-        theta[5], length, seg_length);
+        theta[5], theta[6], seg_length);
     while(pulse_map.get_next(dom, charges, times)) {
         double p_time_sum = 0.0;
         ESource source;
+        // Sources in track is empty?
         while(test_track.get_next_source(source)) {
             double delta_r = dist(source.get_pos(), dom.get_pos());
             if(!charges.empty()) {
@@ -281,7 +281,7 @@ double TestFunctions::icecube(
             llh += charge_sum * log(p_time_sum + 0.3/80.0);
         }
     }
-    return (-1.0)*llh;
+    return (-llh);
 }
 
 /** Change the used function and the number of dimensions.

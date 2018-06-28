@@ -14,6 +14,7 @@ const std::string MAPSNAME      = "maps";
 const std::string POLY          = "poly";
 const std::string SAMPLE        = "sample";
 const std::string MULTI         = "multi";
+const std::string SCAN          = "scan";
 // Different functions
 const std::string HIMMEL        = "himmelblau";
 const std::string TOWN          = "townsend";

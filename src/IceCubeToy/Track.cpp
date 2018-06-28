@@ -83,11 +83,11 @@ void Track::fill_PulseMap(
 bool Track::get_next_source(
     ESource &source) {
 
-        if(index == sources.size()-1) {
+        if(index == sources.size()) {
             index = 0;
             return false;
         }
-        index++;
         source = sources[index];
+        index++;
         return true;
 }

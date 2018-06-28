@@ -15,6 +15,7 @@
 #include "Minimizer/SampleSpace.h"
 #include "Minimizer/MAPS.h"
 #include "Minimizer/PolyChord.h"
+#include "Minimizer/Scan.h"
 #include "Minimizer/Minimizer.h"
 #include "Minimizer/MultiNest.h"
 #include "likelihood/TestFunctions.h"
@@ -112,14 +113,14 @@ void load_minimizer_xml(
             int seed            = pt.get<int>("seed");
             bool dump_points    = pt.get<bool>("dump_points");
 
-            bool ins                = pt.get<bool>("ins");
-            bool mode_separation    = pt.get<bool>("mode_separation");
-            bool const_eff          = pt.get<bool>("const_eff");
-            int n_live              = pt.get<int>("n_live");
+            bool ins                 = pt.get<bool>("ins");
+            bool mode_separation     = pt.get<bool>("mode_separation");
+            bool const_eff           = pt.get<bool>("const_eff");
+            int n_live               = pt.get<int>("n_live");
             double enlargement       = pt.get<double>("enlargement");
-            int feedback_interval   = pt.get<int>("feedback_interval");
-            int max_modes           = pt.get<int>("max_modes");
-            bool feedback           = pt.get<bool>("feedback");
+            int feedback_interval    = pt.get<int>("feedback_interval");
+            int max_modes            = pt.get<int>("max_modes");
+            bool feedback            = pt.get<bool>("feedback");
 
             MultiNest minimizer(tolerance, max_iter, ins, mode_separation,
                 const_eff, n_live, enlargement, feedback_interval, max_modes,
@@ -140,6 +141,27 @@ void load_minimizer_xml(
             SampleSpace minimizer(max_iter, max_points, seed, dump_points);
 
             std::string path = "../../output/SampleSpace/";
+            if(dump_points) minimizer.set_output(path);
+            minimizers.push_back(minimizer.clone());
+            continue;
+        }
+
+        if(name == SCAN) {
+            int n_points_per_dim = pt.get<int>("n_points_per_dim");
+            int max_points       = pt.get<int>("max_points");
+            int seed;
+            // Those have default values 
+            try{
+                 seed = pt.get<int>("seed");
+            } catch(const boost::property_tree::ptree_bad_path &e) {
+                seed = NULL;
+            }
+            bool dump_points     = pt.get<bool>("dump_points");
+
+            Scan minimizer(n_points_per_dim, max_points, 
+                seed, dump_points);
+
+            std::string path = "../../output/Scan/";
             if(dump_points) minimizer.set_output(path);
             minimizers.push_back(minimizer.clone());
             continue;
