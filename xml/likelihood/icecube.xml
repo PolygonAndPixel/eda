@@ -9,4 +9,3 @@ xsi:schemaLocation="likelihoods_schema.xsd">
         <upper_bounds>70 0 0 100 6 6 1000</upper_bounds>
     </likelihood>
 </likelihoods>
- 
