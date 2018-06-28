@@ -30,7 +30,13 @@
 *.exe
 *.out
 *.app
-build/apps/eda
+build/apps/*
 
 # Outputs
 output/*
+
+# Code editor
+.vscode/
+
+# Do not ignore python code 
+!build/apps/*.py
