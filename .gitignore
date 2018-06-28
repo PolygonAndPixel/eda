@@ -38,5 +38,6 @@ output/*
 # Code editor
 .vscode/
 
-# Do not ignore python code 
-!build/apps/*.py
+# Do not ignore python code and scripts
+!build/apps/python/
+!build/apps/scripts/

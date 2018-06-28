@@ -50,5 +50,4 @@ clean:
 	cd src/Minimizer/polychord && $(MAKE) clean
 	-@rm -rvf $(OBJ_DIR)/*
 	-@rm -rvf $(APP_DIR)/$(TARGET)
-	-@rm -rvf $(APP_DIR)/tmp/*.txt
-	-@rm -rvf $(APP_DIR)/tmp/clusters/*.txt
+	-@rm -rvf $(APP_DIR)/tmp/*
