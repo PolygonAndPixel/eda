@@ -83,7 +83,7 @@ void Scan::scan_space(
             std::cout << std::endl;
         }
     }
-    result.lh_efficiency = 1;
+    result.lh_efficiency = 1.0/i;
         
 }
 
