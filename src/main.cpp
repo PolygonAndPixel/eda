@@ -17,7 +17,7 @@ void print_result(
 
     std::cout << std::endl << "Best fit for " << result.function_name
         << " with " << result.minimizer_name << " is "
-        << result.best_fit << std::endl;
+        << -result.best_fit << std::endl;
     std::cout << "It took " << result.n_lh_calls << " likelihood evaluations"
         << std::endl;
     std::cout << "It had an efficiency of " << result.lh_efficiency

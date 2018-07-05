@@ -35,13 +35,13 @@ void Scan::scan_space(
         std::ofstream ofile((base_dir_+file_name_).c_str(),
             std::ofstream::out  | std::ofstream::app);
 
-        for(int j=0; j<nDims; j++) ofile << "Param" << j << "\t";
+        for(uint32_t j=0; j<nDims; j++) ofile << "Param" << j << "\t";
         // ofile << "X\tY\tZ\tT\tZenith\tAzimuth\tEnergy";
         ofile << std::endl;
         ofile.close();
     }
     double delta = 1.0/n_points;
-    int i = 0;
+    uint32_t i = 0;
     while(cube[nDims-1] <= 1.0) {
         i++;
         v_d theta = to_physics(cube, nDims);
@@ -56,23 +56,21 @@ void Scan::scan_space(
             result.params_best_fit = theta;
         }
         cube[0] += delta;
-        for(int j=0; j<nDims-1; j++) {
+        for(uint32_t j=0; j<nDims-1; j++) {
             if(cube[j] > 1.0) {
                 cube[j+1] += delta;
-                for(int k=j; (k>=0 && k>=j-1); k--) cube[k] = 0;
+                for(uint32_t k=j; (k>=0 && k>=j-1); k--) cube[k] = 0;
             } else {
                 break;
             }
         }
 
         if(dump_points_ && (i%max_points_ == 0 || cube[nDims-1] >= 1.0)) {
-            int d = 1;
+            uint32_t d = 1;
             std::ofstream ofile((base_dir_+file_name_).c_str(),
                 std::ofstream::out  | std::ofstream::app);
-            for(v_d::iterator p=results.begin();
-                p != results.end(); ++p) {
-
-                ofile << *p << "\t";
+            for(auto & p: results) {
+                ofile << p << "\t";
                 if(d%(nDims+1) == 0) ofile << std::endl;
                 d++;
             }
@@ -108,7 +106,7 @@ v_d Scan::to_physics(
 
     v_d theta;
     
-    for (int i=0; i<nDims; i++) {
+    for (uint32_t i=0; i<nDims; i++) {
         theta.push_back(this->lower_bnds[i]
         + (this->upper_bnds[i] - this->lower_bnds[i])
         * cube[i]);

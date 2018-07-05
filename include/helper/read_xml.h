@@ -170,6 +170,7 @@ void load_minimizer_xml(
         if(name == GD) {
             int max_iter        = pt.get<int>("max_iter");
             int min_iter        = pt.get<int>("min_iter");
+            int max_points       = pt.get<int>("max_points");
 
             // Those have default values 
             double conv_crit;
@@ -190,7 +191,7 @@ void load_minimizer_xml(
                  stepsize = pt.get<double>("stepsize");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
 
-            GradientDescent minimizer(max_iter, min_iter, 0, seed, 
+            GradientDescent minimizer(max_iter, min_iter, max_points, seed, 
                 stepsize, conv_crit, dump_points);
 
             std::string path = "../../output/GD/";

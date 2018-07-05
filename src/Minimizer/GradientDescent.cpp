@@ -3,11 +3,6 @@
  * It just samples randomly the space for plots. It does not minimize anything!
  *
  * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
- * TODO:
- * https://en.wikipedia.org/wiki/Stochastic_gradient_descent
- * Adam
- * stochastic start
- * Natural GD ad kSGD
  */
 #include "Minimizer/GradientDescent.h"
 #include <boost/foreach.hpp>
@@ -43,19 +38,25 @@ void GradientDescent::descent(
     int accepted = 0;
     bool converged = false;
     v_d cube(nDims);
-    for(auto &v: cube) v = 0.5;
+    for(auto &v: cube) v = uf(intgen);;
     v_d theta = to_physics(cube, nDims);
     double llh = get_llh(theta);
     v_d gradient = get_gradient(cube, nDims, llh);
 
     v_d cube_old(nDims);
-    for(auto &v: cube_old) v = 0.5 + stepsize_;
+    for(uint32_t i = 0; i < nDims; i++)
+        cube_old[i] = cube[i] + stepsize_;
     v_d theta_old = to_physics(cube_old, nDims);
     double llh_old = get_llh(theta_old);
     v_d gradient_old = get_gradient(cube_old, nDims, llh_old);
 
     result.best_fit = llh;
     result.params_best_fit = theta;
+
+    if(dump_points_) {
+        results.insert(results.end(), theta.begin(), theta.end());
+        results.push_back(llh);
+    }
 
     for(uint32_t iter = 0; iter < max_iter_; iter++) {
         cube_old = cube;
@@ -77,8 +78,28 @@ void GradientDescent::descent(
         }
         if(iter > min_iter_) {
             converged = (fabs(llh - llh_old) < conv_crit_);
-            if(converged) break; 
+            
         }
+
+        if(dump_points_) {
+            results.insert(results.end(), theta.begin(), theta.end());
+            results.push_back(llh);
+
+            if(iter%max_points_ == 0 || iter == max_iter_-1 || converged) {
+                uint32_t d = 1;
+                std::ofstream ofile((base_dir_+file_name_).c_str(),
+                    std::ofstream::out  | std::ofstream::app);
+                    
+                for(auto & p: results) {
+                    ofile << p << "\t";
+                    if(d%(nDims+1) == 0) ofile << std::endl;
+                    d++;
+                }
+                ofile.close();
+                results.clear();
+            }
+        }
+        if(converged) break; 
 
         gradient = get_gradient(cube, nDims, llh);
     }
