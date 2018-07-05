@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -std=c++14 
-LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -lpthread -llapack -llapacke -lgfortran
+CXXFLAGS = -std=c++14 -fopenmp
+LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -lpthread -llapack -llapacke -fopenmp -lgfortran
 FFLAG =
 
 BUILD = build

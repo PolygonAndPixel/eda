@@ -177,6 +177,10 @@ void load_minimizer_xml(
             try{
                 conv_crit = pt.get<double>("conv_crit");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
+            int n_gradients;
+            try{
+                 n_gradients = pt.get<int>("n_gradients");
+            } catch(const boost::property_tree::ptree_bad_path &e) { }
             int seed;
             try{
                  seed = pt.get<int>("seed");
@@ -191,8 +195,8 @@ void load_minimizer_xml(
                  stepsize = pt.get<double>("stepsize");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
 
-            GradientDescent minimizer(max_iter, min_iter, max_points, seed, 
-                stepsize, conv_crit, dump_points);
+            GradientDescent minimizer(max_iter, min_iter, max_points, 
+                n_gradients, seed, stepsize, conv_crit, dump_points);
 
             std::string path = "../../output/GD/";
             if(dump_points) minimizer.set_output(path);
