@@ -3,6 +3,11 @@
  * It just samples randomly the space for plots. It does not minimize anything!
  *
  * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
+ * TODO:
+ * https://en.wikipedia.org/wiki/Stochastic_gradient_descent
+ * Adam
+ * stochastic start
+ * Natural GD ad kSGD
  */
 #include "Minimizer/GradientDescent.h"
 #include <boost/foreach.hpp>
@@ -13,14 +18,16 @@
 /** Constructor and destructor **/
 GradientDescent::GradientDescent(
     int max_iter,
+    int min_iter,
     int max_points,
     int seed,
-    double step_size,
+    double stepsize,
     double conv_crit,
     bool dump_points) : Minimizer(0, max_iter, 0, max_points, seed, dump_points)
 {
-    stepsize = step_size;
-    this->conv_crit = conv_crit;
+    stepsize_ = stepsize;
+    conv_crit_ = conv_crit;
+    min_iter_ = min_iter;
 }
 
 // GradientDescent::~GradientDescent() {}
@@ -42,7 +49,7 @@ void GradientDescent::descent(
     v_d gradient = get_gradient(cube, nDims, llh);
 
     v_d cube_old(nDims);
-    for(auto &v: cube_old) v = 0.5 + stepsize;
+    for(auto &v: cube_old) v = 0.5 + stepsize_;
     v_d theta_old = to_physics(cube_old, nDims);
     double llh_old = get_llh(theta_old);
     v_d gradient_old = get_gradient(cube_old, nDims, llh_old);
@@ -56,7 +63,7 @@ void GradientDescent::descent(
         gradient_old = gradient;
         // Get the next value
         for(uint32_t i = 0; i < nDims; i++) {
-            cube[i] = cube_old[i] + stepsize*gradient_old[i];
+            cube[i] = cube_old[i] + stepsize_*gradient_old[i];
 
         }
         theta = to_physics(cube, nDims);
@@ -68,8 +75,10 @@ void GradientDescent::descent(
             result.params_best_fit = theta;
             accepted++;
         }
-        converged = (fabs(llh - llh_old) < conv_crit);
-        if(converged) break; 
+        if(iter > min_iter_) {
+            converged = (fabs(llh - llh_old) < conv_crit_);
+            if(converged) break; 
+        }
 
         gradient = get_gradient(cube, nDims, llh);
     }
@@ -89,7 +98,7 @@ v_d GradientDescent::get_gradient(
     v_d gradient;
     for(uint32_t i = 0; i < nDims; i++) {
         v_d cube_tmp = cube;
-        cube_tmp[i] += stepsize;
+        cube_tmp[i] += stepsize_;
         v_d phys = to_physics(cube_tmp, nDims);
         double llh_tmp = get_llh(phys);
         result.n_lh_calls++;

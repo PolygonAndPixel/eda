@@ -6,6 +6,7 @@ xsi:schemaLocation="MinimizerSchema.xsd">
     <GD>
         <name>gradient descent</name>
         <max_iter>1000000</max_iter>
+        <min_iter>100000</min_iter>
         <max_points>0</max_points>
         <seed>1025</seed>
         <dump_points>false</dump_points>

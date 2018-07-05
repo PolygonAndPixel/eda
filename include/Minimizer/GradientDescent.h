@@ -8,7 +8,7 @@
 class GradientDescent : public Minimizer {
 public:
 
-    GradientDescent(int max_iter,  int max_points, int seed=1025, 
+    GradientDescent(int max_iter, int min_iter, int max_points, int seed=1025, 
                 double stepsize = 0.01, double conv_crit=0.0, 
                 bool dump_points=false);
 
@@ -30,8 +30,9 @@ public:
     v_d to_physics(v_d cube, uint32_t nDims);
 
 private:
-    double stepsize;
-    double conv_crit;
+    double stepsize_;
+    double conv_crit_;
+    int min_iter_;
 };
 
 #endif
