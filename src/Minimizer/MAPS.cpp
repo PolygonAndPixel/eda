@@ -739,8 +739,8 @@ void MAPS::execute_maps(
             for(uint32_t j=0; j<ndims; j++) {
                 init_samples[i][j] = uf(intgen);
             }
-            init_samples[i][ndims] = get_llh(to_physics(init_samples[i],
-                ndims));
+            v_d phys = to_physics(init_samples[i], ndims);
+            init_samples[i][ndims] = get_llh(phys);
             n_init_samples++;
         }
         // if(dump_points_) {
@@ -855,7 +855,7 @@ void MAPS::execute_maps(
                         }
                         lh_bestFit_ = pop[ndims];
                     }
-                    if(lh_worstFit_ < pop[ndims]) {
+                    if(lh_worstFit_ > pop[ndims]) {
                         lh_worstFit_ = pop[ndims];
                     }
                 }
@@ -891,7 +891,7 @@ m_d MAPS::truncatedly_select(
     // Sort points descending of its fitness
     std::sort(pop.begin(), pop.end(),
         [](const v_d & a, const v_d & b) {
-            return a[a.size()-1] < b[b.size()-1];});
+            return a[a.size()-1] > b[b.size()-1];});
 
     m_d pop_out(n, v_d(n));
     // We truncatedly select R \leq N of them
@@ -1087,7 +1087,7 @@ m_d MAPS::evolve_population(
         v_d new_p_phys = to_physics(new_p, ndims);
         new_p[ndims] = get_llh(new_p_phys);
         // Accept only if it is better than the worst lh
-        if(new_p[ndims] < worst_llh) {
+        if(new_p[ndims] > worst_llh) {
             // Replace the one with the worst llh
             pop[pop.size()-1] = new_p;
             // Sort points descending of its fitness

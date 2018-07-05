@@ -73,11 +73,8 @@ void MultiNest::fortran_get_llh(
 
     MultiNest *multiBase = static_cast<MultiNest*>(misc);
     multiBase->result.n_lh_calls++;
-    llh = multiBase->test_func_->get_lh(
-        multiBase->to_physics(v_d(cube, cube+n_dims), n_dims));
-
-    // MultiNest maximizes, hence we take the negative value.
-    llh *= -1;
+    v_d phys = multiBase->to_physics(v_d(cube, cube+n_dims), n_dims);
+    llh = multiBase->test_func_->get_lh(phys);
 }
 
 /** Dumps information about the minimization at the end.

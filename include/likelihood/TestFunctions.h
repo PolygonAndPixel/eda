@@ -14,7 +14,7 @@
 #include "IceCubeToy/Track.h"
 
 class TestFunctions {
-    typedef double(TestFunctions::*lh_pointer)(v_d theta);
+    typedef double(TestFunctions::*lh_pointer)(v_d & theta);
 public:
     TestFunctions();
     /// Set the function and the number of dimensions for these functions.
@@ -28,15 +28,18 @@ public:
     uint32_t get_ndims();
     /// Generic likelihood function which calls the actual function which has
     /// been choosen during creation of this class.
-    double get_lh(v_d theta);
+    double get_lh(v_d & theta);
+    double get_neg_lh(v_d & theta);
+    double get_neg_llh(v_d & theta);
     /// The likelihood functions that take one vector of doubles and calculate
     /// the likelihood.
-    double eggholder(v_d theta);
-    double townsend(v_d theta);
-    double rosenbrock(v_d theta);
-    double himmelblau(v_d theta);
-    double gauss_shell(v_d theta);
-    double icecube(v_d theta);
+    double eggholder(v_d & theta);
+    double paraboloid(v_d & theta);
+    double townsend(v_d & theta);
+    double rosenbrock(v_d & theta);
+    double himmelblau(v_d & theta);
+    double gauss_shell(v_d & theta);
+    double icecube(v_d & theta);
 
     void set_func(std::string func_name, uint32_t ndims,
         uint32_t n_x=3, uint32_t n_y=3, uint32_t n_z=5);

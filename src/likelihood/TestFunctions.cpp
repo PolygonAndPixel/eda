@@ -4,7 +4,7 @@
  *
  * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
  * */
-
+#include <iostream>
 #include "likelihood/TestFunctions.h"
 
 TestFunctions::TestFunctions() {
@@ -44,6 +44,10 @@ TestFunctions::TestFunctions(
     else if(func_name == HIMMEL) {
         lh_p = &TestFunctions::himmelblau;
         ndims_ = 2;
+    }
+    else if(func_name == PARABOLOID) {
+        lh_p = &TestFunctions::paraboloid;
+        ndims_ = ndims;
     }
     else if(func_name == ICECUBE) {
         // Generate detector
@@ -106,16 +110,45 @@ uint32_t TestFunctions::get_ndims() {
 }
 
 /** Call the member function stored in lh_p. If you can use C++17, I
- *  recommend using std::invoke instead.
+ *  recommend using std::invoke instead. 
  *
  *  \param theta    Physical parameters of point that shall be evaluated.
  *
- *  \return         Likelihood
+ *  \return         negative Likelihood
  * */
 double TestFunctions::get_lh(
-    v_d theta) {
+    v_d & theta) {
 
     return CALL_MEMBER_FN(*this, lh_p)(theta);
+}
+
+/** Call the member function stored in lh_p. If you can use C++17, I
+ *  recommend using std::invoke instead. 
+ *  Returns the negative likelihood.
+ *
+ *  \param theta    Physical parameters of point that shall be evaluated.
+ *
+ *  \return         Negative likelihood
+ * */
+double TestFunctions::get_neg_lh(
+    v_d & theta) {
+
+    return -CALL_MEMBER_FN(*this, lh_p)(theta);
+}
+
+/** Call the member function stored in lh_p. If you can use C++17, I
+ *  recommend using std::invoke instead. 
+ *  Returns the negative log-likelihood which is used for real-world problems.
+ *  However, most test functions here are usable with just the likelihood.
+ *
+ *  \param theta    Physical parameters of point that shall be evaluated.
+ *
+ *  \return         negative log-likelihood
+ * */
+double TestFunctions::get_neg_llh(
+    v_d & theta) {
+
+    return -log(CALL_MEMBER_FN(*this, lh_p)(theta));
 }
 
 /** Calculate the likelihood by evaluating the eggholder function.
@@ -128,13 +161,32 @@ double TestFunctions::get_lh(
  *  \return         Likelihood
  * */
 double TestFunctions::eggholder(
-    v_d theta) {
+    v_d & theta) {
 
     double left = -(theta[1] + 47)*sin(sqrt(abs(theta[0]/2 + (theta[1]+47))));
     double right = theta[0] * sin(sqrt(abs(theta[0] - (theta[1]+47))));
 
     return left - right;
 }
+
+/** Calculate the likelihood by evaluating a paraboloid.
+ *  Minimum:        f(0, 0, ..., 0) = 0
+ *
+ *
+ *  \param theta    Physical parameters of point that shall be evaluated.
+ *
+ *  \return         Likelihood
+ * */
+double TestFunctions::paraboloid(
+    v_d & theta) {
+
+    double sum = 0;
+    for(auto v: theta) {
+        sum += v*v;
+    }
+    return sum;
+}
+
 
 /** Calculate the likelihood by evaluating a modified townsend function.
  *  This function has some constraints that simply return infinity if not
@@ -148,7 +200,7 @@ double TestFunctions::eggholder(
  *  \return         Likelihood
  * */
 double TestFunctions::townsend(
-    v_d theta) {
+    v_d & theta) {
 
     double t = atan2(theta[0], theta[1]);
     double constraint = 2*cos(t) - 0.5*cos(2*t)
@@ -173,7 +225,7 @@ double TestFunctions::townsend(
  *  \return         Likelihood
  * */
 double TestFunctions::rosenbrock(
-    v_d theta) {
+    v_d & theta) {
 
     double lh = 0;
     for(uint32_t i = 0; i<theta.size()-1; ++i) {
@@ -196,7 +248,7 @@ double TestFunctions::rosenbrock(
  *  \return         Likelihood
  * */
 double TestFunctions::himmelblau(
-    v_d theta) {
+    v_d & theta) {
 
     double left = (theta[0]*theta[0] + theta[1] - 11);
     left *= left;
@@ -219,7 +271,7 @@ double TestFunctions::himmelblau(
  *  \return         Likelihood
  * */
 double TestFunctions::gauss_shell(
-    v_d theta) {
+    v_d & theta) {
 
     double factor = 1.0/sqrt(2*M_PI*shell_width*shell_width);
 
@@ -253,7 +305,7 @@ double TestFunctions::gauss_shell(
  *  \return         Likelihood
  * */
 double TestFunctions::icecube(
-    v_d theta) {
+    v_d & theta) {
 
     double llh = 0.0;
     DOM dom;
@@ -319,6 +371,10 @@ void TestFunctions::set_func(
     else if(func_name == HIMMEL) {
         lh_p = &TestFunctions::himmelblau;
         ndims_ = 2;
+    }
+    else if(func_name == PARABOLOID) {
+        lh_p = &TestFunctions::paraboloid;
+        ndims_ = ndims;
     }
     else if(func_name == ICECUBE) {
         // Generate detector

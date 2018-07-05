@@ -15,6 +15,7 @@ const std::string POLY          = "poly";
 const std::string SAMPLE        = "sample";
 const std::string MULTI         = "multi";
 const std::string SCAN          = "scan";
+const std::string GD            = "gradient descent";
 // Different functions
 const std::string HIMMEL        = "himmelblau";
 const std::string TOWN          = "townsend";
@@ -22,6 +23,7 @@ const std::string ROSEN         = "rosenbrock";
 const std::string EGG           = "eggholder";
 const std::string GAUSS         = "gaussian_shell";
 const std::string ICECUBE       = "icecube";
+const std::string PARABOLOID    = "paraboloid";
 const std::string ALL           = "all";
 
 const double EULER_CONST = exp(1.0);

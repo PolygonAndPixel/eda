@@ -11,15 +11,15 @@
  #include <boost/algorithm/string.hpp>
 
 #include "helper/abbreviations.h"
-#include "Minimizer/Minimizer.h"
-#include "Minimizer/SampleSpace.h"
+#include "Minimizer/GradientDescent.h"
 #include "Minimizer/MAPS.h"
-#include "Minimizer/PolyChord.h"
-#include "Minimizer/Scan.h"
 #include "Minimizer/Minimizer.h"
-#include "Minimizer/MultiNest.h"
-#include "likelihood/TestFunctions.h"
 #include "Minimizer/MinimizerResult.h"
+#include "Minimizer/MultiNest.h"
+#include "Minimizer/PolyChord.h"
+#include "Minimizer/SampleSpace.h"
+#include "Minimizer/Scan.h"
+#include "likelihood/TestFunctions.h"
 
 #include <memory>
 
@@ -154,7 +154,7 @@ void load_minimizer_xml(
             try{
                  seed = pt.get<int>("seed");
             } catch(const boost::property_tree::ptree_bad_path &e) {
-                seed = NULL;
+                // seed = NULL;
             }
             bool dump_points     = pt.get<bool>("dump_points");
 
@@ -162,6 +162,38 @@ void load_minimizer_xml(
                 seed, dump_points);
 
             std::string path = "../../output/Scan/";
+            if(dump_points) minimizer.set_output(path);
+            minimizers.push_back(minimizer.clone());
+            continue;
+        }
+
+        if(name == GD) {
+            int max_iter        = pt.get<int>("max_iter");
+            int max_points      = pt.get<int>("max_points");
+
+            // Those have default values 
+            double conv_crit;
+            try{
+                conv_crit = pt.get<double>("conv_crit");
+            } catch(const boost::property_tree::ptree_bad_path &e) { }
+            int seed;
+            try{
+                 seed = pt.get<int>("seed");
+            } catch(const boost::property_tree::ptree_bad_path &e) { }
+            bool dump_points;
+            try{
+                 bool dump_points    = pt.get<bool>("dump_points");
+            } catch(const boost::property_tree::ptree_bad_path &e) { }
+
+            double stepsize;
+            try{
+                 stepsize = pt.get<double>("stepsize");
+            } catch(const boost::property_tree::ptree_bad_path &e) { }
+
+            GradientDescent minimizer(max_iter, max_points, seed, 
+                stepsize, conv_crit, dump_points);
+
+            std::string path = "../../output/GD/";
             if(dump_points) minimizer.set_output(path);
             minimizers.push_back(minimizer.clone());
             continue;

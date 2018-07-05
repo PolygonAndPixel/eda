@@ -131,9 +131,9 @@ double PolyChord::fortran_get_llh(
 
     PolyChord *pBase = static_cast<PolyChord*>(misc);
     pBase->result.n_lh_calls++;
-    double llh = pBase->test_func_->get_lh(v_d(theta, theta+n_dims));
-    // PolyChord maximizes, hence we take the negative result
-    return -llh;
+    v_d v_theta(theta, theta+n_dims);
+    double llh = pBase->test_func_->get_lh(v_theta);
+    return llh;
 }
 
 /** Dumps information about the minimization at the end.

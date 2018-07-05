@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<likelihoods
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="likelihoods_schema.xsd">
+    <likelihood>
+        <function_name>paraboloid</function_name>
+        <lower_bounds>-5 -5</lower_bounds>
+        <upper_bounds>10 10</upper_bounds>
+    </likelihood>
+</likelihoods>
