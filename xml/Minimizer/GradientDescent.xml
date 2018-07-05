@@ -9,7 +9,7 @@ xsi:schemaLocation="MinimizerSchema.xsd">
         <max_points>0</max_points>
         <seed>1025</seed>
         <dump_points>false</dump_points>
-        <stepsize>1</stepsize>
+        <stepsize>0.001</stepsize>
         <conv_crit>0.00001</conv_crit>
     </GD>
 </Minimizers>

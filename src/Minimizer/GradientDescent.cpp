@@ -51,18 +51,6 @@ void GradientDescent::descent(
     result.params_best_fit = theta;
 
     for(uint32_t iter = 0; iter < max_iter_; iter++) {
-        // Calculate the stepsize 
-        stepsize = 0;
-        v_d delta_g(nDims);
-        for(uint32_t i = 0; i < nDims; i++) {
-            delta_g[i] = gradient[i] - gradient_old[i];
-            stepsize += (cube[i] - cube_old[i]) * delta_g[i];
-        }
-        double resize = 0;
-        for(auto &g: delta_g) resize += g*g;
-        
-        stepsize /= fabs(resize);
-        stepsize = 0.001;
         cube_old = cube;
         llh_old = llh;
         gradient_old = gradient;
@@ -73,7 +61,6 @@ void GradientDescent::descent(
         }
         theta = to_physics(cube, nDims);
         llh = get_llh(theta);
-        std::cout << llh << "\n";
         result.n_lh_calls++;
 
         if(llh > result.best_fit) {
