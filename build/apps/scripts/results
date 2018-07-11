@@ -1,0 +1,103 @@
+Running himmelblau
+Had to randomly sample 250000000 points
+Best fit for himmelblau with MAPS is inf
+It took 250000000 likelihood evaluations
+It had an efficiency of -nan
+Found parameters are 0, 0, 
+
+Running himmelblau
+
+Best fit for himmelblau_ with MultiNest is -5.15214e-07
+It took 12179 likelihood evaluations
+It had an efficiency of 0.514492
+Found parameters are 3.0001, 1.99983, 
+
+Running himmelblau
+
+Best fit for himmelblau with PolyChord is 3.29504e-08
+It took 325068 likelihood evaluations
+It had an efficiency of 0.826851
+Found parameters are 2.99997, 1.99999, 
+
+ *****************************************************
+ MultiNest v3.8
+ Copyright Farhan Feroz & Mike Hobson
+ Release Oct 2014
+
+ no. of live points =  500
+ dimensionality =    2
+ *****************************************************
+ ln(ev)=  -5.6212075403479149      +/-   9.5804276298857793E-002
+ Total Likelihood Evaluations:        12179
+ Sampling finished. Exiting MultiNest
+
+PolyChord: Next Generation Nested Sampling
+copyright: Will Handley, Mike Hobson & Anthony Lasenby
+  version: 1.11
+  release: 7th July 2017
+    email: wh260@mrao.cam.ac.uk
+
+ ____________________________________________________ 
+|                                                    |
+| ndead  =        13322                              |
+| log(Z) =           -5.37649 +/-            0.06739 |
+|____________________________________________________|
+Running eggholder
+Had to randomly sample 250000000 points
+Best fit for eggholder with MAPS is inf
+It took 250000000 likelihood evaluations
+It had an efficiency of -nan
+Found parameters are 0, 0, 
+
+Running eggholder
+
+Best fit for eggholder_ with MultiNest is 958.531
+It took 93263 likelihood evaluations
+It had an efficiency of 0.461448
+Found parameters are 512, 403.997, 
+
+Running eggholder
+
+Best fit for eggholder with PolyChord is -958.534
+It took 542192 likelihood evaluations
+It had an efficiency of 0.810963
+Found parameters are 512, 404, 
+
+ *****************************************************
+ MultiNest v3.8
+ Copyright Farhan Feroz & Mike Hobson
+ Release Oct 2014
+
+ no. of live points = 2000
+ dimensionality =    2
+ *****************************************************
+ ln(ev)=   943.92263657319415      +/-   8.0352712317026995E-002
+ Total Likelihood Evaluations:        93263
+ Sampling finished. Exiting MultiNest
+
+PolyChord: Next Generation Nested Sampling
+copyright: Will Handley, Mike Hobson & Anthony Lasenby
+  version: 1.11
+  release: 7th July 2017
+    email: wh260@mrao.cam.ac.uk
+
+ ____________________________________________________ 
+|                                                    |
+| ndead  =        22956                              |
+| log(Z) =          943.43355 +/-            0.29342 |
+|____________________________________________________|
+Running gaussian_shell
+Had to randomly sample 250000000 points
+Best fit for gaussian_shell with MAPS is inf
+It took 250000000 likelihood evaluations
+It had an efficiency of -nan
+Found parameters are 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+
+Running gaussian_shell
+
+Best fit for gaussian_shell_ with MultiNest is -0
+It took 300 likelihood evaluations
+It had an efficiency of 0
+Found parameters are -5.63716, -1.71792, 1.89149, -0.977933, 1.99422, -1.1776, 0.151176, 2.05979, 1.44325, -1.08525, 0.575399, 2.4287, -0.342549, 1.50409, -1.34287, -1.10662, -1.64556, 2.03769, -1.93749, -1.30019, -1.79992, -0.845096, -0.801315, 0.197341, 0.942696, -1.99696, -2.12572, -1.40255, 1.59483, 2.38726, 
+
+Running gaussian_shell

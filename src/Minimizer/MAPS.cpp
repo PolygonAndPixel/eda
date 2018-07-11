@@ -26,6 +26,7 @@ MAPS::MAPS(
     int max_sub_pops,
     int n_selected,
     int n_sub_selected,
+    double size_factor,
     int seed,
     bool dump_points) : Minimizer(tolerance, max_iter, min_iter,
                                   max_points, seed, dump_points)
@@ -35,8 +36,15 @@ MAPS::MAPS(
     max_sub_pops_ = max_sub_pops;
     n_selected_ = n_selected;
     n_sub_selected_ = n_sub_selected;
-    size_factor_ = EULER_CONST; // From paper
-     size_factor_ = 1.5;         // Value that gives reasonable results
+    size_factor_ = size_factor;
+}
+
+/** Return the name of this class.
+ *
+ *  \return     Name of this class.
+ */
+std::string MAPS::get_name() {
+    return ("MAPS (Maintaining and Processing Sub-models)");
 }
 
 /** Check if a population is premature.
@@ -620,7 +628,7 @@ bool MAPS::is_similar(
 
     v_d a = get_center(A);
     v_d b = get_center(B);
-    return is_similar(a, b, cov, precision_criterion_);
+    return is_similar(a, b, cov, epsilon);
 }
 
 /** Calculates the center of a population.
@@ -731,8 +739,8 @@ void MAPS::execute_maps(
             for(uint32_t j=0; j<ndims; j++) {
                 init_samples[i][j] = uf(intgen);
             }
-            init_samples[i][ndims] = get_llh(to_physics(init_samples[i],
-                ndims));
+            v_d phys = to_physics(init_samples[i], ndims);
+            init_samples[i][ndims] = get_llh(phys);
             n_init_samples++;
         }
         // if(dump_points_) {
@@ -815,7 +823,7 @@ void MAPS::execute_maps(
         }
         while(true) {
             if(DEBUG_FLAG)
-                std::cout << "starting processing. " << estimated_pops[0][0].size() << std::endl;
+                std::cout << "starting processing. " << std::endl;
             estimated_pops = processing(estimated_pops, ndims);
 
             // Get best and worst llh from the each population and check if all
@@ -829,9 +837,10 @@ void MAPS::execute_maps(
                 break;
             }
             if(DEBUG_FLAG) {
-                std::cout << "Now1 " << estimated_pops.size() << std::endl;
-                std::cout << "Now2 " << estimated_pops[0].size() << std::endl;
-                std::cout << "Now3 " << estimated_pops[0][0].size() << std::endl;
+                std::cout << std::flush;
+                std::cout << "Now1 " << estimated_pops.size() << std::endl << std::flush;
+                std::cout << "Now2 " << estimated_pops[0].size() << std::endl << std::flush;
+                std::cout << "Now3 " << estimated_pops[0][0].size() << std::endl << std::flush;
             }
             lh_bestFit_ = estimated_pops[0][0][ndims];
             for(uint32_t d=0; d<ndims; d++) {
@@ -846,7 +855,7 @@ void MAPS::execute_maps(
                         }
                         lh_bestFit_ = pop[ndims];
                     }
-                    if(lh_worstFit_ < pop[ndims]) {
+                    if(lh_worstFit_ > pop[ndims]) {
                         lh_worstFit_ = pop[ndims];
                     }
                 }
@@ -882,7 +891,7 @@ m_d MAPS::truncatedly_select(
     // Sort points descending of its fitness
     std::sort(pop.begin(), pop.end(),
         [](const v_d & a, const v_d & b) {
-            return a[a.size()-1] < b[b.size()-1];});
+            return a[a.size()-1] > b[b.size()-1];});
 
     m_d pop_out(n, v_d(n));
     // We truncatedly select R \leq N of them
@@ -1078,7 +1087,7 @@ m_d MAPS::evolve_population(
         v_d new_p_phys = to_physics(new_p, ndims);
         new_p[ndims] = get_llh(new_p_phys);
         // Accept only if it is better than the worst lh
-        if(new_p[ndims] < worst_llh) {
+        if(new_p[ndims] > worst_llh) {
             // Replace the one with the worst llh
             pop[pop.size()-1] = new_p;
             // Sort points descending of its fitness
@@ -1088,6 +1097,11 @@ m_d MAPS::evolve_population(
             worst_llh = pop[pop.size()-1][ndims];
             n_not_accepted = 0;
             result.lh_efficiency += 1;
+            std::cout << "new point: ";
+            for(const auto &v: new_p) {
+                std::cout << v << ", ";
+            }
+            std::cout << std::endl;
 
             if(dump_points_) {
                 std::ofstream ofile((base_dir_+file_name_).c_str(),

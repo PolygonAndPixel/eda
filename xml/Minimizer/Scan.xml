@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Minimizers
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="MinimizerSchema.xsd">
+    <scan>
+        <name>scan</name>
+        <n_points_per_dim>10</n_points_per_dim>
+        <max_points>1000000</max_points>
+        <dump_points>true</dump_points>
+    </scan>
+</Minimizers>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Minimizers
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="MinimizerSchema.xsd">
+
+    <maps>
+        <!-- This is based on
+        'Improving Estimation of Distribution Algorithm on Multimodal
+        Problems by Detecting Promising Areas'
+        Peng Yang, Ke Tang and Xiaofen Lu
+        http://ieeexplore.ieee.org/abstract/document/6899662/
+        10.1109/TCYB.2014.2352411 -->
+        <name>maps</name>
+        <tolerance>1e-3</tolerance>
+        <max_iter>50000</max_iter>
+        <min_iter>1024</min_iter>
+        <max_points>0</max_points>
+        <seed>1025</seed>
+        <dump_points>false</dump_points>
+        <!-- N -->
+        <n_start_points>1000</n_start_points>
+        <!-- N_sub -->
+        <size_sub_pop>100</size_sub_pop>
+        <!-- E_sub -->
+        <max_sub_pops>10</max_sub_pops>
+        <!-- R -->
+        <n_selected>500</n_selected>
+        <!-- R_sub -->
+        <n_sub_selected>25</n_sub_selected>
+        <!-- \mu, also referred to as e -->
+        <size_factor>1.0</size_factor>
+    </maps>
+
+    <multi>
+        <name>multi</name>
+        <tolerance>1e-3</tolerance>
+        <max_iter>0</max_iter>
+        <seed>1025</seed>
+        <dump_points>false</dump_points>
+
+        <ins>false</ins>
+        <mode_separation>true</mode_separation>
+        <const_eff>false</const_eff>
+        <n_live>2000</n_live>
+        <enlargement>0.5</enlargement>
+        <feedback_interval>1000</feedback_interval>
+        <max_modes>10</max_modes>
+        <feedback>false</feedback>
+    </multi>
+
+    <poly>
+        <name>poly</name>
+        <tolerance>1e-3</tolerance>
+        <max_iter>0</max_iter>
+        <min_iter>0</min_iter>
+        <max_points>0</max_points>
+        <seed>1025</seed>
+        <dump_points>false</dump_points>
+
+        <n_prior>-1</n_prior>
+        <n_grade>1</n_grade>
+        <grade_frac>1</grade_frac>
+        <n_live>1000</n_live>
+        <!--
+        -1: nothing,
+        0: header and tail,
+        1: run time evidences and clustering information
+        2: fancy output
+        3: verbose
+        -->
+        <feedback>-1</feedback>
+        <max_dead>-1</max_dead>
+        <boost_posterior>5.0</boost_posterior>
+        <num_repeats>6</num_repeats>
+        <posteriors>false</posteriors>
+        <equals>true</equals>
+        <cluster_posteriors>true</cluster_posteriors>
+        <do_clustering>true</do_clustering>
+    </poly>
+</Minimizers>

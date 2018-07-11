@@ -16,12 +16,14 @@ public:
     MAPS(double tolerance, int max_iter, int min_iter,
          int max_points=0, int n_start_points=1000,
          int size_sub_pop=100, int max_sub_pops=9,
-         int n_selected=500, int n_sub_selected=25,
+         int n_selected=500, int n_sub_selected=25, double size_factor=1.5,
          int seed=1025, bool dump_points=false);
 
-     virtual std::unique_ptr<Minimizer> clone() const override {
-         return std::make_unique<MAPS>(*this);
-     }
+    virtual std::unique_ptr<Minimizer> clone() const override {
+        return std::make_unique<MAPS>(*this);
+    }
+
+    std::string get_name();
 
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,

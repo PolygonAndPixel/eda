@@ -1,36 +1,34 @@
 /**
- * @brief
- * It just samples randomly the space for plots. It does not minimize anything!
+ * @brief 
+ * It just samples in a grid from the space for plots. 
+ * It does not minimize anything!
  *
  * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
  */
-#include "Minimizer/SampleSpace.h"
+#include "Minimizer/Scan.h"
 #include <boost/foreach.hpp>
 #include <boost/random.hpp>
 #include <boost/nondet_random.hpp>
 #include <fstream>
 
 /** Constructor and destructor **/
-SampleSpace::SampleSpace(
-    int max_iter,
+Scan::Scan(
+    int n_points_per_dim,
     int max_points,
     int seed,
-    bool dump_points) : Minimizer(0, max_iter, 0, max_points, seed, dump_points)
+    bool dump_points) : Minimizer(0, 0, 0, max_points, seed, dump_points)
 {
-
+    n_points = n_points_per_dim;
 }
 
-// SampleSpace::~SampleSpace() {}
-
-/** Function that samples randomly and dumps every max_points_ the points.
+/** Function that samples in a grid and dumps every max_points_ the points.
  *  \param nDims             Dimensionallity of parameter space in terms of
  *                           free parameter for minimization
  * */
-void SampleSpace::sample_space(
+void Scan::scan_space(
     uint32_t nDims){
 
-    uint32_t c = 1;
-    v_d cube(nDims);
+    v_d cube(nDims, 0.0);
 
     if(dump_points_) {
         std::cout << "Saving files to " << base_dir_ << file_name_ << std::endl;
@@ -42,9 +40,10 @@ void SampleSpace::sample_space(
         ofile << std::endl;
         ofile.close();
     }
-    for(uint32_t i=0; i<max_iter_; i++, c++) {
-        for(auto &c: cube) c = uf(intgen);
-
+    double delta = 1.0/n_points;
+    uint32_t i = 0;
+    while(cube[nDims-1] <= 1.0) {
+        i++;
         v_d theta = to_physics(cube, nDims);
         double current_result = get_llh(theta);
         if(dump_points_) {
@@ -56,31 +55,42 @@ void SampleSpace::sample_space(
             result.best_fit = current_result;
             result.params_best_fit = theta;
         }
+        cube[0] += delta;
+        for(uint32_t j=0; j<nDims-1; j++) {
+            if(cube[j] > 1.0) {
+                cube[j+1] += delta;
+                for(uint32_t k=j; (k>=0 && k>=j-1); k--) cube[k] = 0;
+            } else {
+                break;
+            }
+        }
 
-        if(dump_points_ && (c%max_points_ == 0 || i == max_iter_-1)) {
+        if(dump_points_ && (i%max_points_ == 0 || cube[nDims-1] >= 1.0)) {
             uint32_t d = 1;
             std::ofstream ofile((base_dir_+file_name_).c_str(),
                 std::ofstream::out  | std::ofstream::app);
-            for(v_d::iterator p=results.begin();
-                p != results.end(); ++p) {
-
-                ofile << *p << "\t";
+            for(auto & p: results) {
+                ofile << p << "\t";
                 if(d%(nDims+1) == 0) ofile << std::endl;
                 d++;
             }
             ofile.close();
             results.clear();
+            
+            for(auto &c: cube) std::cout << c << ",\t";
+            std::cout << std::endl;
         }
     }
-    result.lh_efficiency = 1;
+    result.lh_efficiency = 1.0/i;
+        
 }
 
 /** Return the name of this class.
  *
  *  \return     Name of this class.
  */
-std::string SampleSpace::get_name() {
-    return ("SampleSpace (sampling the space randomly)");
+std::string Scan::get_name() {
+    return ("Scan (Scanning the space in a grid)");
 }
 
 /** Function to map from the unit hypercube to Theta in the physical space.
@@ -90,7 +100,7 @@ std::string SampleSpace::get_name() {
  * \param nDims             Dimensionallity of parameter space in terms of
  *                          free parameter for minimization
  * */
-v_d SampleSpace::to_physics(
+v_d Scan::to_physics(
     v_d cube,
     uint32_t nDims) {
 
@@ -101,7 +111,7 @@ v_d SampleSpace::to_physics(
         + (this->upper_bnds[i] - this->lower_bnds[i])
         * cube[i]);
     }
-
+    
     return theta;
 }
 
@@ -114,7 +124,7 @@ v_d SampleSpace::to_physics(
  *  \return                 The result of the minimization
  * */
 MinimizerResult
-SampleSpace::Minimize(
+Scan::Minimize(
     TestFunctions test_func,
     v_d lower_bounds,
     v_d upper_bounds ) {
@@ -125,8 +135,8 @@ SampleSpace::Minimize(
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
     file_name_ = test_func_->get_name();
-    sample_space(test_func_->get_ndims());
-    result.minimizer_name = "SampleSpace";
+    scan_space(test_func_->get_ndims());
+    result.minimizer_name = "Scan";
     result.function_name = test_func_->get_name();
     return result;
 }

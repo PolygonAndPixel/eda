@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Minimizers
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="MinimizerSchema.xsd">
+
+    <multi>
+        <!-- This is based on the Rosenbrock settings from
+        'PolyChord: next-generation nested sampling'
+        * W.J. Handley, M.P. Hobson, A.N. Lasenby. May 2015 15 pp.
+        * https://arxiv.org/abs/1506.00171
+        * DOI: 10.1093/mnras/stv1911
+        and
+        'MultiNest: an efficient and robust Bayesian inference tool for
+        cosmology and particle physics'
+        F. Feroz, M. P. Hobson and M. Bridges
+        https://arxiv.org/abs/0809.3437
+        DOI: 10.1111/j.1365-2966.2009.14548.x
+        -->
+        <name>multi</name>
+        <tolerance>1e-3</tolerance>
+        <max_iter>0</max_iter>
+        <seed>1025</seed>
+        <dump_points>false</dump_points>
+
+        <ins>true</ins>
+        <mode_separation>false</mode_separation>
+        <const_eff>false</const_eff>
+        <n_live>1000</n_live>
+        <enlargement>0.3</enlargement>
+        <feedback_interval>5000</feedback_interval>
+        <max_modes>10</max_modes>
+        <feedback>false</feedback>
+    </multi>
+
+    <poly>
+        <!-- This is based on the gaussian_shells settings from
+        'PolyChord: next-generation nested sampling'
+        * W.J. Handley, M.P. Hobson, A.N. Lasenby. May 2015 15 pp.
+        * https://arxiv.org/abs/1506.00171
+        * DOI: 10.1093/mnras/stv1911 -->
+        <name>poly</name>
+        <tolerance>1e-3</tolerance>
+        <max_iter>0</max_iter>
+        <min_iter>0</min_iter>
+        <max_points>0</max_points>
+        <seed>1025</seed>
+        <dump_points>false</dump_points>
+
+        <n_prior>-1</n_prior>
+        <n_grade>1</n_grade>
+        <grade_frac>1</grade_frac>
+        <n_live>1000</n_live>
+        <!--
+        -1: nothing,
+        0: header and tail,
+        1: run time evidences and clustering information
+        2: fancy output
+        3: verbose
+        -->
+        <feedback>-1</feedback>
+        <max_dead>-1</max_dead>
+        <boost_posterior>5.0</boost_posterior>
+        <num_repeats>12</num_repeats>
+        <posteriors>true</posteriors>
+        <equals>true</equals>
+        <cluster_posteriors>true</cluster_posteriors>
+        <do_clustering>true</do_clustering>
+    </poly>
+</Minimizers>

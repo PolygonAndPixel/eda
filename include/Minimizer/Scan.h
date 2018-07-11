@@ -1,18 +1,17 @@
-#ifndef SampleSpace_H_INCLUDED
-#define SampleSpace_H_INCLUDED
+#ifndef Scan_H_INCLUDED
+#define Scan_H_INCLUDED
 
 #include "helper/abbreviations.h"
 #include "MinimizerResult.h"
 #include "Minimizer.h"
 
-class SampleSpace : public Minimizer {
+class Scan : public Minimizer {
 public:
 
-    SampleSpace(int max_iter,  int max_points, int seed=1025,
-                bool dump_points=false);
+    Scan(int n_points_per_dim, int max_points, int seed=1025, bool dump_points=false);
 
     virtual std::unique_ptr<Minimizer> clone() const override {
-        return std::make_unique<SampleSpace>(*this);
+        return std::make_unique<Scan>(*this);
     }
 
     std::string get_name();
@@ -21,13 +20,13 @@ public:
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
                              v_d upper_bounds);
 
-    void sample_space(uint32_t nDims);
+    void scan_space(uint32_t nDims);
 
     /// Transform point from hypercube to physical space
     v_d to_physics(v_d cube, uint32_t nDims);
 
 private:
-
+    int n_points;
 };
 
 #endif

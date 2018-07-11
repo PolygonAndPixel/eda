@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -std=c++14
-LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -lpthread -llapack -llapacke -lgfortran
+CXXFLAGS = -std=c++14 -fopenmp -define:OMP
+LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -lpthread -llapack -llapacke -fopenmp -lgfortran
 FFLAG =
 
 BUILD = build
@@ -10,6 +10,7 @@ TARGET = eda
 INCLUDE = -I /opt/OpenBLAS/include/ -Iinclude
 SRC = \
 	$(wildcard src/*.cpp) \
+	$(wildcard src/IceCubeToy/*.cpp) \
 	$(wildcard src/likelihood/*.cpp) \
 	$(wildcard src/Minimizer/*.cpp) \
 
@@ -41,7 +42,7 @@ debug: CXXFLAGS += -g
 debug: FFLAG += debug
 debug: all
 
-release: CXXFLAGS += -O3
+release: CXXFLAGS += -O2 -Wno-conversion-null 
 release: FFLAG += release
 release: all
 
@@ -49,3 +50,4 @@ clean:
 	cd src/Minimizer/polychord && $(MAKE) clean
 	-@rm -rvf $(OBJ_DIR)/*
 	-@rm -rvf $(APP_DIR)/$(TARGET)
+	-@rm -rvf $(APP_DIR)/tmp/*

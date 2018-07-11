@@ -38,7 +38,8 @@ PolyChord::PolyChord(
     nGrade_                 = (n_grade>0) ? n_grade : 1; // The number of grades
     // The fraction of time spent in each grade
     if(grade_frac) {
-        grade_frac_         = grade_frac;
+        grade_frac_         = new double[nGrade_];
+        for(uint32_t i=0; i<nGrade_; ++i) grade_frac_[i] = grade_frac[i];
     } else {
         grade_frac_         = new double[nGrade_];
         for(uint32_t i=0; i<nGrade_; ++i) grade_frac_[i] = 1.0;
@@ -70,6 +71,15 @@ PolyChord::PolyChord(
     write_prior_            = false;
     update_files_           = -1;
     nDerived_               = 0;
+    base_dir_               = "tmp"; // temporary files are written here
+}
+
+/** Return the name of this class.
+ *
+ *  \return     Name of this class.
+ */
+std::string PolyChord::get_name() {
+    return ("PolyChord");
 }
 
 /** Function to map from the unit hypercube to Theta in the physical space.
@@ -121,9 +131,9 @@ double PolyChord::fortran_get_llh(
 
     PolyChord *pBase = static_cast<PolyChord*>(misc);
     pBase->result.n_lh_calls++;
-    double llh = pBase->test_func_->get_lh(v_d(theta, theta+n_dims));
-    // PolyChord maximizes, hence we take the negative result
-    return -llh;
+    v_d v_theta(theta, theta+n_dims);
+    double llh = pBase->test_func_->get_lh(v_theta);
+    return llh;
 }
 
 /** Dumps information about the minimization at the end.

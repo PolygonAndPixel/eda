@@ -4,9 +4,8 @@
  *
  * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
  * */
-
-#include "likelihood/TestFunctions.h"
 #include <iostream>
+#include "likelihood/TestFunctions.h"
 
 TestFunctions::TestFunctions() {
 
@@ -24,7 +23,10 @@ TestFunctions::TestFunctions() {
 
 TestFunctions::TestFunctions(
     std::string func_name,
-    uint32_t ndims) {
+    uint32_t ndims,
+    uint32_t n_x,
+    uint32_t n_y,
+    uint32_t n_z) {
 
     name = func_name;
     if(func_name == EGG) {
@@ -42,6 +44,42 @@ TestFunctions::TestFunctions(
     else if(func_name == HIMMEL) {
         lh_p = &TestFunctions::himmelblau;
         ndims_ = 2;
+    }
+    else if(func_name == PARABOLOID) {
+        lh_p = &TestFunctions::paraboloid;
+        ndims_ = ndims;
+    }
+    else if(func_name == ICECUBE) {
+        // Generate detector
+        uint32_t dist_xy = 50;
+        uint32_t dist_z = 15;
+
+        v_d dummy;
+        v_d dummy2;
+        std::mt19937 intgen(1025);
+        std::normal_distribution<double> nf(0.2, 0.03);
+        for(uint32_t i=0; i<n_x; i++) {
+            for(uint32_t j=0; j<n_y; j++) {
+                for(uint32_t k=0; k<n_z; k++) {
+                    double x = (i-0.5*(n_x-1)) * dist_xy;
+                    double y = (j-0.5*(n_y-1)) * dist_xy;
+                    double z = (k-0.5*(n_z-1)) * dist_z;
+                    DOM dom(x, y, z, 0.4+nf(intgen));
+                    pulse_map.add_DOM(dom, dummy, dummy2);
+                }
+            }
+        }
+        // Generate track (single event)
+        length = 5.0;
+        seg_length = 5.0;
+        Track track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, 5.0, 5.0);
+        // Generate data
+        track.fill_PulseMap(pulse_map);
+        pulse_map.add_noise();
+        lh_p = &TestFunctions::icecube;
+        // x, y, z, t, theta, phi, energy
+        ndims_ = 7;
+
     }
     else {
         lh_p = &TestFunctions::gauss_shell;
@@ -72,16 +110,45 @@ uint32_t TestFunctions::get_ndims() {
 }
 
 /** Call the member function stored in lh_p. If you can use C++17, I
- *  recommend using std::invoke instead.
+ *  recommend using std::invoke instead. 
  *
  *  \param theta    Physical parameters of point that shall be evaluated.
  *
- *  \return         Likelihood
+ *  \return         negative Likelihood
  * */
 double TestFunctions::get_lh(
-    v_d theta) {
+    v_d & theta) {
 
     return CALL_MEMBER_FN(*this, lh_p)(theta);
+}
+
+/** Call the member function stored in lh_p. If you can use C++17, I
+ *  recommend using std::invoke instead. 
+ *  Returns the negative likelihood.
+ *
+ *  \param theta    Physical parameters of point that shall be evaluated.
+ *
+ *  \return         Negative likelihood
+ * */
+double TestFunctions::get_neg_lh(
+    v_d & theta) {
+
+    return -CALL_MEMBER_FN(*this, lh_p)(theta);
+}
+
+/** Call the member function stored in lh_p. If you can use C++17, I
+ *  recommend using std::invoke instead. 
+ *  Returns the negative log-likelihood which is used for real-world problems.
+ *  However, most test functions here are usable with just the likelihood.
+ *
+ *  \param theta    Physical parameters of point that shall be evaluated.
+ *
+ *  \return         negative log-likelihood
+ * */
+double TestFunctions::get_neg_llh(
+    v_d & theta) {
+
+    return -log(CALL_MEMBER_FN(*this, lh_p)(theta));
 }
 
 /** Calculate the likelihood by evaluating the eggholder function.
@@ -94,13 +161,32 @@ double TestFunctions::get_lh(
  *  \return         Likelihood
  * */
 double TestFunctions::eggholder(
-    v_d theta) {
+    v_d & theta) {
 
     double left = -(theta[1] + 47)*sin(sqrt(abs(theta[0]/2 + (theta[1]+47))));
     double right = theta[0] * sin(sqrt(abs(theta[0] - (theta[1]+47))));
 
     return left - right;
 }
+
+/** Calculate the likelihood by evaluating a paraboloid.
+ *  Minimum:        f(0, 0, ..., 0) = 0
+ *
+ *
+ *  \param theta    Physical parameters of point that shall be evaluated.
+ *
+ *  \return         Likelihood
+ * */
+double TestFunctions::paraboloid(
+    v_d & theta) {
+
+    double sum = 0;
+    for(auto v: theta) {
+        sum += v*v;
+    }
+    return sum;
+}
+
 
 /** Calculate the likelihood by evaluating a modified townsend function.
  *  This function has some constraints that simply return infinity if not
@@ -114,7 +200,7 @@ double TestFunctions::eggholder(
  *  \return         Likelihood
  * */
 double TestFunctions::townsend(
-    v_d theta) {
+    v_d & theta) {
 
     double t = atan2(theta[0], theta[1]);
     double constraint = 2*cos(t) - 0.5*cos(2*t)
@@ -139,7 +225,7 @@ double TestFunctions::townsend(
  *  \return         Likelihood
  * */
 double TestFunctions::rosenbrock(
-    v_d theta) {
+    v_d & theta) {
 
     double lh = 0;
     for(uint32_t i = 0; i<theta.size()-1; ++i) {
@@ -162,7 +248,7 @@ double TestFunctions::rosenbrock(
  *  \return         Likelihood
  * */
 double TestFunctions::himmelblau(
-    v_d theta) {
+    v_d & theta) {
 
     double left = (theta[0]*theta[0] + theta[1] - 11);
     left *= left;
@@ -185,9 +271,9 @@ double TestFunctions::himmelblau(
  *  \return         Likelihood
  * */
 double TestFunctions::gauss_shell(
-    v_d theta) {
+    v_d & theta) {
 
-    double factor = 1/sqrt(2*M_PI*shell_width*shell_width);
+    double factor = 1.0/sqrt(2*M_PI*shell_width*shell_width);
 
     double left = (theta[0]-2.5)*(theta[0]-2.5);
     double right = (theta[0]+2.5)*(theta[0]+2.5);
@@ -207,8 +293,47 @@ double TestFunctions::gauss_shell(
     right /= 2 * shell_width*shell_width;
     right = factor * exp(-right);
 
-    if(isinf(log(left + right))) return 0;
-    return log(left + right);
+    return -(left + right);
+}
+
+/** Calculate the negative log-likelihood by evaluating the
+ *  likelihood of a neutrino event within an IceCube dummy detector with
+ *  only one event modelled after Millipede.
+ *
+ *  \param theta    Physical parameters of point that shall be evaluated.
+ *
+ *  \return         Likelihood
+ * */
+double TestFunctions::icecube(
+    v_d & theta) {
+
+    double llh = 0.0;
+    DOM dom;
+    v_d charges;
+    v_d times;
+    Track test_track(theta[0], theta[1], theta[2], theta[3], theta[4],
+        theta[5], theta[6], seg_length);
+    while(pulse_map.get_next(dom, charges, times)) {
+        double p_time_sum = 0.0;
+        ESource source;
+        // Sources in track is empty?
+        while(test_track.get_next_source(source)) {
+            double delta_r = dist(source.get_pos(), dom.get_pos());
+            if(!charges.empty()) {
+                for(uint32_t i=0; i<times.size(); i++) {
+                    double delta_time = times[i] - source.get_time();
+                    p_time_sum += hit_prob(delta_r, delta_time);
+                }
+            }
+            llh -= hit_charge(delta_r);
+        }
+        if(!charges.empty()) {
+            double charge_sum = 0.0;
+            for(auto &i: charges) charge_sum += i;
+            llh += charge_sum * log(p_time_sum + 0.3/80.0);
+        }
+    }
+    return (-llh);
 }
 
 /** Change the used function and the number of dimensions.
@@ -218,13 +343,17 @@ double TestFunctions::gauss_shell(
  *                      town:       townsend function
  *                      rosenbrock: rosenbrock function
  *                      himmelblau: himmelblau's function
+ *                      icecube:    IceCube toy model
  *                      else just use gaussian shell function
  *  \param ndims        The number of dimension.
  *
  * */
 void TestFunctions::set_func(
     std::string func_name,
-    uint32_t ndims) {
+    uint32_t ndims,
+    uint32_t n_x,
+    uint32_t n_y,
+    uint32_t n_z) {
 
     name = func_name;
     if(func_name == EGG) {
@@ -242,6 +371,41 @@ void TestFunctions::set_func(
     else if(func_name == HIMMEL) {
         lh_p = &TestFunctions::himmelblau;
         ndims_ = 2;
+    }
+    else if(func_name == PARABOLOID) {
+        lh_p = &TestFunctions::paraboloid;
+        ndims_ = ndims;
+    }
+    else if(func_name == ICECUBE) {
+        // Generate detector
+        uint32_t dist_xy = 50;
+        uint32_t dist_z = 15;
+
+        v_d dummy;
+        v_d dummy2;
+        std::mt19937 intgen(1025);
+        std::normal_distribution<double> nf(0.2, 0.03);
+        for(uint32_t i=0; i<n_x; i++) {
+            for(uint32_t j=0; j<n_y; j++) {
+                for(uint32_t k=0; k<n_z; k++) {
+                    double x = (i-0.5*(n_x-1)) * dist_xy;
+                    double y = (j-0.5*(n_y-1)) * dist_xy;
+                    double z = (k-0.5*(n_z-1)) * dist_z;
+                    DOM dom(x, y, z, 0.4+nf(intgen));
+                    pulse_map.add_DOM(dom, dummy, dummy2);
+                }
+            }
+        }
+        // Generate track (single event)
+        length = 5.0;
+        seg_length = 5.0;
+        Track track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, 5.0, 5.0);
+        // Generate data
+        track.fill_PulseMap(pulse_map);
+        pulse_map.add_noise();
+        lh_p = &TestFunctions::icecube;
+        // x, y, z, t, theta, phi, energy
+        ndims_ = 7;
     }
     else {
         lh_p = &TestFunctions::gauss_shell;
