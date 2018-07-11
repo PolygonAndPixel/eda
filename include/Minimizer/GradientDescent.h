@@ -1,7 +1,9 @@
 #ifndef GradientDescent_H_INCLUDED
 #define GradientDescent_H_INCLUDED
 
+#ifdef OMP
 #include <omp.h>
+#endif
 
 #include "helper/abbreviations.h"
 #include "MinimizerResult.h"
@@ -26,7 +28,10 @@ public:
                              v_d upper_bounds);
 
     void descent(uint32_t nDims);
+    
+#ifdef OMP
     void descent_parallel(uint32_t nDims);
+#endif
 
     v_d get_gradient(v_d & cube, uint32_t nDims, double llh);
     v_d get_gradient(v_d & cube, uint32_t nDims, double llh, 

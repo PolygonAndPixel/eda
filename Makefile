@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++14 -fopenmp
+CXXFLAGS = -std=c++14 -fopenmp -define:OMP
 LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -lpthread -llapack -llapacke -fopenmp -lgfortran
 FFLAG =
 
@@ -42,7 +42,7 @@ debug: CXXFLAGS += -g
 debug: FFLAG += debug
 debug: all
 
-release: CXXFLAGS += -O2 -Wno-conversion-null
+release: CXXFLAGS += -O2 -Wno-conversion-null 
 release: FFLAG += release
 release: all
 

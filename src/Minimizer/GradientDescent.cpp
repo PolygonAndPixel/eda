@@ -120,7 +120,10 @@ void GradientDescent::descent(
     result.lh_efficiency = (float) accepted / (float) result.n_lh_calls;
 }
 
+#ifdef OMP
 /** Function that uses a simple gradient descent but poorly parallelized.
+ *  Several gradients starting at different random locations are run in
+ *  parallel.
  *  \param nDims             Dimensionallity of parameter space in terms of
  *                           free parameter for minimization
  * */
@@ -213,34 +216,6 @@ void GradientDescent::descent_parallel(
     result.lh_efficiency = (float) accepted / (float) result.n_lh_calls;
 }
 
-/** Calculate the gradient at the given point by evaluating the likelihood
- *  a tiny step in all other directions.
- *  
- *  \param cube     The hypercube coordinates of the point to evaluate
- *  \param nDims    Dimensionallity of parameter space in terms of
- *                  free parameter for minimization 
- *  \param llh      The likelihood at the point cube
- * 
- *  \return         A gradient vector
- * 
- * */
-v_d GradientDescent::get_gradient(
-    v_d & cube, 
-    uint32_t nDims, 
-    double llh) {
-
-    v_d gradient;
-    for(uint32_t i = 0; i < nDims; i++) {
-        v_d cube_tmp = cube;
-        cube_tmp[i] += stepsize_;
-        v_d phys = to_physics(cube_tmp, nDims);
-        double llh_tmp = get_llh(phys);
-        result.n_lh_calls++;
-        gradient.push_back( llh_tmp - llh );
-    }
-    return gradient;
-
-}
 
 /** Calculate the gradient at the given point by evaluating the likelihood
  *  a tiny step in all other directions.
@@ -266,6 +241,37 @@ v_d GradientDescent::get_gradient(
         v_d phys = to_physics(cube_tmp, nDims);
         double llh_tmp = get_llh(phys);
         n_lh_calls++;
+        gradient.push_back( llh_tmp - llh );
+    }
+    return gradient;
+
+}
+
+#endif
+
+/** Calculate the gradient at the given point by evaluating the likelihood
+ *  a tiny step in all other directions.
+ *  
+ *  \param cube     The hypercube coordinates of the point to evaluate
+ *  \param nDims    Dimensionallity of parameter space in terms of
+ *                  free parameter for minimization 
+ *  \param llh      The likelihood at the point cube
+ * 
+ *  \return         A gradient vector
+ * 
+ * */
+v_d GradientDescent::get_gradient(
+    v_d & cube, 
+    uint32_t nDims, 
+    double llh) {
+
+    v_d gradient;
+    for(uint32_t i = 0; i < nDims; i++) {
+        v_d cube_tmp = cube;
+        cube_tmp[i] += stepsize_;
+        v_d phys = to_physics(cube_tmp, nDims);
+        double llh_tmp = get_llh(phys);
+        result.n_lh_calls++;
         gradient.push_back( llh_tmp - llh );
     }
     return gradient;
@@ -322,7 +328,13 @@ GradientDescent::Minimize(
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
     file_name_ = test_func_->get_name();
+
+#ifdef OMP
     descent_parallel(test_func_->get_ndims());
+#else 
+    descent(test_func_->get_ndims());
+#endif
+
     result.minimizer_name = "GradientDescent";
     result.function_name = test_func_->get_name();
     return result;
