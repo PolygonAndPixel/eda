@@ -30,7 +30,7 @@ is the path to your likelihood configuration file (examples can be found at
 for the functions you don't want to use).
 
 ## Known Problems
-PolyChord currently uses the unfortunate parameters for gaussian shells.
+PolyChord currently uses unfortunate parameters for gaussian shells.
 This leads to a very long run.
 A similar problem occurs for MultiNest where it does not find the shells.
 You may increase the number of live points in the configuration file to
