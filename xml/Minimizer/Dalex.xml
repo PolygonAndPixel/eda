@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Minimizers
+xmlns="https://www.w3schools.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="MinimizerSchema.xsd">
+    <scan>
+        <name>dalex</name>
+        <max_iter>1000</max_iter>
+        <max_points>10</max_points>
+        <dump_points>false</dump_points>
+        <seed>1025</seed>
+    </scan>
+</Minimizers>

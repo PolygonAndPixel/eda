@@ -1,6 +1,7 @@
 CXX = g++
-CXXFLAGS = -std=c++14 -fopenmp -define:OMP
-LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -lpthread -llapack -llapacke -fopenmp -lgfortran
+CXXFLAGS = -std=c++14 -fopenmp  -w
+CXX_THIRD_PARTY =
+LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -L/home/mhierony/ARPACK -lpthread -llapack -llapacke -fopenmp -lgfortran -larpack
 FFLAG =
 
 BUILD = build
@@ -16,6 +17,13 @@ SRC = \
 
 OBJECTS = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 FOBJECTS = $(OBJ_DIR)/src/Minimizer/polychord/*.o $(OBJ_DIR)/src/Minimizer/multinest/*.o
+THIRD_OBJECTS = $(OBJ_DIR)/src/Minimizer/dalex/src/analysis/*.o \
+	$(OBJ_DIR)/src/Minimizer/dalex/src/controls/*.o \
+	$(OBJ_DIR)/src/Minimizer/dalex/src/dalex/*.o \
+	$(OBJ_DIR)/src/Minimizer/dalex/src/utils/*.o \
+	# $(OBJ_DIR)/src/Minimizer/dalex/src/examples/*.o \
+	# $(OBJ_DIR)/src/Minimizer/dalex/src/tests/*.o \
+	
 
 all: build $(APP_DIR)/$(TARGET)
 
@@ -25,7 +33,7 @@ $(OBJ_DIR)/%.o: %.cpp
 
 $(APP_DIR)/$(TARGET): $(OBJECTS)
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $(APP_DIR)/$(TARGET) $(OBJECTS) $(FOBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $(APP_DIR)/$(TARGET) $(OBJECTS) $(FOBJECTS) $(THIRD_OBJECTS) $(LDFLAGS)
 
 
 .PHONY: all build clean debug release
@@ -37,13 +45,16 @@ build:
 	@mkdir -p $(OBJ_DIR)/src/Minimizer
 	cd src/Minimizer/polychord && $(MAKE) $(FFLAG)
 	cd src/Minimizer/multinest && $(MAKE) $(FFLAG)
+	cd src/Minimizer/dalex && $(MAKE) $(CXX_THIRD_PARTY)
 
 debug: CXXFLAGS += -g
 debug: FFLAG += debug
+debug: CXX_THIRD_PARTY += debug
 debug: all
 
 release: CXXFLAGS += -O2 -Wno-conversion-null 
 release: FFLAG += release
+release: CXX_THIRD_PARTY += release
 release: all
 
 clean:
