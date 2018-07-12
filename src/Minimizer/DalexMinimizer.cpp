@@ -9,10 +9,6 @@
  * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
  */
 #include "Minimizer/DalexMinimizer.h"
-#include <boost/foreach.hpp>
-#include <boost/random.hpp>
-#include <boost/nondet_random.hpp>
-#include <fstream>
 
 /** Constructor and destructor **/
 DalexMinimizer::DalexMinimizer(
@@ -64,13 +60,13 @@ void DalexMinimizer::execute(
 
     // Class needed by Dalex
     class my_chisq_fn : public chisquared{
-
     public:
 
         // the constructor should call the constructor for
         // chisquared, passing in one int for the dimensionality
         // of the likelihood function
         my_chisq_fn(int nDims) : chisquared(nDims){
+            _accepted = 0;
             _called = 0;
             _dim = nDims;
             _best_params.clear();
@@ -84,6 +80,19 @@ void DalexMinimizer::execute(
                 _llh_func = llh_func;
         }
 
+        void set_dump(bool dump_points, std::string filename) {
+            _dump = dump_points;
+            if(_dump) {
+                std::cout << "Saving files to " << filename << std::endl;
+                std::ofstream ofile((filename).c_str(),
+                    std::ofstream::out  | std::ofstream::app);
+
+                for(int j=0; j<_dim; j++) ofile << "Param" << j << "\t";
+                ofile << std::endl;
+                ofile.close();
+                _out_name = filename;
+            }
+        }
         // you must define an operator that accepts an array_1d<double>
         // representing the point in parameter space and returns
         // a double representing the chi^2 value at that point
@@ -93,22 +102,32 @@ void DalexMinimizer::execute(
                 theta.push_back(in.get_data(i));
             }
             _called++;
-            double ans = _llh_func->get_neg_lh(theta);
+            double ans = _llh_func->get_lh(theta);
             if(ans < _best) {
                 _best = ans;
                 _best_params = theta;
+                _accepted++;
             }
-            // std::cout << ans << "\n";
+            if(_dump) {
+                std::ofstream ofile((_out_name).c_str(),
+                    std::ofstream::out  | std::ofstream::app);
+                for(auto & p: theta) ofile << p << "\t";
+                ofile << "\t" << ans << std::endl;
+                ofile.close();            
+            }
             return ans;
         }
 
         v_d get_best_params() {return _best_params;}
         double get_chimin() {return _best;}
+        int get_accepted() {return _accepted;}
     private:
         TestFunctions *_llh_func;
-
+        int _accepted;
         double _best;
         v_d _best_params;
+        std::string _out_name;
+        bool _dump;
     };
     
     my_chisq_fn chifn(nDims);
@@ -118,6 +137,7 @@ void DalexMinimizer::execute(
         max.set(i, upper_bnds[i]);
     }
     chifn.set_fun(test_func_);
+    chifn.set_dump(dump_points_, base_dir_ + file_name_);
 
     dalex_driver dalex_d;
     dalex_d.set_deltachi(12.03); // What value is reasonable?
@@ -140,7 +160,8 @@ void DalexMinimizer::execute(
     result.best_fit = dalex_d.get_chimin();
     result.n_lh_calls = dalex_d.get_called();
     result.params_best_fit = chifn.get_best_params();
-    std::cout << dalex_d.get_chimin() << ", " << chifn.get_chimin() << "\n";
+    result.lh_efficiency = (float) chifn.get_accepted() 
+            / (float) result.n_lh_calls;
 }
 
 /** Required Minimize() function for every minimizer. Sets the bounds.

@@ -12,13 +12,16 @@
 #ifndef DalexMinimizer_H_INCLUDED
 #define DalexMinimizer_H_INCLUDED
 
+#include <boost/foreach.hpp>
+#include <boost/random.hpp>
+#include <boost/nondet_random.hpp>
+#include <fstream>
 #include <limits>
 
 #include "helper/abbreviations.h"
 #include "MinimizerResult.h"
 #include "Minimizer.h"
-// #include "dalex/include/dalex.h"
-// #include "dalex/include/dalex_initializer.h"
+
 #include "dalex/include/dalex_driver.h"
 #include "dalex/include/chisq.h"
 
@@ -42,7 +45,6 @@ public:
 
     /// Transform point from hypercube to physical space
     v_d to_physics(v_d cube, uint32_t nDims);
-
 
 private:
     int seed_;
