@@ -16,6 +16,7 @@ const std::string SAMPLE        = "sample";
 const std::string MULTI         = "multi";
 const std::string SCAN          = "scan";
 const std::string GD            = "gradient descent";
+const std::string DALEX         = "dalex";
 // Different functions
 const std::string HIMMEL        = "himmelblau";
 const std::string TOWN          = "townsend";
