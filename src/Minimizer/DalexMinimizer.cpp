@@ -125,8 +125,7 @@ void DalexMinimizer::execute(
     dalex_d.set_min(min);
     dalex_d.set_max(max);
     dalex_d.set_chisquared(&chifn);
-    // std::string timing_name = "basic_timing.txt";
-    // std::string output_name = "basic_output.txt";
+
     char timingname[200];
     strcpy( timingname, (base_dir_ + "basic_timing.txt").c_str() );
     dalex_d.set_timingname(timingname);
@@ -142,33 +141,6 @@ void DalexMinimizer::execute(
     result.n_lh_calls = dalex_d.get_called();
     result.params_best_fit = chifn.get_best_params();
     std::cout << dalex_d.get_chimin() << ", " << chifn.get_chimin() << "\n";
-    
-
-
-
-    // dalex_initializer * initializer = new dalex_initializer();
-
-    // chisq_wrapper * chifn_wrapped = new chisq_wrapper();
-    // array_1d<double> min, max;
-    // for(uint32_t i = 0; i < nDims; i++) {
-    //     min.set(i, lower_bnds[i]);
-    //     max.set(i, upper_bnds[i]);
-    // }
-    // chifn_wrapped->set_min(min);
-    // chifn_wrapped->set_max(max);
-    // chifn_wrapped->set_chisquared(); // What?
-    // chifn_wrapped->set_deltachi(12.0);
-    // chifn_wrapped->set_seed(seed_);
-    // chifn_wrapped->initialize(nDims*2);
-    // initializer->set_chifn(chifn_wrapped);
-    // initializer->search();
-
-    // std::cout << chifn_wrapped->get_called() << ", " 
-    //     << chifn_wrapped->chimin() << "\n";
-
-    // delete chifn_wrapped;
-    // delete initializer;
-
 }
 
 /** Required Minimize() function for every minimizer. Sets the bounds.
