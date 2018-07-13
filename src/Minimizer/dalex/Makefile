@@ -4,7 +4,6 @@ LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -L/home/mhierony/ARPACK -lpthread -llap
 
 BUILD = ../../../build
 OBJ_DIR = $(BUILD)/objects/src/Minimizer/dalex
-# OBJ_DIR = $(BUILD)/objects/Minimizer/dalex
 TARGET_DIR = $(OBJ_DIR)/dalex
 APP_DIR = $(BUILD)
 TARGET = dalex
@@ -16,8 +15,6 @@ SRC = \
 	$(wildcard src/controls/*.cpp) \
 	$(wildcard src/dalex/*.cpp) \
 	$(wildcard src/utils/*.cpp) \
-	# $(wildcard src/examples/*.cpp) \
-	# $(wildcard src/tests/*.cpp) \
 
 OBJECTS = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
@@ -35,17 +32,6 @@ build:
 	@mkdir -p $(OBJ_DIR)/src/controls
 	@mkdir -p $(OBJ_DIR)/src/dalex
 	@mkdir -p $(OBJ_DIR)/src/utils
-	# @mkdir -p $(OBJ_DIR)/src/examples
-	# @mkdir -p $(OBJ_DIR)/src/tests
-	
-	# @mkdir -p $(OBJ_DIR)/objects
-	# @mkdir -p $(OBJ_DIR)/objects/src
-	# @mkdir -p $(OBJ_DIR)/objects/src/analysis
-	# @mkdir -p $(OBJ_DIR)/objects/src/controls
-	# @mkdir -p $(OBJ_DIR)/objects/src/dalex
-	# @mkdir -p $(OBJ_DIR)/objects/src/examples
-	# @mkdir -p $(OBJ_DIR)/objects/src/tests
-	# @mkdir -p $(OBJ_DIR)/objects/src/utils
 
 debug: CXXFLAGS += -g
 debug: all
