@@ -1,6 +1,6 @@
 /**
  * @brief
- * It just samples randomly the space for plots. It does not minimize anything!
+ * A simple gradient descent.
  *
  * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
  */
@@ -35,7 +35,6 @@ GradientDescent::GradientDescent(
  * */
 void GradientDescent::descent(
     uint32_t nDims){
-
 
     int accepted = 0;
 
