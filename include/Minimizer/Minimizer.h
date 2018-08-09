@@ -29,7 +29,7 @@ public:
     uint32_t get_n_lh_calls() {return result.n_lh_calls;};
     double get_lh_efficiency() {return result.lh_efficiency;};
     void reset_calls(){result.n_lh_calls=0; result.lh_efficiency=0;
-        lh_bestFit_=std::numeric_limits<float>::infinity();};
+        lh_bestFit_=std::numeric_limits<double>::infinity();};
     void set_bounds(v_d upper, v_d lower) {upper_bnds=upper; lower_bnds=lower;};
 
     void set_output(std::string path) {base_dir_ = path; dump_points_ = true;};
