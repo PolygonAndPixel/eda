@@ -59,7 +59,7 @@ void Scan::scan_space(
         for(uint32_t j=0; j<nDims-1; j++) {
             if(cube[j] > 1.0) {
                 cube[j+1] += delta;
-                for(uint32_t k=j; (k>=0 && k>=j-1); k--) cube[k] = 0;
+                for(int k=j; (k>=0 && k>=j-1); k--) cube[k] = 0;
             } else {
                 break;
             }
