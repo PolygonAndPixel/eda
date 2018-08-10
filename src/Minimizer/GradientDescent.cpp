@@ -74,6 +74,7 @@ void GradientDescent::descent(
 
             }
             theta = to_physics(cube, nDims);
+            
             llh = get_llh(theta);
             result.n_lh_calls++;
 
