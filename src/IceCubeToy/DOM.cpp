@@ -15,18 +15,18 @@ DOM::DOM(
     double z,
     double noise_rate) {
 
-    pos.push_back(x);
-    pos.push_back(y);
-    pos.push_back(z);
+    pos_.push_back(x);
+    pos_.push_back(y);
+    pos_.push_back(z);
     noise_rate_ = noise_rate;
 }
 
 /** Getter for the position of the DOM.
  *
- *  \return         pos
+ *  \return         pos_
  * */
 v_d DOM::get_pos() {
-    return pos;
+    return pos_;
 }
 
 /** Getter for the noise rate of the DOM.

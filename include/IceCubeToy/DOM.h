@@ -12,7 +12,7 @@ public:
     double get_noise();
 
 private:
-    v_d pos;
+    v_d pos_;
     double noise_rate_;
 };
 

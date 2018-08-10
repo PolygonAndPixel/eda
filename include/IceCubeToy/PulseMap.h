@@ -1,6 +1,7 @@
 #ifndef PULSEMAP_H_INCLUDED
 #define PULSEMAP_H_INCLUDED
 
+#include <algorithm>
 #include <random>
 #include "helper/abbreviations.h"
 #include "IceCubeToy/DOM.h"
@@ -16,10 +17,10 @@ public:
     std::mt19937 intgen;
 
 private:
-    std::vector<DOM> DOMS;
-    m_d charges;
-    m_d times;
-    uint32_t index = 0;
+    std::vector<DOM> DOMS_;
+    m_d charges_;
+    m_d times_;
+    uint32_t index_ = 0;
 };
 
 #endif

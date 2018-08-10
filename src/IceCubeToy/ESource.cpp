@@ -18,26 +18,26 @@ ESource::ESource(
     double phi,
     double en) {
 
-    pos.push_back(x);
-    pos.push_back(y);
-    pos.push_back(z);
+    pos_.push_back(x);
+    pos_.push_back(y);
+    pos_.push_back(z);
     time_ = t;
-    direction.push_back(theta);
-    direction.push_back(phi);
-    energy = en;
+    direction_.push_back(theta);
+    direction_.push_back(phi);
+    energy_ = en;
 }
 
 /** Getter for the position of the energy source.
  *
- *  \return         pos
+ *  \return         pos_
  * */
 v_d ESource::get_pos() {
-    return pos;
+    return pos_;
 }
 
 /** Getter for the time of the energy source.
  *
- *  \return         time
+ *  \return         time_
  * */
 double ESource::get_time() {
     return time_;
@@ -45,16 +45,16 @@ double ESource::get_time() {
 
 /** Getter for the direction of the energy source.
  *
- *  \return         direction (theta, phi)
+ *  \return         direction_ (theta, phi)
  * */
 v_d ESource::get_direction() {
-    return direction;
+    return direction_;
 }
 
 /** Getter for the energy of the energy source.
  *
- *  \return         energy
+ *  \return         energy_
  * */
 double ESource::get_energy() {
-    return energy;
+    return energy_;
 }

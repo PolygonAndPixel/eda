@@ -15,10 +15,10 @@ public:
     double get_energy();
 
 private:
-    v_d pos;
+    v_d pos_;
     double time_;
-    v_d direction;
-    double energy;
+    v_d direction_;
+    double energy_;
 };
 
 #endif

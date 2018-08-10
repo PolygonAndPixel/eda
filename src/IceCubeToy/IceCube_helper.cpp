@@ -26,7 +26,7 @@ double hit_time(
     double delta_time) {
 
     double scat0 = 10;
-    double a =delta_r/scat0;
+    double a = delta_r/scat0;
     double x = delta_time;
     double gamma = tgamma(a);
     return ((pow(x, a-1) * exp(-x))/gamma);

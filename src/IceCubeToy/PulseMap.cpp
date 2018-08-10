@@ -13,7 +13,7 @@ PulseMap::PulseMap(
     int seed) {
 
     intgen.seed(seed);
-    index = 0;
+    index_ = 0;
 }
 
 /* Add a DOM with the charges it detected and the corresponding timings.
@@ -27,9 +27,9 @@ void PulseMap::add_DOM(
     v_d &charge,
     v_d &time) {
 
-    DOMS.push_back(dom);
-    charges.push_back(charge);
-    times.push_back(time);
+    DOMS_.push_back(dom);
+    charges_.push_back(charge);
+    times_.push_back(time);
 }
 
 /** Get next DOM, charges and times.
@@ -45,14 +45,14 @@ bool PulseMap::get_next(
     v_d &charge,
     v_d &time) {
 
-    if(index == DOMS.size()) {
-        index = 0;
+    if(index_ == DOMS_.size()) {
+        index_ = 0;
         return false;
     }
-    dom = DOMS[index];
-    charge = charges[index];
-    time = times[index];
-    index++;
+    dom = DOMS_[index_];
+    charge = charges_[index_];
+    time = times_[index_];
+    index_++;
     return true;
 }
 
@@ -68,6 +68,16 @@ void PulseMap::add_noise(
     DOM dom;
     v_d dom_times;
     v_d dom_charges;
+    double tmp_min = times_[0][0];
+    double tmp_max = times_[0][0];
+    for(v_d t: times_) {
+        double tmp = *std::min_element(t.begin(), t.end());
+        if(tmp < tmp_min) tmp_min = tmp;
+        tmp = *std::max_element(t.begin(), t.end());
+        if(tmp > tmp_max) tmp_max = tmp;
+    }
+    t_min = tmp_min - t_min;
+    t_max = tmp_max + t_max;
     std::uniform_real_distribution<double> uf(t_min, t_max);
 
     while(get_next(dom, dom_times, dom_charges)) {
