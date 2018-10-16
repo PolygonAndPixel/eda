@@ -13,10 +13,10 @@ kd_tree::kd_tree(const kd_tree &in){
     copy(in);
 }
 
-kd_tree::kd_tree(array_2d<double> &mm){
+kd_tree::kd_tree(array_2d<value_t> &mm){
 
-    array_1d<double> i_max,i_min;
-    int i;
+    array_1d<value_t> i_max,i_min;
+    index_t i;
 
     for(i=0;i<mm.get_cols();i++){
         i_min.set(i,0.0);
@@ -26,7 +26,7 @@ kd_tree::kd_tree(array_2d<double> &mm){
     build_tree(mm,i_min,i_max);
 }
 
-kd_tree::kd_tree(array_2d<double> &mm, array_1d<double> &nmin, array_1d<double> &nmax){
+kd_tree::kd_tree(array_2d<value_t> &mm, array_1d<value_t> &nmin, array_1d<value_t> &nmax){
     build_tree(mm,nmin,nmax);
 }
 
@@ -37,7 +37,7 @@ void kd_tree::copy(const kd_tree &in){
     search_ct_solo=in.search_ct_solo;
     diagnostic=in.diagnostic;
 
-    int i,j;
+    index_t i,j;
     tree.reset();
     tree.set_cols(in.tree.get_cols());
     for(i=0;i<in.tree.get_rows();i++){
@@ -69,42 +69,42 @@ void kd_tree::copy(const kd_tree &in){
     nkernel=in.nkernel;
 }
 
-double kd_tree::get_search_time(){
+value_t kd_tree::get_search_time(){
     return search_time;
 }
 
-int kd_tree::get_search_ct(){
+index_t kd_tree::get_search_ct(){
     return search_ct;
 }
 
-void kd_tree::set_search_ct(int ii){
+void kd_tree::set_search_ct(index_t ii){
     search_ct=ii;
 }
 
-void kd_tree::set_search_time(double nn){
+void kd_tree::set_search_time(value_t nn){
     search_time=nn;
 }
 
-int kd_tree::get_search_ct_solo(){
+index_t kd_tree::get_search_ct_solo(){
     return search_ct_solo;
 }
 
-double kd_tree::get_search_time_solo(){
+value_t kd_tree::get_search_time_solo(){
     return search_time_solo;
 }
 
-void kd_tree::set_search_ct_solo(int ii){
+void kd_tree::set_search_ct_solo(index_t ii){
     search_ct_solo=ii;
 }
 
-void kd_tree::set_search_time_solo(double nn){
+void kd_tree::set_search_time_solo(value_t nn){
     search_time_solo=nn;
 }
 
-void kd_tree::build_tree(array_2d<double> &mm){
+void kd_tree::build_tree(array_2d<value_t> &mm){
 
-    array_1d<double> i_min,i_max;
-    int i;
+    array_1d<value_t> i_min,i_max;
+    index_t i;
 
     for(i=0;i<mm.get_cols();i++){
         i_min.set(i,0.0);
@@ -114,8 +114,8 @@ void kd_tree::build_tree(array_2d<double> &mm){
     build_tree(mm,i_min,i_max);
 }
 
-void kd_tree::build_tree(array_2d<double> &mm,
-    array_1d<double> &nmin, array_1d<double> &nmax){
+void kd_tree::build_tree(array_2d<value_t> &mm,
+    array_1d<value_t> &nmin, array_1d<value_t> &nmax){
 
     if(nmin.get_dim()!=mm.get_cols()){
         printf("WARNING nimin dim %d cols %d\n",nmin.get_dim(),mm.get_cols());
@@ -136,10 +136,10 @@ void kd_tree::build_tree(array_2d<double> &mm,
     data.reset();
     tree.reset();
 
-    array_1d<int> inn,use_left,use_right;
-    array_1d<double> tosort,sorted;
+    array_1d<index_t> inn,use_left,use_right;
+    array_1d<value_t> tosort,sorted;
 
-    int i,j,k,l,inp;
+    index_t i,j,k,l,inp;
 
     tol=1.0e-7;
 
@@ -166,7 +166,7 @@ void kd_tree::build_tree(array_2d<double> &mm,
         maxs.set(i,nmax.get_data(i));
     }
 
-    array_1d<double> vector;
+    array_1d<value_t> vector;
 
     for(i=0;i<data.get_rows();i++){
          data.set_row(i,mm(i));
@@ -238,8 +238,8 @@ void kd_tree::build_tree(array_2d<double> &mm,
 
 }
 
-void kd_tree::organize(array_1d<int> &use_in, int u_start,
-                       int parent, int idim, int ct, int dir){
+void kd_tree::organize(array_1d<index_t> &use_in, index_t u_start,
+                       index_t parent, index_t idim, index_t ct, index_t dir){
 
     /*
     This routine provides the iterative backend of build_tree.  It takes a
@@ -268,14 +268,14 @@ void kd_tree::organize(array_1d<int> &use_in, int u_start,
     iteration of organize
     */
 
-    int i,j,k,l,newparent,inp;
-    double pivot,nn;
+    index_t i,j,k,l,newparent,inp;
+    value_t pivot,nn;
 
-    array_1d<int> use;
+    array_1d<index_t> use;
 
     use.set_name("kd_tree_organize_use");
 
-    array_1d<double> tosort,sorted,mean,var;
+    array_1d<value_t> tosort,sorted,mean,var;
     tosort.set_name("kd_tree_organize_tosort");
     sorted.set_name("kd_tree_organize_sorted");
     mean.set_name("kd_tree_organize_mean");
@@ -302,7 +302,7 @@ void kd_tree::organize(array_1d<int> &use_in, int u_start,
         for(j=0;j<data.get_cols();j++)mean.add_val(j,data.get_data(use.get_data(i),j));
     }
 
-    for(i=0;i<data.get_cols();i++)mean.divide_val(i,double(ct));
+    for(i=0;i<data.get_cols();i++)mean.divide_val(i,value_t(ct));
 
     for(i=0;i<ct;i++){
         for(j=0;j<data.get_cols();j++){
@@ -456,7 +456,7 @@ void kd_tree::organize(array_1d<int> &use_in, int u_start,
 
 void kd_tree::write_tree(char *name){
 
-   int i,j,k,l;
+   index_t i,j,k,l;
    FILE *output;
 
    output=fopen(name,"w");
@@ -473,36 +473,36 @@ void kd_tree::write_tree(char *name){
    fclose(output);
 }
 
-int kd_tree::get_dim(){
+index_t kd_tree::get_dim(){
     return data.get_cols();
 }
 
-int kd_tree::get_diagnostic(){
+index_t kd_tree::get_diagnostic(){
     return diagnostic;
 }
 
-int kd_tree::get_pts(){
+index_t kd_tree::get_pts(){
     return data.get_rows();
 }
 
-array_1d<double> kd_tree::get_pt(int dex){
+array_1d<value_t> kd_tree::get_pt(index_t dex){
     return data(dex);
 }
 
-void kd_tree::get_pt(int dex, array_1d<double> &output){
+void kd_tree::get_pt(index_t dex, array_1d<value_t> &output){
 
     if(dex<0 || dex>=data.get_rows()){
         printf("WARNING asked for point %d but pts %d\n",dex,data.get_rows());
         exit(1);
     }
 
-    int i;
+    index_t i;
     for(i=0;i<data.get_cols();i++){
         output.set(i,data.get_data(dex,i));
     }
 }
 
-double kd_tree::get_pt(int dex, int i){
+value_t kd_tree::get_pt(index_t dex, index_t i){
 
     if(dex<0 || dex>=data.get_rows()){
         printf("WARNING asked for point %d but pts %d\n",dex,data.get_rows());
@@ -518,14 +518,14 @@ double kd_tree::get_pt(int dex, int i){
 }
 
 void kd_tree::check_tree(){
-    int i;
+    index_t i;
     for(i=0;i<data.get_rows();i++){
         check_tree(i);
     }
 }
 
-void kd_tree::check_tree(int where){
-   int i,ancestor,j;
+void kd_tree::check_tree(index_t where){
+   index_t i,ancestor,j;
 
    //printf("checking %d of %d\n",where,data.get_rows());
 
@@ -560,7 +560,7 @@ void kd_tree::check_tree(int where){
 
 
 
-void kd_tree::confirm(int idim, int compareto, int dir, int where){
+void kd_tree::confirm(index_t idim, index_t compareto, index_t dir, index_t where){
      /*
      idim is the dimension on which this branch was originally split
      compareto is the index of the parent which first split on idim
@@ -601,14 +601,14 @@ void kd_tree::confirm(int idim, int compareto, int dir, int where){
 
 }
 
-void kd_tree::add(const array_1d<double> &v){
+void kd_tree::add(const array_1d<value_t> &v){
     /*
     add the point v to the tree
     */
 
-    int i,j,k,l,node,dir;
+    index_t i,j,k,l,node,dir;
 
-    int pts=data.get_rows();
+    index_t pts=data.get_rows();
 
     /*first, find the node that this new point will descend from*/
     node=find_node(v);
@@ -635,7 +635,7 @@ void kd_tree::add(const array_1d<double> &v){
 
     data.add_row(v);
 
-    int oldpts=pts;
+    index_t oldpts=pts;
     pts=tree.get_rows();
 
     if(pts!=oldpts+1){
@@ -652,7 +652,7 @@ void kd_tree::add(const array_1d<double> &v){
     }
 
     /*make sure that the new point is still connected to the masterparent*/
-    int ancestor=tree.get_data(pts-1,3);
+    index_t ancestor=tree.get_data(pts-1,3);
     i=pts-1;
     while(ancestor>=0){
         i=ancestor;
@@ -665,9 +665,9 @@ void kd_tree::add(const array_1d<double> &v){
 
 }
 
-int kd_tree::find_node(const array_1d<double> &v){
+index_t kd_tree::find_node(const array_1d<value_t> &v){
 
-    int i,j,k,l,nextstep,where;
+    index_t i,j,k,l,nextstep,where;
 
     where=masterparent;
 
@@ -688,11 +688,11 @@ int kd_tree::find_node(const array_1d<double> &v){
 
 }
 
-double kd_tree::distance(int dex, const array_1d<double> &vv){
+value_t kd_tree::distance(index_t dex, const array_1d<value_t> &vv){
     return distance(vv,dex);
 }
 
-double kd_tree::distance(int dex1, int dex2){
+value_t kd_tree::distance(index_t dex1, index_t dex2){
 
     if(dex1<0 || dex2<0 || dex1>=data.get_rows() || dex2>=data.get_rows()){
         printf("WARNING asked for distance between pts %d %d\n",dex1,dex2);
@@ -702,8 +702,8 @@ double kd_tree::distance(int dex1, int dex2){
 
     }
 
-    double dd=0.0;
-    int i;
+    value_t dd=0.0;
+    index_t i;
 
     for(i=0;i<data.get_cols();i++){
         dd+=power((data.get_data(dex1,i)-data.get_data(dex2,i))/(maxs.get_data(i)-mins.get_data(i)),2);
@@ -713,13 +713,13 @@ double kd_tree::distance(int dex1, int dex2){
 
 }
 
-double kd_tree::distance(const array_1d<double> &vv, int dex){
+value_t kd_tree::distance(const array_1d<value_t> &vv, index_t dex){
     if(dex<0 || dex>=data.get_rows()){
         printf("WARNING asked for distance to %d but pts %d\n",dex,data.get_rows());
     }
 
-   double dd;
-   int i;
+   value_t dd;
+   index_t i;
 
    dd=0.0;
    // printf("%e %e to %e %e\n",p1[0],p1[2],p2[0],p2[1]);
@@ -729,9 +729,9 @@ double kd_tree::distance(const array_1d<double> &vv, int dex){
 
 }
 
-double kd_tree::distance(const array_1d<double> &p1, const array_1d<double> &p2){
-  double dd;
-  int i;
+value_t kd_tree::distance(const array_1d<value_t> &p1, const array_1d<value_t> &p2){
+  value_t dd;
+  index_t i;
 
   dd=0.0;
  // printf("%e %e to %e %e\n",p1[0],p1[2],p2[0],p2[1]);
@@ -740,8 +740,8 @@ double kd_tree::distance(const array_1d<double> &p1, const array_1d<double> &p2)
   return dd;
 }
 
-void kd_tree::neigh_check(const array_1d<double> &v, int kk,
-array_1d<int> &neigh, array_1d<double> &dd, int where, int wherefrom){
+void kd_tree::neigh_check(const array_1d<value_t> &v, index_t kk,
+array_1d<index_t> &neigh, array_1d<value_t> &dd, index_t where, index_t wherefrom){
 
     /*
     This routine provides the backend for nn_srch
@@ -763,8 +763,8 @@ array_1d<int> &neigh, array_1d<double> &dd, int where, int wherefrom){
     discovered so far).
     */
 
-    int i,j,k,l,side,goon;
-    double dtry,dwhere;
+    index_t i,j,k,l,side,goon;
+    value_t dtry,dwhere;
 
     /*on what side of where does v belong?*/
     if(v.get_data(tree.get_data(where,0))<data.get_data(where,tree.get_data(where,0)))side=1;
@@ -826,8 +826,8 @@ array_1d<int> &neigh, array_1d<double> &dd, int where, int wherefrom){
     }
 }
 
-void kd_tree::nn_srch(int dex, int kk, array_1d<int> &neigh,
-array_1d<double> &dd){
+void kd_tree::nn_srch(index_t dex, index_t kk, array_1d<index_t> &neigh,
+array_1d<value_t> &dd){
 
     /*
     Find the nearest neighbors of the tree node specified by dex.
@@ -839,15 +839,15 @@ array_1d<double> &dd){
         printf("WARNING wanted neighbors to %d but pts %d\n",dex,data.get_rows());
     }
 
-    int i;
-    array_1d<double> vector;
+    index_t i;
+    array_1d<value_t> vector;
 
     nn_srch(data(dex),kk,neigh,dd);
 
 }
 
-void kd_tree::nn_srch(const array_1d<double> &v, int kk, array_1d<int> &neigh,
-array_1d<double> &dd){
+void kd_tree::nn_srch(const array_1d<value_t> &v, index_t kk, array_1d<index_t> &neigh,
+array_1d<value_t> &dd){
 
     /*
     Find the nearest neighbors of the point specified by v.
@@ -860,15 +860,15 @@ array_1d<double> &dd){
     nearest neighbors
     */
 
-    double before=double(time(NULL));
+    value_t before=value_t(time(NULL));
 
-    int i,j,k,l,node,where,behind;
-    double ddnode,ddtry;
+    index_t i,j,k,l,node,where,behind;
+    value_t ddnode,ddtry;
 
     neigh.set_dim(kk);
     dd.set_dim(kk);
 
-    array_1d<int> inn;
+    array_1d<index_t> inn;
     inn.set_name("kd_tree_nn_srch_inn");
 
     /*first, find the node in the tree where you would add v, were you adding
@@ -899,7 +899,7 @@ array_1d<double> &dd){
         }
     }
 
-    array_1d<double> ddstore;
+    array_1d<value_t> ddstore;
     ddstore.set_name("kd_tree_nn_srch_ddstore");
 
     for(i=0;i<kk;i++){
@@ -920,22 +920,22 @@ array_1d<double> &dd){
     if(tree.get_data(node,2)>=0)neigh_check(v,kk,neigh,dd,tree.get_data(node,2),node);
 
     if(kk>1){
-        search_time+=double(time(NULL))-before;
+        search_time+=value_t(time(NULL))-before;
         search_ct++;
     }
     else{
-        search_time_solo+=double(time(NULL))-before;
+        search_time_solo+=value_t(time(NULL))-before;
         search_ct_solo++;
     }
 }
 
-void kd_tree::remove(int target){
+void kd_tree::remove(index_t target){
     /*
     remove the node specified by target
     */
 
-    int nl,nr,i,j,k,l,mvup,side,putit;
-    int root;
+    index_t nl,nr,i,j,k,l,mvup,side,putit;
+    index_t root;
 
 
     /*first, need to find out how many nodes are on the left and right hand brances
@@ -1049,7 +1049,7 @@ void kd_tree::remove(int target){
 
 }
 
-void kd_tree::count(int where, int *ct){
+void kd_tree::count(index_t where, index_t *ct){
     /*
     a way to count the number of nodes on a branch
     */
@@ -1064,14 +1064,14 @@ void kd_tree::count(int where, int *ct){
     }
 }
 
-void kd_tree::reassign(int target){
+void kd_tree::reassign(index_t target){
     /*
     For use when removing a node from the tree.
 
     This will reassign target to its new location on the tree.
     */
 
-    int where,dir,k;
+    index_t where,dir,k;
 
     where=masterparent;
     if(data.get_data(target,tree.get_data(where,0))<data.get_data(where,tree.get_data(where,0)))dir=1;
@@ -1096,7 +1096,7 @@ void kd_tree::reassign(int target){
 
 }
 
-void kd_tree::descend(int root){
+void kd_tree::descend(index_t root){
     /*
     For use when removing a node from the tree.
 
@@ -1112,7 +1112,7 @@ void kd_tree::descend(int root){
 
 }
 
-int kd_tree::kernel_srch(array_1d<double> &pt, array_1d<double> &kern, array_1d<int> &kdex){
+index_t kd_tree::kernel_srch(array_1d<value_t> &pt, array_1d<value_t> &kern, array_1d<index_t> &kdex){
    /*
    pt is the center of your kernel
 
@@ -1124,7 +1124,7 @@ int kd_tree::kernel_srch(array_1d<double> &pt, array_1d<double> &kern, array_1d<
 
    THIS IS NOT WELL-TESTED
   */
-  int node,i,k;
+  index_t node,i,k;
 
   nkernel=0;
   ktests=1;
@@ -1153,12 +1153,12 @@ int kd_tree::kernel_srch(array_1d<double> &pt, array_1d<double> &kern, array_1d<
   return nkernel;
 }
 
-void kd_tree::kernel_check(array_1d<double> &pt, array_1d<double> &kern, array_1d<int> &kdex,\
-int consider, int wherefrom){
+void kd_tree::kernel_check(array_1d<value_t> &pt, array_1d<value_t> &kern, array_1d<index_t> &kdex,\
+index_t consider, index_t wherefrom){
   //consider is the point you are currently looking at
   //wherefrom is where you came from
 
-  int i,j,k,l,otherbranch;
+  index_t i,j,k,l,otherbranch;
 
 
   ktests++;
@@ -1224,7 +1224,7 @@ int consider, int wherefrom){
 
 }
 
-int kd_tree::radial_srch(array_1d<double> &pt, double radius, array_1d<int> &rdex){
+index_t kd_tree::radial_srch(array_1d<value_t> &pt, value_t radius, array_1d<index_t> &rdex){
    /*
    Find all the points within (normalized) radius of pt.  Store their indices in rdex.
    Return the number of points found.
@@ -1232,8 +1232,8 @@ int kd_tree::radial_srch(array_1d<double> &pt, double radius, array_1d<int> &rde
    THIS IS NOT WELL-TESTED
    */
 
-   int node;
-   double dd;
+   index_t node;
+   value_t dd;
 
    nkernel=0;
    node=find_node(pt);
@@ -1259,10 +1259,10 @@ int kd_tree::radial_srch(array_1d<double> &pt, double radius, array_1d<int> &rde
 
 }
 
-void kd_tree::radial_check(array_1d<double> &pt, double radius, array_1d<int> &rdex, int consider, int from){
+void kd_tree::radial_check(array_1d<value_t> &pt, value_t radius, array_1d<index_t> &rdex, index_t consider, index_t from){
 
-    double dd;
-    int j,k,l,otherbranch;
+    value_t dd;
+    index_t j,k,l,otherbranch;
 
 
     ktests++;
@@ -1320,41 +1320,41 @@ void kd_tree::radial_check(array_1d<double> &pt, double radius, array_1d<int> &r
 
 }
 
-double kd_tree::get_max(int ix){
+value_t kd_tree::get_max(index_t ix){
     return maxs.get_data(ix);
 }
 
-double kd_tree::get_min(int ix){
+value_t kd_tree::get_min(index_t ix){
     return mins.get_data(ix);
 }
 
-void kd_tree::set_max(int dex, double nn){
+void kd_tree::set_max(index_t dex, value_t nn){
     maxs.set(dex,nn);
 }
 
-void kd_tree::set_min(int dex, double nn){
+void kd_tree::set_min(index_t dex, value_t nn){
     mins.set(dex,nn);
 }
 
 
 //////////////////
 
-void convert_to_boundary(array_2d<double> &pts, double dx, double dy, array_2d<double> &output){
-    array_1d<double> min,max;
+void convert_to_boundary(array_2d<value_t> &pts, value_t dx, value_t dy, array_2d<value_t> &output){
+    array_1d<value_t> min,max;
     min.set_name("boundary_min");
     max.set_name("boundary_max");
-    int i;
+    index_t i;
     min.set(0,0.0);
     max.set(0,dx);
     min.set(1,0.0);
     max.set(1,dy);
-    array_1d<int> neigh;
-    array_1d<double> dd;
+    array_1d<index_t> neigh;
+    array_1d<value_t> dd;
 
     neigh.set_name("boundary_neigh");
     dd.set_name("boundary_dd");
 
-    array_2d<double> boundary;
+    array_2d<value_t> boundary;
     boundary.set_name("boundary_boundary");
 
     //first we need to select all of the points that are on the boundary;
@@ -1364,7 +1364,7 @@ void convert_to_boundary(array_2d<double> &pts, double dx, double dy, array_2d<d
 
     printf("making point_tree with %d %d\n",pts.get_rows(),pts.get_cols());
 
-    double maxdx=-1.0;
+    value_t maxdx=-1.0;
 
     point_tree=new kd_tree(pts,min,max);
     for(i=0;i<pts.get_rows();i++){
@@ -1384,8 +1384,8 @@ void convert_to_boundary(array_2d<double> &pts, double dx, double dy, array_2d<d
 
     point_tree = new kd_tree(boundary,min,max);
 
-    int last_dex;
-    array_1d<double> last_point, original_point;
+    index_t last_dex;
+    array_1d<value_t> last_point, original_point;
     last_point.set_name("boundary_last_point");
     original_point.set_name("boundary_original_point");
 

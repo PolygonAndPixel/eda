@@ -11,24 +11,24 @@ class function_wrapper{
 public:
     function_wrapper();
     ~function_wrapper();
-    virtual double operator()(const array_1d<double>&);
-    virtual int get_called();
-    virtual double get_min(int i){
+    virtual value_t operator()(const array_1d<value_t>&);
+    virtual index_t get_called();
+    virtual value_t get_min(index_t i){
         printf("unimplemented get_min in function_wrapper");
         exit(1);
     }
 
-    virtual double get_max(int i){
+    virtual value_t get_max(index_t i){
         printf("unimplemented get_max in function_wrapper");
         exit(1);
     }
 
-    virtual int get_dim(){
+    virtual index_t get_dim(){
         printf("unimplemented get_dim in function_wrapper");
         exit(1);
     }
 
-    virtual double get_time_spent(){
+    virtual value_t get_time_spent(){
         printf("unimplemented get_time_spent in function_wrapper");
         exit(1);
     }

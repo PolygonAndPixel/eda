@@ -14,23 +14,23 @@
 
 /** Constructor and destructor **/
 PolyChord::PolyChord(
-    double tolerance,
-    int max_iter,
-    int min_iter,
-    int max_points,
-    int n_prior,
-    int n_grade,
-    double *grade_frac,
-    int n_live,
-    int feedback,
-    int max_dead,
-    double boost_posterior,
-    int num_repeats,
+    value_t tolerance,
+    index_t max_iter,
+    index_t min_iter,
+    index_t max_points,
+    index_t n_prior,
+    index_t n_grade,
+    value_t *grade_frac,
+    index_t n_live,
+    index_t feedback,
+    index_t max_dead,
+    value_t boost_posterior,
+    index_t num_repeats,
     bool posteriors,
     bool equals,
     bool cluster_posteriors,
     bool do_clustering,
-    int seed,
+    index_t seed,
     bool dump_points) : Minimizer(tolerance, max_iter, min_iter, max_points,
         seed, dump_points)
 {
@@ -38,11 +38,11 @@ PolyChord::PolyChord(
     nGrade_                 = (n_grade>0) ? n_grade : 1; // The number of grades
     // The fraction of time spent in each grade
     if(grade_frac) {
-        grade_frac_         = new double[nGrade_];
-        for(uint32_t i=0; i<nGrade_; ++i) grade_frac_[i] = grade_frac[i];
+        grade_frac_         = new value_t[nGrade_];
+        for(index_t i=0; i<nGrade_; ++i) grade_frac_[i] = grade_frac[i];
     } else {
-        grade_frac_         = new double[nGrade_];
-        for(uint32_t i=0; i<nGrade_; ++i) grade_frac_[i] = 1.0;
+        grade_frac_         = new value_t[nGrade_];
+        for(index_t i=0; i<nGrade_; ++i) grade_frac_[i] = 1.0;
     }
 
 
@@ -94,14 +94,14 @@ std::string PolyChord::get_name() {
  *                          PolyChord requirements).
  * */
 void PolyChord::fortran_to_physics(
-    double *cube,
-    double *theta,
-    int n_dims,
+    value_t *cube,
+    value_t *theta,
+    index_t n_dims,
     void *misc) {
 
     PolyChord *pBase = static_cast<PolyChord*>(misc);
 
-    for (int i=0; i<n_dims; i++) {
+    for (index_t i=0; i<n_dims; i++) {
         theta[i] = (pBase->lower_bnds[i]
             + (pBase->upper_bnds[i] - pBase->lower_bnds[i])
             * cube[i]);
@@ -122,17 +122,17 @@ void PolyChord::fortran_to_physics(
  *                          (structure of function parameters determined by
  *                          PolyChord requirements).
  * */
-double PolyChord::fortran_get_llh(
-    double *theta,
-    int n_dims,
-    double *phi,
-    int nDerived,
+value_t PolyChord::fortran_get_llh(
+    value_t *theta,
+    index_t n_dims,
+    value_t *phi,
+    index_t nDerived,
     void *misc) {
 
     PolyChord *pBase = static_cast<PolyChord*>(misc);
     pBase->result.n_lh_calls++;
     v_d v_theta(theta, theta+n_dims);
-    double llh = pBase->test_func_->get_lh(v_theta);
+    value_t llh = pBase->test_func_->get_lh(v_theta);
     return llh;
 }
 
@@ -151,21 +151,21 @@ double PolyChord::fortran_get_llh(
  *                                  PolyChord requirements).
  * */
 void PolyChord::c_dumper(
-    double log_evidence,
-    double error_log_evidence,
-    double ndead,
-    double n_likelihood_calls,
-    double n_accepted,
-    double *live_params,
-    int n_cluster,
-    double llh_best_fit,
-    double llh_worst_fit,
-    int n_dims,
+    value_t log_evidence,
+    value_t error_log_evidence,
+    value_t ndead,
+    value_t n_likelihood_calls,
+    value_t n_accepted,
+    value_t *live_params,
+    index_t n_cluster,
+    value_t llh_best_fit,
+    value_t llh_worst_fit,
+    index_t n_dims,
     void *misc)
 {
     PolyChord *pBase = static_cast<PolyChord*>(misc);
     pBase->result.params_best_fit.resize(n_dims);
-    for(uint32_t i=0; i<n_dims; i++) {
+    for(index_t i=0; i<n_dims; i++) {
         pBase->result.params_best_fit[i] = live_params[i];
     }
 
@@ -185,11 +185,11 @@ void PolyChord::c_dumper(
  * */
 v_d PolyChord::to_physics(
     v_d cube,
-    uint32_t n_dims) {
+    index_t n_dims) {
 
     v_d theta(n_dims);
 
-    for (int i=0; i<n_dims; i++) {
+    for (index_t i=0; i<n_dims; i++) {
         theta[i] = (this->lower_bnds[i]
             + (this->upper_bnds[i] - this->lower_bnds[i])
             * cube[i]);
@@ -219,8 +219,8 @@ PolyChord::Minimize(
     file_name_ = test_func_->get_name();
     params_best_fit.resize(test_func_->get_ndims());
 
-    int n_dims = test_func_->get_ndims();
-    int num_repeats = (num_repeats_ < 0) ? 5*n_dims : num_repeats_;
+    index_t n_dims = test_func_->get_ndims();
+    index_t num_repeats = (num_repeats_ < 0) ? 5*n_dims : num_repeats_;
     /// run Fortran routines for minimization
     // Hack to pass a string to fortran.
     char *b_dir = new char[base_dir_.size()+1];

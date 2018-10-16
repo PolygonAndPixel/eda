@@ -22,22 +22,22 @@ namespace interfaces
 
     extern "C" {
         void polychord_c_interface(
-            int nlive, int num_repeats, int nprior, bool do_clustering,
-            int feedback, double precision_criterion, int max_ndead,
-            double boost_posterior, bool posteriors, bool equals,
+            index_t nlive, index_t num_repeats, index_t nprior, bool do_clustering,
+            index_t feedback, value_t precision_criterion, index_t max_ndead,
+            value_t boost_posterior, bool posteriors, bool equals,
             bool cluster_posteriors, bool write_resume,
             bool write_paramnames, bool read_resume, bool write_stats,
             bool write_live, bool write_dead, bool write_prior,
-            int update_files, int nDims, int nDerived, char *base_dir,
-            char *file_root, int nGrade, double *grade_frac, int *grade_dims,
-            double (*Loglike)(double *theta, int nDims,
-                    double *phi, int nDerived, void *),
-            void (*prior)(double *cube, double *theta, int nDims, void *),
-            void (*c_dumper)(double log_evidence, double error_log_evidence,
-                double ndead, double n_likelihood_calls, double n_accepted,
-                double *live_params,
-                int n_cluster, double llh_best_fit, double llh_worst_fit,
-                int nPar, void *),
+            index_t update_files, index_t nDims, index_t nDerived, char *base_dir,
+            char *file_root, index_t nGrade, value_t *grade_frac, index_t *grade_dims,
+            value_t (*Loglike)(value_t *theta, index_t nDims,
+                    value_t *phi, index_t nDerived, void *),
+            void (*prior)(value_t *cube, value_t *theta, index_t nDims, void *),
+            void (*c_dumper)(value_t log_evidence, value_t error_log_evidence,
+                value_t ndead, value_t n_likelihood_calls, value_t n_accepted,
+                value_t *live_params,
+                index_t n_cluster, value_t llh_best_fit, value_t llh_worst_fit,
+                index_t nPar, void *),
             void *context);
     }
 }
@@ -47,14 +47,14 @@ namespace interfaces
 
 /***************************************** C Interface to PolyCHord ***********/
 
-extern void polychord_c_interface(int, int, int,
-    bool, int, double, int, double, bool, bool, bool, bool,
-    bool, bool, bool, bool, bool, bool, int, int, int,
-    char *, char *, int, double *, int *,
-    double (*Loglike)(double *, int, double *, int, void *),
-    void (*prior)(double *, double *, int, void *),
-    void (*c_dumper)(double, double, double, double, double, double *, int,
-        double, double, int, void *), void *context);
+extern void polychord_c_interface(index_t, index_t, index_t,
+    bool, index_t, value_t, index_t, value_t, bool, bool, bool, bool,
+    bool, bool, bool, bool, bool, bool, index_t, index_t, index_t,
+    char *, char *, index_t, value_t *, index_t *,
+    value_t (*Loglike)(value_t *, index_t, value_t *, index_t, void *),
+    void (*prior)(value_t *, value_t *, index_t, void *),
+    void (*c_dumper)(value_t, value_t, value_t, value_t, value_t, value_t *, index_t,
+        value_t, value_t, index_t, void *), void *context);
 
 /******************************************************************************/
 

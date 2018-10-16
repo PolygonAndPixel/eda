@@ -12,9 +12,9 @@
 
 /** Constructor and destructor **/
 DalexMinimizer::DalexMinimizer(
-    int max_iter,
-    int max_points,
-    int seed,
+    index_t max_iter,
+    index_t max_points,
+    index_t seed,
     bool dump_points) : Minimizer(0, max_iter, 0, max_points, seed, dump_points)
 {
     seed_ = seed;
@@ -37,11 +37,11 @@ std::string DalexMinimizer::get_name() {
  * */
 v_d DalexMinimizer::to_physics(
     v_d cube,
-    uint32_t nDims) {
+    index_t nDims) {
 
     v_d theta;
     
-    for (int i=0; i<nDims; i++) {
+    for (index_t i=0; i<nDims; i++) {
         theta.push_back(this->lower_bnds[i]
         + (this->upper_bnds[i] - this->lower_bnds[i])
         * cube[i]);
@@ -56,24 +56,24 @@ v_d DalexMinimizer::to_physics(
  *                          free parameter for minimization
  * */
 void DalexMinimizer::execute(
-    uint32_t nDims){
+    index_t nDims){
 
     // Class needed by Dalex
     class my_chisq_fn : public chisquared{
     public:
 
         // the constructor should call the constructor for
-        // chisquared, passing in one int for the dimensionality
+        // chisquared, passing in one index_t for the dimensionality
         // of the likelihood function
-        my_chisq_fn(int nDims) : chisquared(nDims){
+        my_chisq_fn(index_t nDims) : chisquared(nDims){
             _accepted = 0;
             _called = 0;
             _dim = nDims;
             _best_params.clear();
-            for(uint32_t i = 0; i < nDims; i++)
+            for(index_t i = 0; i < nDims; i++)
                 _best_params.push_back(0);
             
-            _best = std::numeric_limits<double>::max();
+            _best = std::numeric_limits<value_t>::max();
         }
 
         void set_fun(TestFunctions *llh_func) {
@@ -87,22 +87,22 @@ void DalexMinimizer::execute(
                 std::ofstream ofile((filename).c_str(),
                     std::ofstream::out  | std::ofstream::app);
 
-                for(int j=0; j<_dim; j++) ofile << "Param" << j << "\t";
+                for(index_t j=0; j<_dim; j++) ofile << "Param" << j << "\t";
                 ofile << std::endl;
                 ofile.close();
                 _out_name = filename;
             }
         }
-        // you must define an operator that accepts an array_1d<double>
+        // you must define an operator that accepts an array_1d<value_t>
         // representing the point in parameter space and returns
-        // a double representing the chi^2 value at that point
-        virtual double operator()(const array_1d<double> &in){
+        // a value_t representing the chi^2 value at that point
+        virtual value_t operator()(const array_1d<value_t> &in){
             v_d theta;
-            for (int i=0; i<_dim; i++) {
+            for (index_t i=0; i<_dim; i++) {
                 theta.push_back(in.get_data(i));
             }
             _called++;
-            double ans = _llh_func->get_lh(theta);
+            value_t ans = _llh_func->get_lh(theta);
             if(ans < _best) {
                 _best = ans;
                 _best_params = theta;
@@ -119,20 +119,20 @@ void DalexMinimizer::execute(
         }
 
         v_d get_best_params() {return _best_params;}
-        double get_chimin() {return _best;}
-        int get_accepted() {return _accepted;}
+        value_t get_chimin() {return _best;}
+        index_t get_accepted() {return _accepted;}
     private:
         TestFunctions *_llh_func;
-        int _accepted;
-        double _best;
+        index_t _accepted;
+        value_t _best;
         v_d _best_params;
         std::string _out_name;
         bool _dump;
     };
     
     my_chisq_fn chifn(nDims);
-    array_1d<double> min, max;
-    for(uint32_t i = 0; i < nDims; i++) {
+    array_1d<value_t> min, max;
+    for(index_t i = 0; i < nDims; i++) {
         min.set(i, lower_bnds[i]);
         max.set(i, upper_bnds[i]);
     }

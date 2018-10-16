@@ -63,9 +63,9 @@ def gauss_shell(x):
 
 cm = plt.cm.get_cmap('jet_r')
 nDims = 2
-three_d = int(sys.argv[2]) > 0
-contour = int(sys.argv[3]) > 0
-which_func = int(sys.argv[4])
+three_d = index_t(sys.argv[2]) > 0
+contour = index_t(sys.argv[3]) > 0
+which_func = index_t(sys.argv[4])
 print("Save picture as {}".format(sys.argv[1]))
 print("Using 3d projection: {}".format(three_d))
 print("Using contour: {}".format(contour))

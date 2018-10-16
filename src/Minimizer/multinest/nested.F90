@@ -23,20 +23,20 @@ module Nested
   integer ndims ! Number of dimensions
   integer nsc_def !no. of iterations per every sub-clustering step
   integer updInt !update interval
-  double precision Ztol !lowest local evidence for which samples to produce
-  double precision tol ! tolerance at end
-  double precision ef
+  value_t precision Ztol !lowest local evidence for which samples to produce
+  value_t precision tol ! tolerance at end
+  value_t precision ef
   logical multimodal ! multimodal or unimodal sampling
   logical ceff ! constant efficiency?
   integer numlike,globff
-  double precision logZero
+  value_t precision logZero
   integer maxIter
   logical fback,resumeFlag,dlive,genLive,dino
   !output files name
   character(LEN=100)physname,broot,rname,resumename,livename,evname,IS_Files(3)
   !output file units
   integer u_ev,u_resume,u_phys,u_live,u_IS(3)
-  double precision gZ,ginfo !total log(evidence) & info
+  value_t precision gZ,ginfo !total log(evidence) & info
   integer count,sCount
   logical, dimension(:), allocatable :: pWrap
   logical mWrap,aWrap !whether to do wraparound for mode separation
@@ -57,13 +57,13 @@ contains
 	integer maxClst,nest_nsc,nest_totPar,nest_nCdims,nest_pWrap(*),nest_maxIter
 	logical nest_IS,nest_mmodal,nest_fb,nest_resume,nest_ceff,nest_outfile,initMPI
 	character(LEN=100) nest_root
-	double precision nest_tol,nest_ef,nest_Ztol,nest_logZero
+	value_t precision nest_tol,nest_ef,nest_Ztol,nest_logZero
 
 	INTERFACE
     		!the likelihood function
     		subroutine loglike(Cube,n_dim,nPar,lnew,context_pass)
 			integer n_dim,nPar,context_pass
-			double precision lnew,Cube(nPar)
+			value_t precision lnew,Cube(nPar)
 		end subroutine loglike
     	end INTERFACE
 
@@ -72,8 +72,8 @@ contains
     		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
                 paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted,context_pass)
 			integer nSamples, nlive, nPar, context_pass
-			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, INSlogZ, logZerr
+			value_t precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
+			value_t precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 
@@ -251,10 +251,10 @@ contains
 	implicit none
 
 	integer context, n_accepted
-	double precision, allocatable :: p(:,:), phyP(:,:) !live points
-	double precision, allocatable :: l(:) !log-likelihood
-	double precision vnow1!current vol
-	double precision ltmp(totPar+2)
+	value_t precision, allocatable :: p(:,:), phyP(:,:) !live points
+	value_t precision, allocatable :: l(:) !log-likelihood
+	value_t precision vnow1!current vol
+	value_t precision ltmp(totPar+2)
 	character(len=100) fmt
 	integer np,i,j,k,ios
 	logical flag
@@ -264,7 +264,7 @@ contains
 		!the likelihood function
 		subroutine loglike(Cube,n_dim,nPar,lnew,context_pass)
 			integer n_dim,nPar,context_pass
-			double precision lnew,Cube(nPar)
+			value_t precision lnew,Cube(nPar)
 		end subroutine loglike
 	end INTERFACE
 
@@ -273,8 +273,8 @@ contains
     		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
                 paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted, context_pass)
 			integer nSamples, nlive, nPar, context_pass
-			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, INSlogZ, logZerr
+			value_t precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
+			value_t precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 
@@ -386,12 +386,12 @@ contains
 	implicit none
 
     	integer i,j,iostatus,idum,k,m,nptPerProc,nGen,nstart,nend,context,n_accepted
-    	double precision, allocatable :: pnewP(:,:), phyPnewP(:,:), lnewP(:)
-    	double precision p(ndims,nlive+1), phyP(totPar,nlive+1), l(nlive+1)
+    	value_t precision, allocatable :: pnewP(:,:), phyPnewP(:,:), lnewP(:)
+    	value_t precision p(ndims,nlive+1), phyP(totPar,nlive+1), l(nlive+1)
     	integer id
     	character(len=100) fmt,fmt2
 #ifdef MPI
-	double precision, allocatable ::  tmpl(:), tmpp(:,:), tmpphyP(:,:)
+	value_t precision, allocatable ::  tmpl(:), tmpp(:,:), tmpphyP(:,:)
 	integer q
 #endif
 
@@ -399,7 +399,7 @@ contains
     		!the likelihood function
     		subroutine loglike(Cube,n_dim,nPar,lnew,context_pass)
 			integer n_dim,nPar,context_pass
-			double precision lnew,Cube(nPar)
+			value_t precision lnew,Cube(nPar)
 		end subroutine loglike
     	end INTERFACE
 
@@ -408,8 +408,8 @@ contains
     		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
                 paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted,context_pass)
 			integer nSamples, nlive, nPar, context_pass
-			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, INSlogZ, logZerr
+			value_t precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
+			value_t precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 
@@ -626,7 +626,7 @@ contains
     implicit none
 
     integer, intent(in) :: n
-    double precision, intent(out) :: x(:)
+    value_t precision, intent(out) :: x(:)
     integer i,id
 
     ! --- uniform prior ----
@@ -646,9 +646,9 @@ contains
 	!input variables
 
 	integer context, n_accepted
-	double precision p(ndims,nlive+1) !live points
-	double precision phyP(totPar,nlive+1) !physical live points
-	double precision l(nlive+1) !log-likelihood
+	value_t precision p(ndims,nlive+1) !live points
+	value_t precision phyP(totPar,nlive+1) !physical live points
+	value_t precision l(nlive+1) !log-likelihood
 
 
 	!work variables
@@ -657,10 +657,10 @@ contains
 	integer i, j, k, m, n, j1, i1, i2, i3, i4, ff, sff, n1, n2, q, nd, nd_i, nd_j, iostatus
 	integer num_old
 	integer, allocatable :: eswitchff(:), escount(:), dmin(:)
-	double precision d1, d2, d3, d4, d5, urv
-	double precision h, logX, vprev, vnext, shrink !prior volume
-	double precision mar_r !marginal acceptance rate
-	double precision gZOld !global evidence & info
+	value_t precision d1, d2, d3, d4, d5, urv
+	value_t precision h, logX, vprev, vnext, shrink !prior volume
+	value_t precision mar_r !marginal acceptance rate
+	value_t precision gZOld !global evidence & info
 	logical eswitch,peswitch,cSwitch !whether to do ellipsoidal sampling or not
 	logical remFlag, acpt, flag, flag2
 	integer funit1, funit2 !file units
@@ -670,50 +670,50 @@ contains
 	!diagnostics for determining when to do eigen analysis
 	integer neVol
 	parameter(neVol=4)
-	double precision, dimension(:), allocatable :: totVol, x1, x2, y1, y2, slope, intcpt, cVolFrac, pVolFrac
-	double precision, dimension(:,:,:), allocatable :: eVolFrac
+	value_t precision, dimension(:), allocatable :: totVol, x1, x2, y1, y2, slope, intcpt, cVolFrac, pVolFrac
+	value_t precision, dimension(:,:,:), allocatable :: eVolFrac
 
 	!info for output file update
-	double precision, allocatable :: evData(:,:), evDataAll(:), evDataTemp(:)
+	value_t precision, allocatable :: evData(:,:), evDataAll(:), evDataTemp(:)
 
 	!isolated cluster info
 	integer ic_n !no. of nodes
 	integer, allocatable :: ic_sc(:), ic_npt(:)
 	logical, allocatable :: ic_done(:)
 	integer, dimension(:), allocatable :: ic_fNode, ic_nsc, ic_nBrnch
-	double precision, dimension(:,:,:),  allocatable :: ic_brnch, ic_llimits, ic_plimits
-	double precision, allocatable :: ic_climits(:,:,:), ic_volFac(:)
-	double precision, dimension(:),  allocatable :: ic_Z, ic_Zold, ic_info, ic_vnow, ic_hilike, ic_inc
-	double precision, dimension(:,:),  allocatable :: ic_eff
+	value_t precision, dimension(:,:,:),  allocatable :: ic_brnch, ic_llimits, ic_plimits
+	value_t precision, allocatable :: ic_climits(:,:,:), ic_volFac(:)
+	value_t precision, dimension(:),  allocatable :: ic_Z, ic_Zold, ic_info, ic_vnow, ic_hilike, ic_inc
+	value_t precision, dimension(:,:),  allocatable :: ic_eff
 	logical, dimension(:),  allocatable :: ic_reme, ic_rFlag, ic_chk
  	logical modeFound
 
 	!means & standard deviations of the live points (for prior edge detection)
-	double precision, dimension(:,:), allocatable :: ic_mean, ic_sigma
-	double precision lPts(ndims)
+	value_t precision, dimension(:,:), allocatable :: ic_mean, ic_sigma
+	value_t precision lPts(ndims)
 
 	!sub-cluster properties
 	integer sc_n !no. of sub-clusters
 	integer, dimension(:), allocatable :: sc_npt, nptk, nptx ,sc_node, nodek, sck
-	double precision, dimension(:,:), allocatable :: meank, sc_eval, evalk
-	double precision, dimension(:,:,:), allocatable :: sc_invcov, invcovk, sc_evec, eveck, tMatk
-	double precision, dimension(:), allocatable :: kfack, volk, effk
-	double precision, allocatable :: sc_mean(:,:), sc_tmat(:,:,:), sc_kfac(:), sc_eff(:), sc_vol(:)
+	value_t precision, dimension(:,:), allocatable :: meank, sc_eval, evalk
+	value_t precision, dimension(:,:,:), allocatable :: sc_invcov, invcovk, sc_evec, eveck, tMatk
+	value_t precision, dimension(:), allocatable :: kfack, volk, effk
+	value_t precision, allocatable :: sc_mean(:,:), sc_tmat(:,:,:), sc_kfac(:), sc_eff(:), sc_vol(:)
 
 	!auxiliary points (to be re-arranged with main points during clustering)
 	integer naux !dimensionality of aux points
-	double precision, dimension(:,:), allocatable :: aux, pt
+	value_t precision, dimension(:,:), allocatable :: aux, pt
 
 	!rejected point info
-	double precision lowlike !lowest log-like
-	double precision, allocatable :: lowp(:), lowphyP(:) !point with the lowlike
+	value_t precision lowlike !lowest log-like
+	value_t precision, allocatable :: lowp(:), lowphyP(:) !point with the lowlike
 	integer indx(1) !point no. of lowlike
 
 	!new point
-	double precision lnew
-	double precision, allocatable :: pnew(:), phyPnew(:) ! new point
-	double precision, dimension(:,:,:), allocatable :: pnewa, phyPnewa
-	double precision, dimension(:,:), allocatable :: lnewa
+	value_t precision lnew
+	value_t precision, allocatable :: pnew(:), phyPnew(:) ! new point
+	value_t precision, dimension(:,:,:), allocatable :: pnewa, phyPnewa
+	value_t precision, dimension(:,:), allocatable :: lnewa
 	integer, dimension(:), allocatable :: rIdx
 	integer, dimension(:,:), allocatable :: sEll
 	logical, dimension(:), allocatable :: remain
@@ -722,17 +722,17 @@ contains
 	integer nCdim
 
 	!importance sampling
-	double precision, allocatable :: IS_allpts(:,:), IS_iterinfo(:,:), IS_V(:)
+	value_t precision, allocatable :: IS_allpts(:,:), IS_iterinfo(:,:), IS_V(:)
 	integer IS_counter(7)
 	integer :: IS_nstore = 10000, IS_nMC = 1000
-	double precision :: IS_Z(2)
+	value_t precision :: IS_Z(2)
 	logical :: IS_CheckAll = .false., IS_betterMC = .true., IS_GetVolInsidePrior = .true.
 
 	INTERFACE
     		!the likelihood function
     		subroutine loglike(Cube,n_dim,nPar,lnew,context_pass)
 			integer n_dim,nPar,context_pass
-			double precision lnew,Cube(nPar)
+			value_t precision lnew,Cube(nPar)
 		end subroutine loglike
       	end INTERFACE
 
@@ -741,8 +741,8 @@ contains
     		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
                 paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted,context_pass)
 			integer nSamples, nlive, nPar, context_pass
-			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, INSlogZ, logZerr
+			value_t precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
+			value_t precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 
@@ -1619,7 +1619,7 @@ contains
 				IS_V(i) = 0d0
 				if( IS_GetVolInsidePrior ) then
 					do k = nd_i, nd_i+ic_sc(i)
-						j1 = max(5, int( ( dble(IS_nMC) * dble(ic_npt(i)) / dble(nlive) ) * ( dble(sc_vol(k)) / dble(totVol(i)) ) ))
+						j1 = max(5, index_t( ( dble(IS_nMC) * dble(ic_npt(i)) / dble(nlive) ) * ( dble(sc_vol(k)) / dble(totVol(i)) ) ))
 						m = 0
 						do i3 = 1, j1
 							d1=sc_kfac(k)*sc_eff(k)
@@ -1644,7 +1644,7 @@ contains
 				else
 					m = 0
 					j1 = ic_npt(i)
-					if( IS_betterMC .and. IS_nMC > nlive ) j1 = int(dble(IS_nMC) * dble(ic_npt(i)) / dble(nlive))
+					if( IS_betterMC .and. IS_nMC > nlive ) j1 = index_t(dble(IS_nMC) * dble(ic_npt(i)) / dble(nlive))
 					do j = nd_j+1, nd_j+j1
 						if( j > nd_j+ic_npt(i) ) then
 							!first pick an ellipsoid according to the vol
@@ -1701,7 +1701,7 @@ contains
 
 						nd_i = 0 !no. of ellipsoids traversed
 						do i = 1, ic_n
-							if( ic_done(i) .or. totvol(i) == 0d0 .or. ic_npt(i) == 0 .or. ( multimodal .and. .not.isAncestor(int(IS_allpts(j,ndims+6)), i, ic_fnode(1:i)) ) ) then
+							if( ic_done(i) .or. totvol(i) == 0d0 .or. ic_npt(i) == 0 .or. ( multimodal .and. .not.isAncestor(index_t(IS_allpts(j,ndims+6)), i, ic_fnode(1:i)) ) ) then
 								nd_i = nd_i+ic_sc(i)
 								cycle
 							endif
@@ -1926,8 +1926,8 @@ contains
 						if( IS ) then
 							n1 = 0; n2 = 0
 							if( IS_counter(5) == globff+1 ) then
-								n1 = int(IS_iterinfo(globff+1,2))	!n_{i}
-								n2 = int(IS_iterinfo(globff+1,4))	!n_{i}
+								n1 = index_t(IS_iterinfo(globff+1,2))	!n_{i}
+								n2 = index_t(IS_iterinfo(globff+1,4))	!n_{i}
 							endif
 
 							if( n1 > 0 .and. n2 > 0 ) then
@@ -2150,8 +2150,8 @@ contains
 						if( IS ) then
 							n1 = 0; n2 = 0
 							if( IS_counter(5) == globff+1 ) then
-								n1 = int(IS_iterinfo(globff+1,2))	!n_{coll, i}
-								n2 = int(IS_iterinfo(globff+1,4))	!n_{i}
+								n1 = index_t(IS_iterinfo(globff+1,2))	!n_{coll, i}
+								n2 = index_t(IS_iterinfo(globff+1,4))	!n_{i}
 							endif
 
 							if( n1 > 0 .and. n2 > 0 ) then
@@ -2164,13 +2164,13 @@ contains
 								do j = IS_counter(2), IS_counter(1)-n1
 									if( IS_allpts(j,ndims+3) == 0d0 ) cycle
 
-									if( multimodal .and. .not.isAncestor(int(IS_allpts(j,ndims+6)), nd, ic_fnode(1:nd)) ) then
+									if( multimodal .and. .not.isAncestor(index_t(IS_allpts(j,ndims+6)), nd, ic_fnode(1:nd)) ) then
 										IS_allpts(j,ndims+3) = 0d0
 										cycle
 									endif
 
 									!check if this point lies in current ellipsoidal decomposition
-									m = int(IS_allpts(j,ndims+4))
+									m = index_t(IS_allpts(j,ndims+4))
 									if( m > nd_i .and. m <= nd_i+ic_sc(nd) .and. IS_allpts(j,ndims+5) <= sc_kfac(m)*sc_eff(m) ) then
 										IS_allpts(j,ndims+2) = IS_allpts(j,ndims+2) + dble(n2) / IS_iterinfo(globff+1,1)
 										if( i1 == 0 ) IS_counter(2) = j
@@ -2183,15 +2183,15 @@ contains
 
 								!(p(\Theta) n) for points collected in current iteration from previous iterations
 								do j = 1, globff
-									if( multimodal .and. .not.isAncestor(int(IS_iterinfo(j,5)), nd, ic_fnode(1:nd)) ) cycle
+									if( multimodal .and. .not.isAncestor(index_t(IS_iterinfo(j,5)), nd, ic_fnode(1:nd)) ) cycle
 
-									if( int(IS_iterinfo(j,4)) > 0 ) IS_allpts(IS_counter(1)-n1+1:IS_counter(1),ndims+2) = IS_allpts(IS_counter(1)-n1+1:IS_counter(1),ndims+2) + IS_iterinfo(j,4) / IS_iterinfo(j,1)
+									if( index_t(IS_iterinfo(j,4)) > 0 ) IS_allpts(IS_counter(1)-n1+1:IS_counter(1),ndims+2) = IS_allpts(IS_counter(1)-n1+1:IS_counter(1),ndims+2) + IS_iterinfo(j,4) / IS_iterinfo(j,1)
 								enddo
 							endif
 						endif
 
 						if(ceff) then
-							if(ic_eff(nd,1)>0d0 .and. mod(int(ic_eff(nd,1)),10)==0) then
+							if(ic_eff(nd,1)>0d0 .and. mod(index_t(ic_eff(nd,1)),10)==0) then
 								d1=ic_eff(nd,1)/ic_eff(nd,2)
 								ic_eff(nd,1)=0d0
 								ic_eff(nd,2)=0d0
@@ -2384,7 +2384,7 @@ contains
 						open(unit=funit1,file=fName1,form='formatted',status='old', position='append')
 	    					write(fmt,'(a,i5,a)')  '(',totPar+2,'E28.18,i5)'
 						do i=1,j1
-	    						write(funit1,fmt) evData(i,1:totPar+2),int(evData(i,totPar+3))
+	    						write(funit1,fmt) evData(i,1:totPar+2),index_t(evData(i,totPar+3))
 						enddo
 						!close the files
 						close(funit1)
@@ -2446,7 +2446,7 @@ contains
 							!write all the points collected so far
 							open(unit=u_IS(1), file=IS_Files(1), form='unformatted', access='sequential', status='old', position='append')
 							do i = IS_counter(7)+1, IS_counter(1)
-								write(u_IS(1))IS_allpts(i,1:ndims+1),int(IS_allpts(i,ndims+6))
+								write(u_IS(1))IS_allpts(i,1:ndims+1),index_t(IS_allpts(i,ndims+6))
 							enddo
 							IS_counter(7) = IS_counter(1)
 							close(u_IS(1))
@@ -2455,14 +2455,14 @@ contains
 							open(unit=u_IS(2), file=IS_Files(2), form='unformatted', access='sequential', status='replace')
 							write(u_IS(2))IS_counter(1:2),IS_counter(5)
 							do i = 1, IS_counter(1)
-								write(u_IS(2))IS_allpts(i,ndims+2),int(IS_allpts(i,ndims+3))
+								write(u_IS(2))IS_allpts(i,ndims+2),index_t(IS_allpts(i,ndims+3))
 							enddo
 							close(u_IS(2))
 
 							!write the iteration info
 							open(unit=u_IS(3), file=IS_Files(3), form='unformatted', access='sequential',status='old', position='append')
 							do i = IS_counter(6)+1, IS_counter(5)
-								write(u_IS(3))IS_iterinfo(i,1),int(IS_iterinfo(i,2:5))
+								write(u_IS(3))IS_iterinfo(i,1),index_t(IS_iterinfo(i,2:5))
 							enddo
 							IS_counter(6) = IS_counter(5)
 							close(u_IS(3))
@@ -2609,13 +2609,13 @@ contains
       implicit none
 
       integer ndim !dimensionality
-      double precision eval1(:), evec1(:,:), mean1(:), mean2(:), inv_cov1(:,:), inv_cov2(:,:)
+      value_t precision eval1(:), evec1(:,:), mean1(:), mean2(:), inv_cov1(:,:), inv_cov2(:,:)
       ! matrices for ellipsoid interaction detection
-      double precision, allocatable :: matA(:,:), matB(:,:), matR(:,:), matAinvB(:,:)
+      value_t precision, allocatable :: matA(:,:), matB(:,:), matR(:,:), matAinvB(:,:)
       ! variables for calculating eigenvalues of N*N real non-sym matrix
-      double precision, allocatable :: evalR(:), evalI(:), VL(:,:), VR(:,:), WORK(:), delMean(:)
+      value_t precision, allocatable :: evalR(:), evalI(:), VL(:,:), VR(:,:), WORK(:), delMean(:)
       ! effective enlargement factor
-      double precision ef1,ef2
+      value_t precision ef1,ef2
       integer inf,k,i
       integer i1,i2,i3,i4,i5
 
@@ -2689,11 +2689,11 @@ contains
   subroutine samp(pnew,phyPnew,lnew,mean,ekfac,TMat,limits,loglike,eswitch,lowlike,n,context)
 
 	implicit none
-	double precision lnew
-    	double precision pnew(ndims),spnew(ndims),phyPnew(totPar),ekfac
-    	double precision mean(ndims),TMat(ndims,ndims)
-	double precision limits(ndims,2)
-	double precision lowlike	!likelihood threshold
+	value_t precision lnew
+    	value_t precision pnew(ndims),spnew(ndims),phyPnew(totPar),ekfac
+    	value_t precision mean(ndims),TMat(ndims,ndims)
+	value_t precision limits(ndims,2)
+	value_t precision lowlike	!likelihood threshold
 	integer n			!no. of points drawn
     	logical eswitch
     	integer id,i,context
@@ -2702,7 +2702,7 @@ contains
     		!the likelihood function
     		subroutine loglike(Cube,n_dim,nPar,lnew,context_pass)
 			integer n_dim,nPar,context_pass
-			double precision lnew,Cube(nPar)
+			value_t precision lnew,Cube(nPar)
 		end subroutine loglike
     	end INTERFACE
 
@@ -2747,11 +2747,11 @@ contains
 	!input parameters
 	integer flag				!0 => given point in unit hypercube, apply the limits
 						!1 => point to be transformed to unit hypercube, reverse the limits
-	double precision limits(ndims,2)	!current limits
-	double precision pt(ndims)		!point
+	value_t precision limits(ndims,2)	!current limits
+	value_t precision pt(ndims)		!point
 
 	!output variables
-	double precision transpt(ndims)		!final result
+	value_t precision transpt(ndims)		!final result
 
 
 	if( flag == 0 ) then
@@ -2774,9 +2774,9 @@ contains
       implicit none
 
       integer n!total no. of ellipsoids
-      double precision volx(n)!no. points in each ellipsoid
+      value_t precision volx(n)!no. points in each ellipsoid
       integer sEll!answer, the ellipsoid to sample from
-      double precision volTree(n),totvol,urv
+      value_t precision volTree(n),totvol,urv
       integer i
 
  	totvol=0.d0
@@ -2800,9 +2800,9 @@ contains
 
 	implicit none
     	!input variables
-    	double precision logZ !log-evidence
+    	value_t precision logZ !log-evidence
 	logical IS !importance sampling being done?
-	double precision IS_Z(2) !importance sampling log-evidence & its standard deviation
+	value_t precision IS_Z(2) !importance sampling log-evidence & its standard deviation
     	integer nlike !no. of likelihood evaluations
     	integer nacc !no. of accepted samples
 	logical dswitch !dynamic live points
@@ -2826,12 +2826,12 @@ contains
 	integer npt !total no. of points
 	integer ndim !dimensionality
 	integer nCdim !clustering dimensionality
-	double precision pt(nCdim,npt)
+	value_t precision pt(nCdim,npt)
 	integer naux !no. of dimensions of the aux array
-	double precision aux(naux,npt)
+	value_t precision aux(naux,npt)
 	logical ic_chk(ic_n) !whether to check a node for mode separation
-	double precision ic_vnow(ic_n) !prior volumes
-	double precision limits(maxCls,nCdim,2) !physical parameter ranges
+	value_t precision ic_vnow(ic_n) !prior volumes
+	value_t precision limits(maxCls,nCdim,2) !physical parameter ranges
 
 	!input/output parameters
 	!mode info
@@ -2845,17 +2845,17 @@ contains
 	!work variables
 	integer i,j,k,i1,j2,j3,j4,i2,i3,i4,i5,n,n1,n2,n_mode,npt_mode,m,nLost
 	integer, allocatable :: order(:), nptx(:), nodex(:)
-	double precision d1,d2,d4,ef0, ef1, ef2
+	value_t precision d1,d2,d4,ef0, ef1, ef2
 	integer nN,sc_n
 	logical, allocatable :: gList(:), lList(:), toBeChkd(:), overlapk(:,:)
 	logical flag,intFlag
-	double precision, allocatable :: ptk(:,:), auxk(:,:), ptx(:,:), auxx(:,:)
-	double precision, allocatable :: mMean(:), lMean(:), mStdErr(:), lStdErr(:)
-	double precision, allocatable :: mean1(:), mean2(:), mean1w(:), mean2w(:)
-	double precision, allocatable :: eval1(:), evec1(:,:), invcov1(:,:), invcov2(:,:)
+	value_t precision, allocatable :: ptk(:,:), auxk(:,:), ptx(:,:), auxx(:,:)
+	value_t precision, allocatable :: mMean(:), lMean(:), mStdErr(:), lStdErr(:)
+	value_t precision, allocatable :: mean1(:), mean2(:), mean1w(:), mean2w(:)
+	value_t precision, allocatable :: eval1(:), evec1(:,:), invcov1(:,:), invcov2(:,:)
 	logical, allocatable :: wrapEll(:), wrapDim(:,:,:)
 	integer, allocatable :: wrapN(:)
-	double precision, allocatable :: meanw(:,:),meank(:,:),evalk(:,:),eveck(:,:,:),invcovk(:,:,:),tmatk(:,:,:),kfack(:)
+	value_t precision, allocatable :: meanw(:,:),meank(:,:),evalk(:,:),eveck(:,:,:),invcovk(:,:,:),tmatk(:,:,:),kfack(:)
 
 
 	allocate( order(nCdim), nptx(npt/(nCdim+1)+1), nodex(npt/(nCdim+1)+1) )
@@ -3205,17 +3205,17 @@ contains
 	logical multimodal !set clustering limits?
 	integer ndim !dimensionality
 	integer nCdim !clustering dimension
-	double precision pnew(ndim) !new point
-	double precision phyPnew(nCdim) !new physical point
-	double precision climits(ndim,2) !current scaling limits
+	value_t precision pnew(ndim) !new point
+	value_t precision phyPnew(nCdim) !new physical point
+	value_t precision climits(ndim,2) !current scaling limits
 
 	!input/output variables
-	double precision llimits(ndim,2) !current limits
-	double precision plimits(nCdim,2) !current clustering limits
+	value_t precision llimits(ndim,2) !current limits
+	value_t precision plimits(nCdim,2) !current clustering limits
 
 	!work variables
 	integer i
-	double precision pt(ndim)
+	value_t precision pt(ndim)
 
 
 	!first scale the point
@@ -3251,8 +3251,8 @@ contains
  subroutine wraparound(oPt,wPt)
 
 	implicit none
-	double precision oPt !actual point
-	double precision wPt !wrapped-around point
+	value_t precision oPt !actual point
+	value_t precision wPt !wrapped-around point
 
 	wPt=oPt
 	do
@@ -3273,10 +3273,10 @@ contains
 
 	!input variables
 	integer ndim !dimensionality
-	double precision mean(ndim)
-	double precision TMat (ndim,ndim) !transformation matrix
-	double precision ef !enlargement factor
-	double precision limits(ndim,2) !current scale limits
+	value_t precision mean(ndim)
+	value_t precision TMat (ndim,ndim) !transformation matrix
+	value_t precision ef !enlargement factor
+	value_t precision limits(ndim,2) !current scale limits
 
 	!output variable
 	logical wrapEll
@@ -3284,8 +3284,8 @@ contains
 
 	!work variable
 	integer i,j,k
-	double precision cubeEdge(ndim),sCubeEdge
-	double precision pnewM(1,ndim),u(1,ndim)
+	value_t precision cubeEdge(ndim),sCubeEdge
+	value_t precision pnewM(1,ndim),u(1,ndim)
 
 
 	wrapEll=.false.
@@ -3349,11 +3349,11 @@ contains
 
 	!input variables
 	integer ndim
-	double precision limits(ndim,2) !current limits
-	double precision sP(ndim) !scaled point
+	value_t precision limits(ndim,2) !current limits
+	value_t precision sP(ndim) !scaled point
 
 	!output variable
-	double precision cP(ndim) !point in unit hypercube
+	value_t precision cP(ndim) !point in unit hypercube
 
 	!work variables
 	integer i
@@ -3373,11 +3373,11 @@ contains
 
 	!input variables
 	integer ndim
-	double precision limits(ndim,2) !current limits
-	double precision sP(ndim) !scaled point
+	value_t precision limits(ndim,2) !current limits
+	value_t precision sP(ndim) !scaled point
 
 	!output variable
-	double precision cP(ndim) !point in unit hypercube
+	value_t precision cP(ndim) !point in unit hypercube
 
 	!work variables
 	integer i
@@ -3433,11 +3433,11 @@ contains
 	integer n5					!no. of columns
 
 	!output variables
-	double precision, allocatable :: array(:,:)	!array
+	value_t precision, allocatable :: array(:,:)	!array
 
 	!work variables
 	integer i
-	double precision, allocatable :: temp(:,:)
+	value_t precision, allocatable :: temp(:,:)
 
 
 	if( n2 == 0 ) return

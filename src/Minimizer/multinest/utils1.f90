@@ -17,11 +17,11 @@ contains
  subroutine Diagonalize(a,diag,n,switch)
 	!Does m = U diag U^T, returning U in m
 	integer n,id
-	double precision a(n,n),diag(n)
+	value_t precision a(n,n),diag(n)
 	logical switch
 	integer i,j,ierr,il,iu,m,isuppz(2*n)
-	double precision vl,vu,abstol,z(n,n)
-	double precision, dimension(:), allocatable :: work
+	value_t precision vl,vu,abstol,z(n,n)
+	value_t precision, dimension(:), allocatable :: work
 	integer, dimension(:), allocatable :: iwork
 
 	diag=0.
@@ -41,7 +41,7 @@ contains
             	call DSYEVR( 'V', 'A', 'U', n, a, n, vl, vu, il, iu, &
       		abstol, m, diag, Z, n, isuppz, work, lwork, iwork, liwork, ierr )
 
-            	lwork=int(work(1))
+            	lwork=index_t(work(1))
             	liwork=iwork(1)
             	deallocate(work,iwork)
             	setBlk=.true.
@@ -76,8 +76,8 @@ contains
 !---------------------------------------------------------------------- 
 
 ! LogSumExp(x,y)=log(exp(x)+exp(y))
-  double precision function LogSumExp(x,y)
-    double precision x,y
+  value_t precision function LogSumExp(x,y)
+    value_t precision x,y
 
     if (x.gt.y) then
        LogSumExp=x+log(1+exp(y-x))
@@ -93,9 +93,9 @@ contains
   subroutine calc_covmat(npt,np,p,mean,covmat)
     implicit none
     integer np,npt
-    double precision p(:,:)
-    double precision covmat(:,:)
-    double precision mean(:)
+    value_t precision p(:,:)
+    value_t precision covmat(:,:)
+    value_t precision mean(:)
     integer i,j,ip
 
     covmat=0.
@@ -118,9 +118,9 @@ contains
   subroutine calc_covmat_wt(npt,np,p,wt,mean,covmat)
     implicit none
     integer np,npt
-    double precision p(:,:),wt(:)
-    double precision covmat(:,:)
-    double precision mean(:)
+    value_t precision p(:,:),wt(:)
+    value_t precision covmat(:,:)
+    value_t precision mean(:)
     integer i,j,ip
 
     covmat=0.
@@ -143,8 +143,8 @@ contains
   subroutine calc_invcovmat(numdim,evec,eval,invcov)
     implicit none
     integer numdim !num of dimensions & points
-    double precision evec(:,:),eval(:) !eigenvectors & eigenvalues
-    double precision invcov(:,:)
+    value_t precision evec(:,:),eval(:) !eigenvectors & eigenvalues
+    value_t precision invcov(:,:)
     integer i,j,k
 
     invcov=0d0
@@ -166,13 +166,13 @@ contains
   subroutine ScaleFactor(npt,ndim,pt,mean,inv_cov,kmax)
     implicit none
  
-    double precision kmax
+    value_t precision kmax
     integer npt,ndim
-    double precision pt(ndim,npt),ptM(1,ndim),sf(1,1)
+    value_t precision pt(ndim,npt),ptM(1,ndim),sf(1,1)
     integer i,k
-    double precision inv_cov(ndim,ndim)
-    double precision mean(ndim)
-    double precision temp_p(ndim,npt)
+    value_t precision inv_cov(ndim,ndim)
+    value_t precision mean(ndim)
+    value_t precision temp_p(ndim,npt)
     
     do i=1,ndim
 	temp_p(i,1:npt)=pt(i,1:npt)-mean(i)
@@ -191,14 +191,14 @@ contains
    
 !----------------------------------------------------------------------	
  
- double precision function ptScaleFac(ndim,pt,meanx,invcovx)
+ value_t precision function ptScaleFac(ndim,pt,meanx,invcovx)
  	
 	implicit none
       
 	integer ndim!dimensionality
-      	double precision pt(ndim),point(1,ndim)!point to be checked
-      	double precision meanx(ndim),invcovx(ndim,ndim)!cluster attributes
-      	double precision kfac(1,1)!k factor of present point
+      	value_t precision pt(ndim),point(1,ndim)!point to be checked
+      	value_t precision meanx(ndim),invcovx(ndim,ndim)!cluster attributes
+      	value_t precision kfac(1,1)!k factor of present point
       
       	point(1,:)=pt(:)-meanx(:)
 	kfac=MATMUL(MATMUL(point,invcovx),Transpose(point))
@@ -212,9 +212,9 @@ contains
     
     implicit none
  
-    double precision TMatrix(ndim,ndim),evec(ndim,ndim),eval(ndim)
+    value_t precision TMatrix(ndim,ndim),evec(ndim,ndim),eval(ndim)
     integer ndim,np,i,j
-    double precision TMat(ndim,ndim)
+    value_t precision TMat(ndim,ndim)
     
     np=ndim
     TMatrix=evec
@@ -232,15 +232,15 @@ contains
 !----------------------------------------------------------------------
 
   !return the Mahalanobis distance of a point from the given ellipsoid
-  double precision function MahaDis(ndim,pt,mean,inv_cov,kfac)
+  value_t precision function MahaDis(ndim,pt,mean,inv_cov,kfac)
     implicit none
     
     !input varaibles
     integer ndim !dimensionality
-    double precision pt(ndim) !point
-    double precision mean(ndim) !centroid of the ellipsoid
-    double precision inv_cov(ndim,ndim) !inv covariance matrix of the ellipsoid
-    double precision kfac !enlargement factor
+    value_t precision pt(ndim) !point
+    value_t precision mean(ndim) !centroid of the ellipsoid
+    value_t precision inv_cov(ndim,ndim) !inv covariance matrix of the ellipsoid
+    value_t precision kfac !enlargement factor
     
     MahaDis=ptScaleFac(ndim,pt,mean,inv_cov)/kfac
     
@@ -248,12 +248,12 @@ contains
    
 !----------------------------------------------------------------------	
   
-  double precision function ellVol(ndim,eval,k_fac)
+  value_t precision function ellVol(ndim,eval,k_fac)
     
     implicit none
     
     integer ndim
-    double precision eval(ndim),k_fac,pi
+    value_t precision eval(ndim),k_fac,pi
     integer i
     
     pi=4.d0*atan(1.d0)
@@ -279,7 +279,7 @@ contains
     implicit none
     
     integer np,i,id
-    double precision u(:), mod, urv
+    value_t precision u(:), mod, urv
   
     mod=0d0
     do i=1,np
@@ -299,7 +299,7 @@ contains
     implicit none
     
     integer np,i,id
-    double precision u(:), mod
+    value_t precision u(:), mod
   
     mod=0.d0
     do i=1,np
@@ -321,20 +321,20 @@ contains
     !input variables
     integer npt !no. of points
     integer ndim !dimensionality
-    double precision pt(ndim,npt) !points
-    double precision pVol !min vol this ellipsoid should occupy
+    value_t precision pt(ndim,npt) !points
+    value_t precision pVol !min vol this ellipsoid should occupy
     logical switch !initialize the LAPACK eigen analysis routines?
     !output variables
-    double precision mean(ndim) !mean
-    double precision covmat(ndim,ndim) !covariance matrix
-    double precision invcov(ndim,ndim) !inverse covariance matrix
-    double precision tMat(ndim,ndim) !transformation matrix
-    double precision evec(ndim,ndim) !eigenvectors
-    double precision eval(ndim)
-    double precision detcov !determinant of the covariance matrix
-    double precision kfac !enlargement point factor
-    double precision eff !enlargement volume factor
-    double precision vol !ellipsoid volume
+    value_t precision mean(ndim) !mean
+    value_t precision covmat(ndim,ndim) !covariance matrix
+    value_t precision invcov(ndim,ndim) !inverse covariance matrix
+    value_t precision tMat(ndim,ndim) !transformation matrix
+    value_t precision evec(ndim,ndim) !eigenvectors
+    value_t precision eval(ndim)
+    value_t precision detcov !determinant of the covariance matrix
+    value_t precision kfac !enlargement point factor
+    value_t precision eff !enlargement volume factor
+    value_t precision vol !ellipsoid volume
     !work variables
     integer i,j
     
@@ -402,21 +402,21 @@ contains
     !input variables
     integer npt !no. of points
     integer ndim !dimensionality
-    double precision pt(ndim,npt) !points
+    value_t precision pt(ndim,npt) !points
     integer minPt
     !output variables
-    double precision mean(ndim) !centroid
-    double precision invcov(ndim,ndim) !inverse covariance matrix
-    double precision tMat(ndim,ndim) !transformation matrix
-    double precision evec(ndim,ndim) !eigenvectors
-    double precision eval(ndim) !eigenvalues
-    double precision kfac !multiplicative factor for covmat for bounding ell
+    value_t precision mean(ndim) !centroid
+    value_t precision invcov(ndim,ndim) !inverse covariance matrix
+    value_t precision tMat(ndim,ndim) !transformation matrix
+    value_t precision evec(ndim,ndim) !eigenvectors
+    value_t precision eval(ndim) !eigenvalues
+    value_t precision kfac !multiplicative factor for covmat for bounding ell
     !work variables
-    double precision sigma(ndim)
+    value_t precision sigma(ndim)
     integer i,j,k,n
     parameter(n=0)
-    double precision covmat(ndim,ndim),ptk(ndim,npt),dist(npt)
-    double precision maxIndx(n,2)
+    value_t precision covmat(ndim,ndim),ptk(ndim,npt),dist(npt)
+    value_t precision maxIndx(n,2)
     integer nOut,ptOut(n),nptk
     logical flag
     
@@ -461,7 +461,7 @@ contains
 		do i=1,k
 			if(maxIndx(i,2)>3d0) then
 				nOut=nOut+1
-				ptOut(nOut)=int(maxIndx(i,1))
+				ptOut(nOut)=index_t(maxIndx(i,1))
 			endif
 		enddo
 	else
@@ -531,14 +531,14 @@ contains
 	
 	!input variables
 	integer ndim !dimensionality
-	double precision mean(ndim) !centroid of the given ellipsoid
-	double precision efac !enlargement factor of the given ellipsoid
-	double precision TMat(ndim,ndim) !transformation matrix of the given ellipsoid
+	value_t precision mean(ndim) !centroid of the given ellipsoid
+	value_t precision efac !enlargement factor of the given ellipsoid
+	value_t precision TMat(ndim,ndim) !transformation matrix of the given ellipsoid
 	integer id !processor id (for OpenMP)
 	!output variable
-	double precision pt(ndim)
+	value_t precision pt(ndim)
 	!work variables
-	double precision u(1,ndim),pnewM(1,ndim)
+	value_t precision u(1,ndim),pnewM(1,ndim)
 	
 	call genPtInSpheroid(ndim,u(1,:),id)
 	pnewM=MatMul(u,TMat)
@@ -554,14 +554,14 @@ contains
 	
 	!input variables
 	integer ndim !dimensionality
-	double precision mean(ndim) !centroid of the given ellipsoid
-	double precision efac !enlargement factor of the given ellipsoid
-	double precision TMat(ndim,ndim) !transformation matrix of the given ellipsoid
+	value_t precision mean(ndim) !centroid of the given ellipsoid
+	value_t precision efac !enlargement factor of the given ellipsoid
+	value_t precision TMat(ndim,ndim) !transformation matrix of the given ellipsoid
 	integer id !processor id (for OpenMP)
 	!output variable
-	double precision pt(ndim)
+	value_t precision pt(ndim)
 	!work variables
-	double precision u(1,ndim),pnewM(1,ndim)
+	value_t precision u(1,ndim),pnewM(1,ndim)
 	
 	call genPtOnSpheroid(ndim,u(1,:),id)
 	pnewM=MatMul(u,TMat)
@@ -580,20 +580,20 @@ contains
 	integer a_r !if 0 then point rejected, 1 then point inserted
 	integer npt !no. of points after rejection or before insertion
 	integer ndim !dimensionality
-	double precision newpt(ndim) !point to be rejected/inserted
-	double precision pts(ndim,npt) !point set after rejection or before insertion
-	double precision mean(ndim) !centroid of the ellipsoid
-	double precision eval(ndim) !eigenvalues of the ellipsoid
-	double precision invcov(ndim,ndim) !inverse covariance matrix of the ellipsoid
-	double precision pVol !target volume
+	value_t precision newpt(ndim) !point to be rejected/inserted
+	value_t precision pts(ndim,npt) !point set after rejection or before insertion
+	value_t precision mean(ndim) !centroid of the ellipsoid
+	value_t precision eval(ndim) !eigenvalues of the ellipsoid
+	value_t precision invcov(ndim,ndim) !inverse covariance matrix of the ellipsoid
+	value_t precision pVol !target volume
 	
 	!input/output variables
-	double precision kfac !input (output): point enlargement before (after) rejection/insertion
-	double precision eff !input (output): volume enlargement before (after) rejection/insertion
-	double precision vol !input (output): volume before (after) rejection/insertion
+	value_t precision kfac !input (output): point enlargement before (after) rejection/insertion
+	value_t precision eff !input (output): volume enlargement before (after) rejection/insertion
+	value_t precision vol !input (output): volume before (after) rejection/insertion
 	
 	!work variables
-	double precision new_pt(ndim,1),new_kfac
+	value_t precision new_pt(ndim,1),new_kfac
 	
 	
 	!sanity check
@@ -688,19 +688,19 @@ contains
 	implicit none
     	!input variables
 	integer ndim !dimensionality
-	double precision newpt(ndim) !point to be inserted
-	double precision mean(ndim) !centroid of the ellipsoid
-	double precision eval(ndim) !eigenvalues of the ellipsoid
-	double precision invcov(ndim,ndim) !inverse covariance matrix of the ellipsoid
-	double precision pVol !target volume
+	value_t precision newpt(ndim) !point to be inserted
+	value_t precision mean(ndim) !centroid of the ellipsoid
+	value_t precision eval(ndim) !eigenvalues of the ellipsoid
+	value_t precision invcov(ndim,ndim) !inverse covariance matrix of the ellipsoid
+	value_t precision pVol !target volume
 	
 	!input/output variables
-	double precision kfac !input (output): point enlargement before (after) insertion
-	double precision eff !input (output): volume enlargement before (after) insertion
-	double precision vol !input (output): volume before (after) insertion
+	value_t precision kfac !input (output): point enlargement before (after) insertion
+	value_t precision eff !input (output): volume enlargement before (after) insertion
+	value_t precision vol !input (output): volume before (after) insertion
 	
 	!work variables
-	double precision new_pt(ndim,1),d1
+	value_t precision new_pt(ndim,1),d1
 	
 	
 	!find new kfac
@@ -728,7 +728,7 @@ contains
     
     logical inprior
     integer np, i
-    double precision p(np)
+    value_t precision p(np)
     
     inprior = .true.
     
@@ -748,7 +748,7 @@ contains
   	REAL gammln,xx  
       INTEGER j 
       DOUBLE PRECISION ser,stp,tmp,x,y,cof(6) 
-      !Internal arithmetic will be done in double precision, 
+      !Internal arithmetic will be done in value_t precision, 
       !a nicety that you can omit if  ve- gure accuracy is good enough. 
       SAVE cof,stp 
       
@@ -894,8 +894,8 @@ contains
   END FUNCTION erf
   
   
-  double precision function stNormalCDF(x)
-  	double precision x
+  value_t precision function stNormalCDF(x)
+  	value_t precision x
      
      	if(x>6.) then
       	stNormalCDF=1.
@@ -948,11 +948,11 @@ contains
 
   subroutine piksrt(n,n1,arr,arr1)
   	integer n,n1
-  	double precision arr(n)
-  	double precision arr1(n1,n)
+  	value_t precision arr(n)
+  	value_t precision arr1(n1,n)
   	integer i,j
-  	double precision a
-  	double precision a1(n1)
+  	value_t precision a
+  	value_t precision a1(n1)
   	do j=2,n
      		a=arr(j)
      		a1(1:n1)=arr1(1:n1,j)
@@ -970,21 +970,21 @@ contains
 
 !----------------------------------------------------------------------
   !calculation the multivariate normal function
-  double precision function mNormalF(d,x,mu,C)
+  value_t precision function mNormalF(d,x,mu,C)
   	integer d !dimension
-      double precision x(d) !data vector
-      double precision mu(d) !mean
-      double precision C(d,d) !covariance matrix
-      double precision a(d) !residual vector (x-mu)
+      value_t precision x(d) !data vector
+      value_t precision mu(d) !mean
+      value_t precision C(d,d) !covariance matrix
+      value_t precision a(d) !residual vector (x-mu)
       integer i
-      double precision Chisq,sqrD
-      double precision TwoPi
+      value_t precision Chisq,sqrD
+      value_t precision TwoPi
       Parameter(TwoPi=6.283185307)
-      double precision b(d)
+      value_t precision b(d)
       
       !DCHDC routine variables
       integer INFO
-      double precision L(d,d) !cholesky decomposition matrix
+      value_t precision L(d,d) !cholesky decomposition matrix
       
       !compute the Cholesky decomposition of the covariance matrix 'C'
       !C = L^T.L
@@ -1015,13 +1015,13 @@ contains
 
 !----------------------------------------------------------------------
   !calculation the cumulative Gaussian mixture probability in 1-D
-  double precision function cGaussMix(nClstr,pPt,pMean,pCov,wt)
+  value_t precision function cGaussMix(nClstr,pPt,pMean,pCov,wt)
   	integer nClstr !no. of cluster
-      double precision pPt !point
-      double precision pMean(nClstr),pCov(nClstr) !projected mean & variance of clusters
-      double precision wt(nClstr)
+      value_t precision pPt !point
+      value_t precision pMean(nClstr),pCov(nClstr) !projected mean & variance of clusters
+      value_t precision wt(nClstr)
       integer i
-      double precision z
+      value_t precision z
       
       cGaussMix=0.
       do i=1,nClstr
@@ -1038,9 +1038,9 @@ contains
       implicit none
       
       integer ndim
-      double precision pt(:),point(1,ndim)!point to be checked
-      double precision meanx(:),invcovx(:,:),kfacx!cluster attributes
-      double precision kfac!k factor of present point
+      value_t precision pt(:),point(1,ndim)!point to be checked
+      value_t precision meanx(:),invcovx(:,:),kfacx!cluster attributes
+      value_t precision kfac!k factor of present point
       
       ptIn1Ell=.false.
         
@@ -1066,11 +1066,11 @@ contains
       integer npt !no. of points in the mode
       
       !input/output variables
-      double precision vol !ellipsoid volume
-      double precision eff !enlargement
+      value_t precision vol !ellipsoid volume
+      value_t precision eff !enlargement
       
       !work variables
-      double precision d1
+      value_t precision d1
       
       if(eff>1d0) then
       	d1=eff

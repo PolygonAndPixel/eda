@@ -2,7 +2,7 @@
 
 ////////////////////////////////jellyBeanData
 
-chiSquaredData::chiSquaredData(int dd, int cc, double ww, int nData, double sigma) : chisquared(dd, cc, ww){
+chiSquaredData::chiSquaredData(index_t dd, index_t cc, value_t ww, index_t nData, value_t sigma) : chisquared(dd, cc, ww){
     printf("_dim %d\n",_dim);
 
     if(_dim<4){
@@ -32,16 +32,16 @@ chiSquaredData::chiSquaredData(int dd, int cc, double ww, int nData, double sigm
     _xmax=3.0;
     _dx=0.03;
 
-    int ix;
-    double ll;
-    double ll_min,ll_max;
+    index_t ix;
+    value_t ll;
+    value_t ll_min,ll_max;
     ll_min=log(0.05*_xmax);
     ll_max=log(0.6*_xmax);
 
-    double last_center;
-    double d_center;
-    double d_c;
-    d_center=_xmax/double(_dim/4);
+    value_t last_center;
+    value_t d_center;
+    value_t d_c;
+    d_center=_xmax/value_t(_dim/4);
     last_center=0.0;
     for(ix=0;ix<_dim;ix+=4){
         _wave_phase.add(local_dice.doub()*_xmax);
@@ -59,14 +59,14 @@ chiSquaredData::chiSquaredData(int dd, int cc, double ww, int nData, double sigm
 
 }
 
-void chiSquaredData::set_width(int ic, int id, double dd){
+void chiSquaredData::set_width(index_t ic, index_t id, value_t dd){
     _widths.set(ic, id, dd);
 }
 
 void chiSquaredData::write_data(){
     FILE *output;
     output=fopen("data_scratch.txt", "w");
-    int ix;
+    index_t ix;
     for(ix=0;ix<_x_values.get_dim();ix++){
         fprintf(output,"%e %e %e\n",_x_values.get_data(ix),_y_values.get_data(ix),_sigma.get_data(ix));
     }
@@ -74,10 +74,10 @@ void chiSquaredData::write_data(){
 }
 
 void chiSquaredData::print_mins(){
-    array_1d<double> trial,params;
+    array_1d<value_t> trial,params;
     trial.set_name("jellyBeanData_print_mins_trial");
     params.set_name("jellyBeanData_print_mins_params");
-    int ic,ix;
+    index_t ic,ix;
     for(ic=0;ic<_ncenters;ic++){
         for(ix=0;ix<_dim;ix++){
             trial.set(ix,_centers.get_data(ic,ix));
@@ -113,9 +113,9 @@ void chiSquaredData::print_mins(){
 
 void chiSquaredData::initialize_data(){
 
-    array_1d<double> params;
+    array_1d<value_t> params;
     params.set_name("jellyBeanData_initiailize_params");
-    int ix,ic;
+    index_t ix,ic;
 
     for(ix=0;ix<_dim;ix++){
         if(ix%4==2){
@@ -126,10 +126,10 @@ void chiSquaredData::initialize_data(){
         }
     }
 
-    array_1d<double> samples;
+    array_1d<value_t> samples;
     samples.set_name("jellyBeanData_initialize_samples");
 
-    double xx,yy,mean,var;
+    value_t xx,yy,mean,var;
     for(ix=0, xx=0.0;xx<_xmax;xx+=_dx, ix++){
         mean=data_function(params,xx);
         for(ic=0;ic<_ndata;ic++){
@@ -139,7 +139,7 @@ void chiSquaredData::initialize_data(){
         for(ic=0;ic<samples.get_dim();ic++){
             mean+=samples.get_data(ic);
         }
-        mean=mean/double(samples.get_dim());
+        mean=mean/value_t(samples.get_dim());
         _x_values.set(ix,xx);
         _y_values.set(ix,mean);
 
@@ -147,7 +147,7 @@ void chiSquaredData::initialize_data(){
         for(ic=0;ic<samples.get_dim();ic++){
             var+=power(samples.get_data(ic)-mean,2);
         }
-        var=var/double((samples.get_dim()-1)*samples.get_dim());
+        var=var/value_t((samples.get_dim()-1)*samples.get_dim());
         _sigma.set(ix,sqrt(var));
     }
 
@@ -155,24 +155,24 @@ void chiSquaredData::initialize_data(){
 
 }
 
-void chiSquaredData::convert_params(const array_1d<double> &pt, array_1d<double> &out, int ic){
+void chiSquaredData::convert_params(const array_1d<value_t> &pt, array_1d<value_t> &out, index_t ic){
     printf("Called void convert_params");
     exit(1);
 }
 
-double chiSquaredData::data_function(array_1d<double> &params, double xx){
+value_t chiSquaredData::data_function(array_1d<value_t> &params, value_t xx){
 
-    double ans=0.0;
+    value_t ans=0.0;
 
-    double envelope;
-    double env_x;
-    double wave;
-    double amp;
-    double lambda;
-    double phase;
-    double last_center=0.0;
-    double center;
-    int ix,i_param;
+    value_t envelope;
+    value_t env_x;
+    value_t wave;
+    value_t amp;
+    value_t lambda;
+    value_t phase;
+    value_t last_center=0.0;
+    value_t center;
+    index_t ix,i_param;
     for(ix=0,i_param=0;ix<_dim;ix+=4,i_param++){
         center=last_center+fabs(params.get_data(ix))+_env_d_center.get_data(i_param);
         env_x=(xx-center)/(params.get_data(ix+1)+_env_width.get_data(i_param));
@@ -190,17 +190,17 @@ double chiSquaredData::data_function(array_1d<double> &params, double xx){
 
 }
 
-double chiSquaredData::operator()(const array_1d<double> &pt){
+value_t chiSquaredData::operator()(const array_1d<value_t> &pt){
 
-    double before=double(time(NULL));
+    value_t before=value_t(time(NULL));
 
     if(_x_values.get_dim()==0){
         initialize_data();
     }
 
-    double chisq,chisq_min;
-    double yy;
-    int ic,ix;
+    value_t chisq,chisq_min;
+    value_t yy;
+    index_t ic,ix;
     for(ic=0;ic<_ncenters;ic++){
         chisq=0.0;
         convert_params(pt,_param_buffer, ic);
@@ -215,7 +215,7 @@ double chiSquaredData::operator()(const array_1d<double> &pt){
     }
 
     _called++;
-    _time_spent+=double(time(NULL))-before;
+    _time_spent+=value_t(time(NULL))-before;
 
     if(isnan(chisq_min)){
         chisq_min=2.0*exception_value;
@@ -229,7 +229,7 @@ double chiSquaredData::operator()(const array_1d<double> &pt){
 }
 
 
-jellyBeanData::jellyBeanData(int dd, int cc, double wc, int nData, double sigma) :
+jellyBeanData::jellyBeanData(index_t dd, index_t cc, value_t wc, index_t nData, value_t sigma) :
 chiSquaredData(dd, cc, wc, nData, sigma){
 
     _parabola_centers.set_name("parabola_centers");
@@ -239,8 +239,8 @@ chiSquaredData(dd, cc, wc, nData, sigma){
     _parabola_y.set_name("parabola_y");
     _parabola_y.set_cols(2);
 
-    int ic,ix,iy;
-    array_1d<double> trial;
+    index_t ic,ix,iy;
+    array_1d<value_t> trial;
     trial.set_name("jellyBean_data_constructor_trial");
     for(ic=0;ic<_ncenters;ic++){
         for(ix=0;ix<2;ix++){
@@ -265,7 +265,7 @@ chiSquaredData(dd, cc, wc, nData, sigma){
 
     _parabola_curvature=4.0;
 
-    /*int i,j;
+    /*index_t i,j;
     for(i=0;i<_dim;i++){
         for(j=0;j<_dim;j++){
             if(i==j){
@@ -285,22 +285,22 @@ chiSquaredData(dd, cc, wc, nData, sigma){
 }
 
 
-void jellyBeanData::convert_params(const array_1d<double> &pt_in, array_1d<double> &out, int ic){
+void jellyBeanData::convert_params(const array_1d<value_t> &pt_in, array_1d<value_t> &out, index_t ic){
 
-    array_1d<double> pt;
+    array_1d<value_t> pt;
     pt.set_name("convert_params_pt");
     project_to_basis(pt_in,pt);
 
-    double x_is,y_is;
+    value_t x_is,y_is;
     x_is=(pt.get_data(0)-_parabola_centers.get_data(ic,0))*_parabola_x.get_data(ic,0)
          +(pt.get_data(1)-_parabola_centers.get_data(ic,1))*_parabola_x.get_data(ic,1);
 
     y_is=(pt.get_data(0)-_parabola_centers.get_data(ic,0))*_parabola_y.get_data(ic,0)
          +(pt.get_data(1)-_parabola_centers.get_data(ic,1))*_parabola_y.get_data(ic,1);
 
-    double rr=sqrt(x_is*x_is+y_is*y_is);
+    value_t rr=sqrt(x_is*x_is+y_is*y_is);
 
-    double cos_theta,sin_theta;
+    value_t cos_theta,sin_theta;
     cos_theta=x_is/rr;
     sin_theta=y_is/rr;
 
@@ -318,7 +318,7 @@ void jellyBeanData::convert_params(const array_1d<double> &pt_in, array_1d<doubl
         }
     }
 
-    double r_shldbe;
+    value_t r_shldbe;
 
     if(fabs(cos_theta)<1.0e-5 && sin_theta>0.0){
         r_shldbe=1.0e10/_parabola_curvature;
@@ -330,15 +330,15 @@ void jellyBeanData::convert_params(const array_1d<double> &pt_in, array_1d<doubl
         r_shldbe=(1.0+sin_theta)/(2.0*_parabola_curvature*cos_theta*cos_theta);
     }
 
-    double d_radius;
+    value_t d_radius;
     d_radius=fabs(rr-r_shldbe);
 
-    double y_distance;
+    value_t y_distance;
     y_distance=(y_is+0.25/_parabola_curvature)/_widths.get_data(ic,0);
-    double y_term=0.2*sin(y_distance)+log(0.5*y_distance+1.0);
+    value_t y_term=0.2*sin(y_distance)+log(0.5*y_distance+1.0);
     out.set(0,y_term);
 
-    double x_shldbe,dx;
+    value_t x_shldbe,dx;
     if(y_distance<0.0){
         out.set(1,d_radius/_widths.get_data(ic,1));
     }
@@ -359,7 +359,7 @@ void jellyBeanData::convert_params(const array_1d<double> &pt_in, array_1d<doubl
         exit(1);
     }
 
-    int ix;
+    index_t ix;
     for(ix=2;ix<_dim;ix++){
         if(ix%4==2){
             out.set(ix,exp((pt.get_data(ix)-_centers.get_data(ic,ix))/_widths.get_data(ic,ix)));
@@ -377,7 +377,7 @@ void jellyBeanData::convert_params(const array_1d<double> &pt_in, array_1d<doubl
         }
     }
 
-    double xx;
+    value_t xx;
     for(ix=0;ix<_dim;ix++){
         if(ix%4!=2){
             out.multiply_val(ix,0.01);
@@ -395,13 +395,13 @@ void jellyBeanData::convert_params(const array_1d<double> &pt_in, array_1d<doubl
 
 //////////////////////ellipse classes////////////
 
-ellipseData::ellipseData(int dd, int cc, int nData, double sigma) :
+ellipseData::ellipseData(index_t dd, index_t cc, index_t nData, value_t sigma) :
 chiSquaredData(dd, cc, 1.0, nData, sigma){
 
     _dir.set_name("ellipseData_dir");
     _projected.set_name("ellipseData_projected");
 
-    int ix,ic;
+    index_t ix,ic;
     for(ic=0;ic<_ncenters;ic++){
         for(ix=0;ix<_dim;ix++){
             _centers.set(ic,ix,-30.0+60.0*_dice->doub());
@@ -409,9 +409,9 @@ chiSquaredData(dd, cc, 1.0, nData, sigma){
     }
 }
 
-void ellipseData::convert_params(const array_1d<double> &pt, array_1d<double> &out, int ic){
+void ellipseData::convert_params(const array_1d<value_t> &pt, array_1d<value_t> &out, index_t ic){
 
-    int ix;
+    index_t ix;
     for(ix=0;ix<_dim;ix++){
         _dir.set(ix,pt.get_data(ix)-_centers.get_data(ic,ix));
     }
@@ -423,12 +423,12 @@ void ellipseData::convert_params(const array_1d<double> &pt, array_1d<double> &o
     }
 }
 
-nonGaussianEllipseData::nonGaussianEllipseData(int i1, int i2, int i3, double d1) :
+nonGaussianEllipseData::nonGaussianEllipseData(index_t i1, index_t i2, index_t i3, value_t d1) :
 ellipseData(i1, i2, i3, d1){}
 
-void nonGaussianEllipseData::convert_params(const array_1d<double> &pt, array_1d<double> &out, int ic){
+void nonGaussianEllipseData::convert_params(const array_1d<value_t> &pt, array_1d<value_t> &out, index_t ic){
 
-    int ix;
+    index_t ix;
     for(ix=0;ix<_dim;ix++){
         _dir.set(ix,pt.get_data(ix)-_centers.get_data(ic,ix));
     }
@@ -440,7 +440,7 @@ void nonGaussianEllipseData::convert_params(const array_1d<double> &pt, array_1d
         out.set(ix,_projected.get_data(ix)/_widths.get_data(ic,ix));
     }
 
-    double mu,xx;
+    value_t mu,xx;
     xx=_projected.get_data(0)/_widths.get_data(ic,0);
     if(fabs(xx)<fabs(xx-0.05)){
         out.set(0,xx);

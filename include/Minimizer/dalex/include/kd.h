@@ -27,18 +27,18 @@ class kd_tree{
     friend class box;
     
     public:
-        int ktests;
+        index_t ktests;
         
         /*Build a tree out of the list of points provided (each row is a 
         different point in parameter space; therefore, the number of columns
         is the dimensionality of the parameter space)*/
-        kd_tree(array_2d<double>&);
+        kd_tree(array_2d<value_t>&);
         
-        /*Build a tree as above.  The array_1d<double> arguments are minimum
+        /*Build a tree as above.  The array_1d<value_t> arguments are minimum
         and maximum values of each parameter in parameter space.  These
         are not bounds.  max-min is used to normalize distances in parameter
         space when searching for nearest neighbors.*/
-        kd_tree(array_2d<double>&,array_1d<double>&,array_1d<double>&);
+        kd_tree(array_2d<value_t>&,array_1d<value_t>&,array_1d<value_t>&);
         
         kd_tree(const kd_tree&);
         
@@ -51,15 +51,15 @@ class kd_tree{
         /*
         These routines provide the back end for building the KD tree
         */
-        void build_tree(array_2d<double>&);
-        void build_tree(array_2d<double>&,array_1d<double>&,array_1d<double>&);
+        void build_tree(array_2d<value_t>&);
+        void build_tree(array_2d<value_t>&,array_1d<value_t>&,array_1d<value_t>&);
  
         /*
         These routines will set the maximum and minimum values (used for
         normalizing parameter distances; see above)
         */
-        void set_max(int,double);
-        void set_min(int,double);
+        void set_max(index_t,value_t);
+        void set_min(index_t,value_t);
         
         /*check to make sure the tree is properly constructed;
         if it is, set the global variable diagnostic=1;
@@ -67,8 +67,8 @@ class kd_tree{
         void check_tree();
         
         /*check to make sure the part of the tree that descendes from
-        the node specified by the int is properly constructed*/
-        void check_tree(int);
+        the node specified by the index_t is properly constructed*/
+        void check_tree(index_t);
         
         /*
         The distance routines all return parameter space distances between
@@ -81,44 +81,44 @@ class kd_tree{
         */
         
         /*the parameter space distance between arbitrary points*/
-        double distance(const array_1d<double>&, const array_1d<double>&);
+        value_t distance(const array_1d<value_t>&, const array_1d<value_t>&);
  
         /*the parameter space distance between and arbitrary point and a node
         on the tree*/
-        double distance(const array_1d<double>&,int);
-        double distance(int,const array_1d<double>&);
+        value_t distance(const array_1d<value_t>&,index_t);
+        value_t distance(index_t,const array_1d<value_t>&);
         
         /*the parameter space distance between two nodes on the tree*/
-        double distance(int,int);
+        value_t distance(index_t,index_t);
 
-        /*fill the array-1d<double> with the node specified by the int*/
-        void get_pt(int,array_1d<double>&);
+        /*fill the array-1d<value_t> with the node specified by the index_t*/
+        void get_pt(index_t,array_1d<value_t>&);
         
         /*return a node on the tree one dimension at a time; the first
-        int specifies the node; the second int specifies the dimension*/
-        double get_pt(int,int);
+        index_t specifies the node; the second index_t specifies the dimension*/
+        value_t get_pt(index_t,index_t);
         
         /*return a pointer to a node on the tree*/
-        array_1d<double> get_pt(int);
+        array_1d<value_t> get_pt(index_t);
         
         /*return the number of points stored in the tree*/
-        int get_pts();
+        index_t get_pts();
 
         void write_tree(char*);
         
         /*add a point to the tree*/
-        void add(const array_1d<double>&);
+        void add(const array_1d<value_t>&);
         
         /*removes a node from the tree and then rebuilds the tree*/
-        void remove(int);
+        void remove(index_t);
         
         /*counts the number of nodes descended from a given parent*/
-        void count(int,int*);
+        void count(index_t,index_t*);
         
         /*
         The nn_srch routins perform the nearest neighbor searches.
         The first argument specifies the point whose nearest neighbors
-        you want to find (if it is just an int, you are looking for the
+        you want to find (if it is just an index_t, you are looking for the
         nearest neighbors of a node onthe tree)
         
         The second argument specifies the number of nearest neighbors to find.
@@ -131,8 +131,8 @@ class kd_tree{
         Remember: all distances are normalized by maxs-mins (see documentation
         of the distance() routines)
         */
-        void nn_srch(const array_1d<double>&,int,array_1d<int>&,array_1d<double>&);
-        void nn_srch(int,int,array_1d<int>&,array_1d<double>&);
+        void nn_srch(const array_1d<value_t>&,index_t,array_1d<index_t>&,array_1d<value_t>&);
+        void nn_srch(index_t,index_t,array_1d<index_t>&,array_1d<value_t>&);
         
         /*
         kernel_srch will do a neighbor search centered on a point (the first
@@ -143,7 +143,7 @@ class kd_tree{
         
         NOTE: THIS IS NOT WELL-TESTED
         */
-        int kernel_srch(array_1d<double>&,array_1d<double>&,array_1d<int>&);
+        index_t kernel_srch(array_1d<value_t>&,array_1d<value_t>&,array_1d<index_t>&);
         
         /*
         radial_srch performs a neighbor search centered on a point (the first
@@ -153,43 +153,43 @@ class kd_tree{
         
         NOTE: THIS IS NOT WELL-TESTED
         */
-        int radial_srch(array_1d<double>&,double,array_1d<int>&);
+        index_t radial_srch(array_1d<value_t>&,value_t,array_1d<index_t>&);
         
         /*return the dimensionality of the parameter space*/
-        int get_dim();
+        index_t get_dim();
         
         /*return diagnostic, the global variable that logs whether or not
         the tree was properly constructed*/
-        int get_diagnostic();
+        index_t get_diagnostic();
         
         /*return the maximum and minimum values in a dimension of parameter
         space*/
-        double get_max(int);
-        double get_min(int);
+        value_t get_max(index_t);
+        value_t get_min(index_t);
         
-        double get_search_time();
-        int get_search_ct();
+        value_t get_search_time();
+        index_t get_search_ct();
         
-        int get_search_ct_solo();
-        double get_search_time_solo();
+        index_t get_search_ct_solo();
+        value_t get_search_time_solo();
         
-        void set_search_ct(int);
-        void set_search_time(double);
+        void set_search_ct(index_t);
+        void set_search_time(value_t);
         
-        void set_search_ct_solo(int);
-        void set_search_time_solo(double);
+        void set_search_ct_solo(index_t);
+        void set_search_time_solo(value_t);
         
     private:
         
-        double search_time,search_time_solo;
-        int search_ct,search_ct_solo;
+        value_t search_time,search_time_solo;
+        index_t search_ct,search_ct_solo;
         
         /*a global variable logging whether or not the tree was properly
         constructed; diagnostic=1 if the tree is correct; diagnostic=0 if not*/
-        int diagnostic;
+        index_t diagnostic;
         
         /*
-        The array_2d<int> tree stores the structure of the KD tree.
+        The array_2d<index_t> tree stores the structure of the KD tree.
         Each row corresponds to a data point stored in the tree.
         There are four columns.
         
@@ -209,13 +209,13 @@ class kd_tree{
         Columns are set to -1 if they have no meaningful answer (i.e. the parent
         of the original point or the daughter of a terminal node).
         */
-        array_2d<int> tree;
+        array_2d<index_t> tree;
         
         /*
-        The array_2d<double> data contains the points that are stored in this
+        The array_2d<value_t> data contains the points that are stored in this
         tree.
         */
-        array_2d<double> data;
+        array_2d<value_t> data;
         
         /*
         maxs and mins are maximum and minimum values in each dimension of
@@ -224,53 +224,53 @@ class kd_tree{
         neighbors.  Setting all maxs=1 and all mins=0 will result in nearest
         neighbors reckoned by unnormalized parameter space distances.
         */
-        array_1d<double> maxs,mins;
+        array_1d<value_t> maxs,mins;
         
         /*masterparent is the point that is the first node of the tree*/
-        int masterparent;
+        index_t masterparent;
         
         /*a global variable to define the tolerance with which dimensions
         are sorted on the tree*/
-        double tol;
+        value_t tol;
         
         /*a global variable used by kernel_srch to keep track of how many
         points were found within the kernel
         
         also used by radial_srch
         */
-        int nkernel;
+        index_t nkernel;
         
         /*this provides the backend for check_tree;
         see source code in kd.cpp for more details*/
-        void confirm(int,int,int,int);
+        void confirm(index_t,index_t,index_t,index_t);
         
         /*the iterative backend of build_tree*/
-        void organize(array_1d<int>&,int,int,int,int,int);
+        void organize(array_1d<index_t>&,index_t,index_t,index_t,index_t,index_t);
         
         /*find the node where a new point would be added to the tree;
         this is part of the backend for the add() routine*/
-        int find_node(const array_1d<double>&);
+        index_t find_node(const array_1d<value_t>&);
         
         /*neigh_check provides the back end for nn_srch*/
-        void neigh_check(const array_1d<double>&,
-            int,array_1d<int>&,array_1d<double>&,int,int);
+        void neigh_check(const array_1d<value_t>&,
+            index_t,array_1d<index_t>&,array_1d<value_t>&,index_t,index_t);
         
         /*kernel_check provides the backend for kernel_srch*/
-        void kernel_check(array_1d<double>&,array_1d<double>&,array_1d<int>&,
-            int,int);
+        void kernel_check(array_1d<value_t>&,array_1d<value_t>&,array_1d<index_t>&,
+            index_t,index_t);
         
         /*radial_check provides the backend for radial_srch*/
-        void radial_check(array_1d<double>&,double,array_1d<int>&,int,int);
+        void radial_check(array_1d<value_t>&,value_t,array_1d<index_t>&,index_t,index_t);
         
         /*
         reassign() and descend() provide some of the backend for remove()
         */
-        void reassign(int);
-        void descend(int);
+        void reassign(index_t);
+        void descend(index_t);
 
 };
 
 
-void convert_to_boundary(array_2d<double>&, double, double, array_2d<double>&);
+void convert_to_boundary(array_2d<value_t>&, value_t, value_t, array_2d<value_t>&);
 
 #endif

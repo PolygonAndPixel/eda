@@ -14,8 +14,8 @@
 
 class Minimizer {
 public:
-    Minimizer(double tolerance, int max_iter, int min_iter,
-              int max_points, int seed=1025, bool dump_points=false) {
+    Minimizer(value_t tolerance, index_t max_iter, index_t min_iter,
+              index_t max_points, index_t seed=1025, bool dump_points=false) {
         precision_criterion_ = tolerance;
         max_iter_ = max_iter;
         min_iter_ = min_iter;
@@ -26,10 +26,10 @@ public:
         dump_points_ = dump_points;
     };
 
-    uint32_t get_n_lh_calls() {return result.n_lh_calls;};
-    double get_lh_efficiency() {return result.lh_efficiency;};
+    index_t get_n_lh_calls() {return result.n_lh_calls;};
+    value_t get_lh_efficiency() {return result.lh_efficiency;};
     void reset_calls(){result.n_lh_calls=0; result.lh_efficiency=0;
-        lh_bestFit_=std::numeric_limits<double>::infinity();};
+        lh_bestFit_=std::numeric_limits<value_t>::infinity();};
     void set_bounds(v_d upper, v_d lower) {upper_bnds=upper; lower_bnds=lower;};
 
     void set_output(std::string path) {base_dir_ = path; dump_points_ = true;};
@@ -49,10 +49,10 @@ public:
      *
      *  \return                "neg-log-likelihood"
      * */
-    double get_llh(v_d & theta) {result.n_lh_calls++;
+    value_t get_llh(v_d & theta) {result.n_lh_calls++;
         return test_func_->get_neg_lh(theta);};
     /// Transform point from hypercube to physical space
-    virtual v_d to_physics(v_d cube, uint32_t nDims) = 0;
+    virtual v_d to_physics(v_d cube, index_t nDims) = 0;
 
     virtual std::string get_name() = 0;
 
@@ -60,9 +60,9 @@ public:
     std::uniform_real_distribution<> uf;
     v_d upper_bnds, lower_bnds;
     v_d params_best_fit;
-    double lh_bestFit_, lh_worstFit_;
-    double precision_criterion_;
-    int min_iter_, max_iter_, max_points_;
+    value_t lh_bestFit_, lh_worstFit_;
+    value_t precision_criterion_;
+    index_t min_iter_, max_iter_, max_points_;
 
     TestFunctions *test_func_;
     MinimizerResult result;

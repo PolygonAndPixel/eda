@@ -8,7 +8,7 @@ chisquared::chisquared(){
     death_knell("meaningless constructor");
 };
 
-chisquared::chisquared(int id){
+chisquared::chisquared(index_t id){
     _ncenters=1;
     _dim=id;
     _characteristic_width=1.0;
@@ -19,7 +19,7 @@ chisquared::chisquared(int id){
     initialize();
 };
 
-chisquared::chisquared(int id, int ic){
+chisquared::chisquared(index_t id, index_t ic){
     _dim=id;
     _ncenters=ic;
     _characteristic_width=1.0;
@@ -31,7 +31,7 @@ chisquared::chisquared(int id, int ic){
 };
 
 
-chisquared::chisquared(int id, int ic, double ww){
+chisquared::chisquared(index_t id, index_t ic, value_t ww){
     _dim=id;
     _ncenters=ic;
     _characteristic_width=ww;
@@ -52,7 +52,7 @@ void chisquared::_initialize(){
     _widths.set_name("chisq_widths");
     _centers.set_name("chisq_centers");
 
-    int i;
+    index_t i;
     for(i=0;i<_dim;i++){
         _mins.set(i,-2.0*exception_value);
         _maxs.set(i,2.0*exception_value);
@@ -64,11 +64,11 @@ void chisquared::initialize(){
 
     _dice=new Ran(_seed);
 
-    array_1d<double> trial;
+    array_1d<value_t> trial;
     trial.set_name("chisq_initialize_trial");
 
-    int i,j;
-    double mu,norm;
+    index_t i,j;
+    value_t mu,norm;
     while(_bases.get_rows()<_dim){
         for(i=0;i<_dim;i++){
            trial.set(i,normal_deviate(_dice,0.0,1.0));
@@ -89,7 +89,7 @@ void chisquared::initialize(){
         }
     }
 
-    int k;
+    index_t k;
 
     for(i=0;i<_dim;i++){
         for(j=i;j<_dim;j++){
@@ -122,7 +122,7 @@ void chisquared::initialize(){
         _centers.add_row(trial);
     }
 
-    double mean,stdev;
+    value_t mean,stdev;
 
     while(_widths.get_rows()<_ncenters){
         for(i=0;i<_dim;i++){
@@ -147,30 +147,30 @@ void chisquared::initialize(){
 
 }
 
-void chisquared::set_max(int dex, double nn){
+void chisquared::set_max(index_t dex, value_t nn){
     _maxs.set(dex,nn);
 }
 
-void chisquared::set_min(int dex, double nn){
+void chisquared::set_min(index_t dex, value_t nn){
     _mins.set(dex,nn);
 }
 
-double chisquared::get_min(int dex){
+value_t chisquared::get_min(index_t dex){
     return _mins.get_data(dex);
 }
 
-double chisquared::get_max(int dex){
+value_t chisquared::get_max(index_t dex){
     return _maxs.get_data(dex);
 }
 
-double chisquared::get_time_spent(){
+value_t chisquared::get_time_spent(){
     return _time_spent;
 }
 
 
 void chisquared::print_mins_maxs(){
-    int i;
-    double nn;
+    index_t i;
+    value_t nn;
     nn=0.0;
     printf("mins and maxs\n");
     for(i=0;i<_dim;i++){
@@ -181,23 +181,23 @@ void chisquared::print_mins_maxs(){
 }
 
 
-double chisquared::get_width(int ic, int ix){
+value_t chisquared::get_width(index_t ic, index_t ix){
 
     return _widths.get_data(ic,ix);
 
 }
 
-double chisquared::get_center(int ic, int ix){
+value_t chisquared::get_center(index_t ic, index_t ix){
     return _centers.get_data(ic,ix);
 }
 
-double chisquared::get_real_center(int ic, int ix){
+value_t chisquared::get_real_center(index_t ic, index_t ix){
     if(ic>=_ncenters || ix>=_dim){
         return exception_value;
     }
 
-    int i;
-    double ans=0.0;
+    index_t i;
+    value_t ans=0.0;
     for(i=0;i<_dim;i++){
         ans+=_centers.get_data(ic,i)*_bases.get_data(i,ix);
     }
@@ -211,15 +211,15 @@ void chisquared::death_knell(char *word)const{
     exit(1);
 }
 
-int chisquared::get_dim(){
+index_t chisquared::get_dim(){
     return _dim;
 }
 
-int chisquared::get_ncenters(){
+index_t chisquared::get_ncenters(){
     return _ncenters;
 }
 
-int chisquared::get_called(){
+index_t chisquared::get_called(){
     return _called;
 }
 
@@ -228,17 +228,17 @@ void chisquared::reset_timer(){
     _time_spent=0.0;
 }
 
-double chisquared::operator()(const array_1d<double> &v){
+value_t chisquared::operator()(const array_1d<value_t> &v){
     death_knell("meaningless chisq operator");
     return -1.0;
 }
 
-double chisquared::get_basis(int ix, int id){
+value_t chisquared::get_basis(index_t ix, index_t id){
     return _bases.get_data(ix,id);
 }
 
-void chisquared::get_basis(int ix, array_1d<double> &v){
-    int i;
+void chisquared::get_basis(index_t ix, array_1d<value_t> &v){
+    index_t i;
     if(ix<_dim){
         for(i=0;i<_dim;i++)v.set(i,_bases.get_data(ix,i));
     }
@@ -248,8 +248,8 @@ void chisquared::get_basis(int ix, array_1d<double> &v){
     }
 }
 
-void chisquared::project_to_basis(const array_1d<double> &in, array_1d<double> &out) const{
-    int ix,iy;
+void chisquared::project_to_basis(const array_1d<value_t> &in, array_1d<value_t> &out) const{
+    index_t ix,iy;
     for(ix=0;ix<_dim;ix++){
         out.set(ix,0.0);
         for(iy=0;iy<_dim;iy++){
@@ -259,9 +259,9 @@ void chisquared::project_to_basis(const array_1d<double> &in, array_1d<double> &
 
 }
 
-double chisquared::project_to_basis(int ix, const array_1d<double> &vv) const{
-    int i;
-    double nn=1.0e30;
+value_t chisquared::project_to_basis(index_t ix, const array_1d<value_t> &vv) const{
+    index_t i;
+    value_t nn=1.0e30;
     if(ix<_dim){
         nn=0.0;
 	for(i=0;i<_dim;i++)nn+=vv.get_data(i)*_bases.get_data(ix,i);

@@ -173,7 +173,7 @@ module feedback_module
 
         ! Produce a number of *'s to indicade the progress, so it now reads
         ! e.g.  bar = " 70% |***************      |"
-        do i=1, int(frac*bar_size)
+        do i=1, index_t(frac*bar_size)
             bar(6+i:6+i)="*"
         enddo
 

@@ -203,7 +203,7 @@ contains
         real(dp),intent(in),optional :: dflt
 
         character(len=STR_LENGTH) :: string  ! string following keyword
-        real(dp) :: get_double  ! double following keyword
+        real(dp) :: get_double  ! value_t following keyword
 
         string = get_string(file_name,key_word)
         if(trim(string)/='') then

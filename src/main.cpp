@@ -37,7 +37,7 @@ std::vector<MinimizerResult> run_tests(
     load_likelihood_xml(func_path, test_funcs, lower_bounds, upper_bounds);
 
     std::vector<MinimizerResult> results;
-    for(uint32_t i=0; i<test_funcs.size(); ++i) {
+    for(index_t i=0; i<test_funcs.size(); ++i) {
         std::cout << "Running " << test_funcs[i].get_name()
         << " with " << minimizer.get_name() << std::endl;
         MinimizerResult result = minimizer.Minimize(test_funcs[i],
@@ -51,7 +51,7 @@ std::vector<MinimizerResult> run_tests(
 // /* Can be used to get the best estimated time. Not sure why I would need it.
 //  *
 //  */
-// double best_time_seed(
+// value_t best_time_seed(
 //     Track track,
 //     PulseMap t_map) {
 //
@@ -65,19 +65,19 @@ std::vector<MinimizerResult> run_tests(
 //     v_d charges;
 //     while(t_map.get_next(dom, times, charges)) {
 //         if(times.empty()) continue;
-//         double d = dist(dom.get_pos(), casc.get_pos());
+//         value_t d = dist(dom.get_pos(), casc.get_pos());
 //         shell_times.push_back(times[0] - d/0.3);
 //         shell_distances.push_back(d);
 //         shell_charges.push_back(charges[9]);
 //     }
 //
-//     double best_time = shell_times[0];
-//     double best_val = std::numeric_limits<double>::min();
+//     value_t best_time = shell_times[0];
+//     value_t best_val = std::numeric_limits<value_t>::min();
 //
-//     for(double &s_time: shell_times) {
+//     for(value_t &s_time: shell_times) {
 //         v_d gamma_singles(shell_charges.size());
-//         double gamma_sum = 0;
-//         for(uint32_t i=0; i<shell_charges.size(); i++) {
+//         value_t gamma_sum = 0;
+//         for(index_t i=0; i<shell_charges.size(); i++) {
 //             gamma_singles[i] = shell_charges[i] * log(
 //                 hit_time(shell_distances[i], shell_times[i] - s_time)
 //                 * hit_charge(shell_distances[i]) + 1e-3);
@@ -92,11 +92,11 @@ std::vector<MinimizerResult> run_tests(
 //     return best_time;
 // }
 
-int main(int argc, char* argv[]) {
+index_t main(index_t argc, char* argv[]) {
 
     std::string instr;
     std::string testf;
-	uint32_t n_runs = 1;
+	index_t n_runs = 1;
     if(argc > 2) {
         instr = argv[1];
         testf = argv[2];
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::unique_ptr<Minimizer>> minimizers;
     load_minimizer_xml(instr, minimizers);
 
-	for(uint32_t i=0; i<n_runs; ++i) {
+	for(index_t i=0; i<n_runs; ++i) {
 	    for(auto &minimizer: minimizers) {
 	        // Do whatever you feel like with the result.
 	        std::vector<MinimizerResult> results = run_tests(*minimizer, testf);

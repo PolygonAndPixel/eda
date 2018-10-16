@@ -1,16 +1,16 @@
 #include "cost_fn.h"
 
-cost_fn::cost_fn(chisq_wrapper *cc, array_1d<int> &aa){
+cost_fn::cost_fn(chisq_wrapper *cc, array_1d<index_t> &aa){
     _envelope=1.0;
     build(cc,aa,1);
 }
 
-cost_fn::cost_fn(chisq_wrapper *cc, array_1d<int> &aa, int min_or_med){
+cost_fn::cost_fn(chisq_wrapper *cc, array_1d<index_t> &aa, index_t min_or_med){
     _envelope=1.0;
     build(cc,aa,min_or_med);
 }
 
-void cost_fn::build(chisq_wrapper *cc, array_1d<int> &aa, int min_or_med){
+void cost_fn::build(chisq_wrapper *cc, array_1d<index_t> &aa, index_t min_or_med){
 
     // printf("building cost_fn with %d associates\n",aa.get_dim());
     _called=0;
@@ -27,15 +27,15 @@ void cost_fn::build(chisq_wrapper *cc, array_1d<int> &aa, int min_or_med){
 
     _chifn=cc;
 
-    int i;
+    index_t i;
 
     for(i=0;i<aa.get_dim();i++){
         _associates.add(aa.get_data(i));
     }
 
-    array_1d<double> norm;
-    array_1d<double> min,max;
-    int j;
+    array_1d<value_t> norm;
+    array_1d<value_t> min,max;
+    index_t j;
     for(i=0;i<_associates.get_dim();i++){
         for(j=0;j<_chifn->get_dim();j++){
             if(i==0 || _chifn->get_pt(_associates.get_data(i),j)<min.get_data(j)){
@@ -57,8 +57,8 @@ void cost_fn::build(chisq_wrapper *cc, array_1d<int> &aa, int min_or_med){
         _median_associate.set(i,0.5*(max.get_data(i)+min.get_data(i)));
     }
 
-    array_1d<double> norm_sorted;
-    array_1d<int> norm_dex;
+    array_1d<value_t> norm_sorted;
+    array_1d<index_t> norm_dex;
     for(i=0;i<norm.get_dim();i++){
         norm_dex.add(i);
     }
@@ -72,11 +72,11 @@ void cost_fn::build(chisq_wrapper *cc, array_1d<int> &aa, int min_or_med){
 }
 
 
-double cost_fn::nn_distance(const array_1d<double> &pt){
-    double dd;
-    int i,j,k;
-    double dd_avg;
-    double ct=0.0;
+value_t cost_fn::nn_distance(const array_1d<value_t> &pt){
+    value_t dd;
+    index_t i,j,k;
+    value_t dd_avg;
+    value_t ct=0.0;
     dd_avg=0.0;
 
     for(i=0;i<_associates.get_dim();i++){
@@ -97,11 +97,11 @@ double cost_fn::nn_distance(const array_1d<double> &pt){
 }
 
 
-int cost_fn::get_called(){
+index_t cost_fn::get_called(){
    return _called;
 }
 
-double cost_fn::operator()(const array_1d<double> &pt){
+value_t cost_fn::operator()(const array_1d<value_t> &pt){
 
     if(_chifn==NULL){
         printf("WARNING cannot call cost_fn operator; _chifn is NULL\n");
@@ -110,19 +110,19 @@ double cost_fn::operator()(const array_1d<double> &pt){
 
     _called++;
 
-    double mu;
-    int i_found;
+    value_t mu;
+    index_t i_found;
     _chifn->evaluate(pt,&mu,&i_found);
 
     if(_associates.get_dim()==0){
         return mu;
     }
 
-    double delta=_chifn->target()-_chifn->chimin();
+    value_t delta=_chifn->target()-_chifn->chimin();
 
-    double distance;
+    value_t distance;
 
-    double exp_term;
+    value_t exp_term;
 
     if(mu>_chifn->target()){
         exp_term=exp((_chifn->target()-mu)/_envelope);
@@ -138,7 +138,7 @@ double cost_fn::operator()(const array_1d<double> &pt){
         distance=0.0;
     }
 
-    double val;
+    value_t val;
     val = mu-1.0*delta*distance*exp_term;
     _pt_cache.add(i_found);
     _fn_cache.add(val);

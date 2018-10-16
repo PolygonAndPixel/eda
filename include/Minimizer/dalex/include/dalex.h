@@ -17,9 +17,9 @@ class dalex{
             char out_name[500];
             sprintf(out_name,"ellipse_corners_%d.txt",_chifn->get_seed());
             ellipse_file=fopen(out_name, "w");
-            int i,j,zone;
-            double sign;
-            double component;
+            index_t i,j,zone;
+            value_t sign;
+            value_t component;
             for(zone=0;zone<_exclusion_zones.ct();zone++){
                 for(i=0;i<_chifn->get_dim();i++){
                     for(sign=-1.0;sign<1.5;sign+=2.0){
@@ -67,42 +67,42 @@ class dalex{
 
         void build(chisq_wrapper*);
 
-        void set_limit(int ii){
+        void set_limit(index_t ii){
             _limit=ii;
         }
 
         void search();
         void simplex_search();
-        void simplex_search(int);
-        void simplex_search(array_1d<int>&);
-        int simplex_boundary_search(const int, const int, ellipse_list&, int*);
-        int _exploration_simplex(int,int,array_1d<int>&);
+        void simplex_search(index_t);
+        void simplex_search(array_1d<index_t>&);
+        index_t simplex_boundary_search(const index_t, const index_t, ellipse_list&, index_t*);
+        index_t _exploration_simplex(index_t,index_t,array_1d<index_t>&);
         void tendril_search();
         void init_fill();
-        void find_tendril_candidates(double);
-        void get_new_tendril(int*,int*);
-        void min_explore(int, int);
+        void find_tendril_candidates(value_t);
+        void get_new_tendril(index_t*,index_t*);
+        void min_explore(index_t, index_t);
         void initialize_min_exploration();
 
-        int bisection(int, int, double, double);
-        int bisection(int, const array_1d<double>&, double, double);
-        int bisection(const array_1d<double>&, const array_1d<double>&, double, double);
+        index_t bisection(index_t, index_t, value_t, value_t);
+        index_t bisection(index_t, const array_1d<value_t>&, value_t, value_t);
+        index_t bisection(const array_1d<value_t>&, const array_1d<value_t>&, value_t, value_t);
 
-        double get_basis(int i, int j){
+        value_t get_basis(index_t i, index_t j){
             return _basis_vectors.get_data(i,j);
         }
 
-        void set_target_factor(double tt){
+        void set_target_factor(value_t tt){
             _target_factor=tt;
         }
 
-        double get_norm(int);
+        value_t get_norm(index_t);
 
     private:
 
-       double distance(int i1, int i2){
-           int i,j;
-           double component,dd;
+       value_t distance(index_t i1, index_t i2){
+           index_t i,j;
+           value_t component,dd;
            dd=0.0;
            for(i=0;i<_chifn->get_dim();i++){
                component=0.0;
@@ -114,9 +114,9 @@ class dalex{
            return sqrt(dd);
        }
 
-      double cardinal_distance(int i1, int i2){
-          int i;
-          double dd=0.0;
+      value_t cardinal_distance(index_t i1, index_t i2){
+          index_t i;
+          value_t dd=0.0;
           for(i=0;i<_chifn->get_dim();i++){
               dd+=power((_chifn->get_pt(i1,i)-_chifn->get_pt(i2,i))/
                          _chifn->get_characteristic_length(i),2);
@@ -124,13 +124,13 @@ class dalex{
           return sqrt(dd);
       }
 
-       void add_good_point(int ii){
+       void add_good_point(index_t ii){
            if(_chifn->get_fn(ii)<target() && _good_points.contains(ii)==0){
                _good_points.add(ii);
            }
        }
 
-        void evaluate(const array_1d<double> &pt, double *mu_out, int *i_out){
+        void evaluate(const array_1d<value_t> &pt, value_t *mu_out, index_t *i_out){
             _chifn->evaluate(pt,mu_out,i_out);
             if(mu_out[0]<target() && _good_points.contains(i_out[0])==0){
                 add_good_point(i_out[0]);
@@ -141,10 +141,10 @@ class dalex{
             _update_good_points(_last_checked_good);
         }
 
-        void _update_good_points(int i_start){
+        void _update_good_points(index_t i_start){
             safety_check("_update_good_points");
 
-            int i;
+            index_t i;
             for(i=i_start;i<_chifn->get_pts();i++){
                 if(_chifn->get_fn(i)<target() && _good_points.contains(i)==0){
                     add_good_point(i);
@@ -154,7 +154,7 @@ class dalex{
         }
 
         void assess_good_points(){
-            int i;
+            index_t i;
             for(i=0;i<_good_points.get_dim();i++){
                 if(_chifn->get_fn(_good_points.get_data(i))>target()){
                     _good_points.remove(i);
@@ -163,12 +163,12 @@ class dalex{
             }
         }
 
-        double chimin(){
+        value_t chimin(){
             safety_check("chimin");
             return _chifn->chimin();
         }
 
-        int mindex(){
+        index_t mindex(){
             safety_check("mindex");
             return _chifn->mindex();
         }
@@ -181,55 +181,55 @@ class dalex{
 
         }
 
-        double target(){
+        value_t target(){
             safety_check("target");
             return _target_factor*_chifn->target();
         }
 
         chisq_wrapper *_chifn;
-        double _target_factor;
-        double _reset_threshold,_reset_chimin;
-        int _simplex_mindex;
-        array_1d<int> _good_points;
+        value_t _target_factor;
+        value_t _reset_threshold,_reset_chimin;
+        index_t _simplex_mindex;
+        array_1d<index_t> _good_points;
 
         ////////code related to finding basis vectors
-        array_1d<int> _basis_associates;
-        array_1d<double> _basis_mm,_basis_bb,_basis_model,_basis_vv;
-        array_1d<double> _basis_norm,_basis_associate_norm;
-        array_2d<double> _basis_vectors,_basis_ddsq;
-        double _basis_chimin;
+        array_1d<index_t> _basis_associates;
+        array_1d<value_t> _basis_mm,_basis_bb,_basis_model,_basis_vv;
+        array_1d<value_t> _basis_norm,_basis_associate_norm;
+        array_2d<value_t> _basis_vectors,_basis_ddsq;
+        value_t _basis_chimin;
 
-        double basis_error(array_2d<double>&, array_1d<double>&);
-        void find_trial_bases(int, array_1d<double>&, array_2d<double> &out_bases);
-        void validate_bases(array_2d<double>&, char*);
-        void guess_bases(array_2d<double>&);
-        void find_covariance_matrix(int, array_2d<double>&);
+        value_t basis_error(array_2d<value_t>&, array_1d<value_t>&);
+        void find_trial_bases(index_t, array_1d<value_t>&, array_2d<value_t> &out_bases);
+        void validate_bases(array_2d<value_t>&, char*);
+        void guess_bases(array_2d<value_t>&);
+        void find_covariance_matrix(index_t, array_2d<value_t>&);
         void find_bases();
 
 
         ///////code related to explorers
         explorers _min_explorers;
-        int _last_checked_good;
+        index_t _last_checked_good;
 
         /////code related to minimizers
-        array_1d<int> _minimizers;
+        array_1d<index_t> _minimizers;
         void refine_minimum();
         void iterate_on_minimum();
 
         //////code related to tendrils
-        void get_negative_gradient(int, cost_fn&, ellipse&, array_1d<double>&);
-        array_2d<int> _tendril_path;
+        void get_negative_gradient(index_t, cost_fn&, ellipse&, array_1d<value_t>&);
+        array_2d<index_t> _tendril_path;
 
-        array_1d<int> _particles,_origins;
-        array_1d<int> _particle_candidates,_origin_candidates;
-        array_1d<int> _strikes_arr;
+        array_1d<index_t> _particles,_origins;
+        array_1d<index_t> _particle_candidates,_origin_candidates;
+        array_1d<index_t> _strikes_arr;
 
         void compass_search(ellipse&);
 
-        int _limit;
-        int _strikes,_strikeouts;
-        int _has_struck;
-        int _tendril_init;
+        index_t _limit;
+        index_t _strikes,_strikeouts;
+        index_t _has_struck;
+        index_t _tendril_init;
 
         ellipse_list _exclusion_zones;
         ellipse_sampler _ellipse_sampler;

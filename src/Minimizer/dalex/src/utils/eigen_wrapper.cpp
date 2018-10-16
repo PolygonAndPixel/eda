@@ -8,9 +8,9 @@
 #include <lapacke.h>
 
 
-void matrix_multiply(double **a, int ar, int ac, double **b, int br, int bc, double **p){
+void matrix_multiply(value_t **a, index_t ar, index_t ac, value_t **b, index_t br, index_t bc, value_t **p){
 
-	int i,j,m,n;
+	index_t i,j,m,n;
 	
 	//if(ac!=br)cout<<"WARNING dimensions are wrong "<<ar<<" x "<<ac<<" times "<<br<<" x "<<bc<<endl;
 	
@@ -26,7 +26,7 @@ void matrix_multiply(double **a, int ar, int ac, double **b, int br, int bc, dou
 }
 
 
-double check_inversion(array_2d<double> &m, array_2d<double> &min){
+value_t check_inversion(array_2d<value_t> &m, array_2d<value_t> &min){
 	
 	if(m.get_rows()!=m.get_cols() || m.get_rows()!=min.get_rows() || min.get_rows()!=min.get_cols()){
 	    printf("WARING you passed %d by %d and %d by %d to check_inversion\n",
@@ -38,8 +38,8 @@ double check_inversion(array_2d<double> &m, array_2d<double> &min){
 	    exit(1);
 	}
 	
-	double err,maxerr=-1.0,nn;
-	int i,j,k;
+	value_t err,maxerr=-1.0,nn;
+	index_t i,j,k;
 	
 	for(i=0;i<m.get_rows();i++){
 	    for(j=0;j<m.get_rows();j++){
@@ -63,10 +63,10 @@ double check_inversion(array_2d<double> &m, array_2d<double> &min){
 }
 
 #define detmax 50
-double determinant(double *m, int el){
+value_t determinant(value_t *m, index_t el){
 
-	double ans,mm[detmax*detmax],sign,term;
-	int i,j,k,r,c,minrow,mincol,iminrow,imincol,ct;
+	value_t ans,mm[detmax*detmax],sign,term;
+	index_t i,j,k,r,c,minrow,mincol,iminrow,imincol,ct;
 	
 	if(el>detmax){
 		//cout<<"WARNING too many elements in determinant "<<el<<" > "<<detmax<<endl;
@@ -145,19 +145,19 @@ double determinant(double *m, int el){
 }
 
 
-double trace(double *m, int el){
-	double ans=0;
-	int i;
+value_t trace(value_t *m, index_t el){
+	value_t ans=0;
+	index_t i;
 	for(i=0;i<el;i++)ans+=m[i*el+i];
 	return ans;
 }
 
-void invert_lapack(array_2d<double> &matin, array_2d<double> &min, int verb){
+void invert_lapack(array_2d<value_t> &matin, array_2d<value_t> &min, index_t verb){
 
-	//double matrix[maxdata*maxdata],work[maxdata];
-	int i,j,el;
-	int info,lda,m,n,lwork;
-	//int ipiv[maxdata];
+	//value_t matrix[maxdata*maxdata],work[maxdata];
+	index_t i,j,el;
+	index_t info,lda,m,n,lwork;
+	//index_t ipiv[maxdata];
 	
 	if(matin.get_rows()!=matin.get_cols()){
 	    printf("WARNING did not pass a symmetric matrix to invert_lapack %d %d\n",
@@ -171,20 +171,20 @@ void invert_lapack(array_2d<double> &matin, array_2d<double> &min, int verb){
 	el=matin.get_rows();
 	min.set_dim(el,el);
 	
-	double *matrix, *work;
-	int *ipiv;
+	value_t *matrix, *work;
+	index_t *ipiv;
 	
 	
 	
 	
-	/*matrix=new double [maxdata*maxdata];
-	work=new double [maxdata];
-	ipiv=new int [maxdata];*/
+	/*matrix=new value_t [maxdata*maxdata];
+	work=new value_t [maxdata];
+	ipiv=new index_t [maxdata];*/
 	
 	lwork=4*el;
-	matrix=new double[el*el];
-	work=new double[lwork];
-	ipiv=new int [el];
+	matrix=new value_t[el*el];
+	work=new value_t[lwork];
+	ipiv=new index_t [el];
 	
 	for(i=0;i<el;i++){
 	for(j=0;j<el;j++){
@@ -232,20 +232,20 @@ void invert_lapack(array_2d<double> &matin, array_2d<double> &min, int verb){
 
 }
 
-void eval_symm(array_2d<double> &matrix, array_2d<double> &vectors, array_1d<double> &values){
+void eval_symm(array_2d<value_t> &matrix, array_2d<value_t> &vectors, array_1d<value_t> &values){
     eval_symm(matrix,vectors,values,-1.0);
 }
 
-void eval_symm(array_2d<double> &matrix, array_2d<double> &vectors, array_1d<double> &values, double check){
-    int ix,iy;
-    int batch1=matrix.get_rows()/2;
+void eval_symm(array_2d<value_t> &matrix, array_2d<value_t> &vectors, array_1d<value_t> &values, value_t check){
+    index_t ix,iy;
+    index_t batch1=matrix.get_rows()/2;
 
     vectors.set_cols(matrix.get_cols());
     values.set_dim(matrix.get_cols());
 
-    array_1d<double> temp_vals;
+    array_1d<value_t> temp_vals;
     temp_vals.set_name("eval_symm_temp_vals");
-    array_2d<double> buffer;
+    array_2d<value_t> buffer;
     buffer.set_name("eval_symm_buffer");
     buffer.set_cols(matrix.get_cols());
 
@@ -258,7 +258,7 @@ void eval_symm(array_2d<double> &matrix, array_2d<double> &vectors, array_1d<dou
         }
     }
 
-    int batch2=matrix.get_cols()-batch1;
+    index_t batch2=matrix.get_cols()-batch1;
 
     eval_symm_guts(matrix,buffer,temp_vals,batch2,matrix.get_cols(),-1,-1.0);
 
@@ -270,9 +270,9 @@ void eval_symm(array_2d<double> &matrix, array_2d<double> &vectors, array_1d<dou
     }
 
 
-    int i,j,k;
-    array_1d<double> test,control;
-    double dotproduct,err;
+    index_t i,j,k;
+    array_1d<value_t> test,control;
+    value_t dotproduct,err;
     test.set_name("eval_symm(actual)_test");
     control.set_name("eval_symm(actual)_control");
     if(check>0.0){
@@ -310,12 +310,12 @@ void eval_symm(array_2d<double> &matrix, array_2d<double> &vectors, array_1d<dou
     }
 }
 
-void eval_symm_guts(array_2d<double> &m, array_2d<double> &vecs, array_1d<double> &vals, int nev, int n, int order){
+void eval_symm_guts(array_2d<value_t> &m, array_2d<value_t> &vecs, array_1d<value_t> &vals, index_t nev, index_t n, index_t order){
     eval_symm_guts(m,vecs,vals,nev,n,order,-1.0);
 }
 
-void eval_symm_guts(array_2d<double> &m, array_2d<double> &vecs, array_1d<double> &vals,
-int nev, int n, int order, double check){
+void eval_symm_guts(array_2d<value_t> &m, array_2d<value_t> &vecs, array_1d<value_t> &vals,
+index_t nev, index_t n, index_t order, value_t check){
 //this will use ARPACK to get nev eigenvalues and vectors of a symmetric
 // n-by-n matrix
 //order=1 looks for nev largest eigenvalues
@@ -323,28 +323,28 @@ int nev, int n, int order, double check){
 
 //NOTE: cannot solve for all of the eigenvalues of a given matrix
 
- int ido=0,info=0;
+ index_t ido=0,info=0;
  char bmat='I';
  char which[2];
- double tol=-1.0;
- double *resid;
- int ncv;
- double *v;
- int ldv=n;
- int iparam[11],ipntr[11];
- double *workd;
- int lworkl;
- double *workl;
+ value_t tol=-1.0;
+ value_t *resid;
+ index_t ncv;
+ value_t *v;
+ index_t ldv=n;
+ index_t iparam[11],ipntr[11];
+ value_t *workd;
+ index_t lworkl;
+ value_t *workl;
 
- int rvec=1;
+ index_t rvec=1;
  char howmny='A';
- int *select;
- double *d;
- double *z;
- int ldz;
+ index_t *select;
+ value_t *d;
+ value_t *z;
+ index_t ldz;
 
- int i,j,k,l;
- double junk,sigma;
+ index_t i,j,k,l;
+ value_t junk,sigma;
 
  if(3*nev<n)ncv=3*nev;
  else ncv=n;
@@ -357,14 +357,14 @@ int nev, int n, int order, double check){
  else which[0]='S';
  which[1]='M';
 
- resid=new double[n];
- v=new double[n*ncv];
- workd=new double[3*n];
- workl=new double[lworkl];
+ resid=new value_t[n];
+ v=new value_t[n*ncv];
+ workd=new value_t[3*n];
+ workl=new value_t[lworkl];
 
- select=new int[ncv];
- d=new double[nev];
- z=new double[n*nev];
+ select=new index_t[ncv];
+ d=new value_t[nev];
+ z=new value_t[n*nev];
  ldz=n;
 
  iparam[0]=1;
@@ -474,8 +474,8 @@ int nev, int n, int order, double check){
       }
   }
 
-  array_1d<double> test,control;
-  double dotproduct,err;
+  array_1d<value_t> test,control;
+  value_t dotproduct,err;
   test.set_name("eval_symm_test");
   control.set_name("eval_symm_control");
   if(check>0.0){
@@ -512,13 +512,13 @@ int nev, int n, int order, double check){
 
 
 
-double eigen_check(array_2d<double> &matrix, array_1d<double> &vec, double lambda, int n){
- int i,j,k,l;
- double err,maxerr=-1.0,ans;
+value_t eigen_check(array_2d<value_t> &matrix, array_1d<value_t> &vec, value_t lambda, index_t n){
+ index_t i,j,k,l;
+ value_t err,maxerr=-1.0,ans;
 
- double *vans;
+ value_t *vans;
 
- //vans=new double[n];
+ //vans=new value_t[n];
 
  //printf("checking %e %e %e\n",vec[0],vec[1],vec[2]);
 
@@ -549,9 +549,9 @@ double eigen_check(array_2d<double> &matrix, array_1d<double> &vec, double lambd
 
 }
 
-double eigen_check_open(double **matrix, double *vec, int n){
- int i,j,k,l;
- double err,maxerr=-1.0,ans,lambda=-1.0e20;
+value_t eigen_check_open(value_t **matrix, value_t *vec, index_t n){
+ index_t i,j,k,l;
+ value_t err,maxerr=-1.0,ans,lambda=-1.0e20;
 
  for(i=0;i<n;i++){
   ans=0.0;
@@ -580,32 +580,32 @@ double eigen_check_open(double **matrix, double *vec, int n){
 }
 
 //solves real symmetric matrix using lapack routines
-void eigen_solve(double **min, int rows, int values, double *values_out, double **vectors){
+void eigen_solve(value_t **min, index_t rows, index_t values, value_t *values_out, value_t **vectors){
 
-double *dm,*matrix;
+value_t *dm,*matrix;
 char uplo,order,range,side,trans;
-int info,lda,lwork,n,ldz,ldc;
-int il,iu,m,nsplit;
-double *d, *e, *tau, *work, *z, *c,*w;
-double abstol,vl,vu;
-double *vec1,*vec2;
-int *iblock, *isplit, *iwork,*ifail;
-int j,k;
+index_t info,lda,lwork,n,ldz,ldc;
+index_t il,iu,m,nsplit;
+value_t *d, *e, *tau, *work, *z, *c,*w;
+value_t abstol,vl,vu;
+value_t *vec1,*vec2;
+index_t *iblock, *isplit, *iwork,*ifail;
+index_t j,k;
 
-matrix=new double [rows*rows];
-dm = new double [rows*rows];
-d= new double [rows];
-e= new double [rows-1];
-tau = new double [rows-1];
-work=new double [rows*rows];
-w=new double [rows];
+matrix=new value_t [rows*rows];
+dm = new value_t [rows*rows];
+d= new value_t [rows];
+e= new value_t [rows-1];
+tau = new value_t [rows-1];
+work=new value_t [rows*rows];
+w=new value_t [rows];
 
 
-vec1 = new double[rows];
-vec2=new double [rows];
-iblock = new int [rows];
-isplit = new int [rows];
-iwork=new int [3*rows];
+vec1 = new value_t[rows];
+vec2=new value_t [rows];
+iblock = new index_t [rows];
+isplit = new index_t [rows];
+iwork=new index_t [3*rows];
 
 
 //remember, Fortran's convention is [column][row]
@@ -648,8 +648,8 @@ values_out[j]=w[j];
 m=values;
 ldz=rows;
 
-z=new double [ldz*m];
-ifail=new int [m];
+z=new value_t [ldz*m];
+ifail=new index_t [m];
 
 dstein_(&n,d,e,&m,w,iblock,isplit,z,&ldz,work,iwork,ifail,&info);
 if(info!=0){
@@ -696,7 +696,7 @@ n=values;
 ldc=rows;
 lwork=rows;
 
-c=new double [ldc*rows];
+c=new value_t [ldc*rows];
 
 //for(j=0;j<values;j++)cout<<"predorm vout "<<values_out[j]<<endl;
 
@@ -738,7 +738,7 @@ delete [] ifail;
 
 }
 
-void solve_lapack_nbyn(array_2d<double> &mm, array_1d<double> &yy, array_1d<double> &xx){
+void solve_lapack_nbyn(array_2d<value_t> &mm, array_1d<value_t> &yy, array_1d<value_t> &xx){
 
     if(yy.get_dim()!=mm.get_rows()){
         printf("WARNNG in solve_lapack yy dim %d mm rows %d\n",
@@ -754,16 +754,16 @@ void solve_lapack_nbyn(array_2d<double> &mm, array_1d<double> &yy, array_1d<doub
 	exit(1);
     }
 
-    double *aa;
-    int m,n,lda,*ipiv,info;
+    value_t *aa;
+    index_t m,n,lda,*ipiv,info;
 
-    aa=new double[mm.get_rows()*mm.get_cols()];
+    aa=new value_t[mm.get_rows()*mm.get_cols()];
 
-    int i,j;
+    index_t i,j;
     if(mm.get_rows()<mm.get_cols())i=mm.get_rows()+1;
     else i=mm.get_cols()+1;
 
-    ipiv=new int[i];
+    ipiv=new index_t[i];
 
     info=0;
     m=mm.get_rows();
@@ -782,11 +782,11 @@ void solve_lapack_nbyn(array_2d<double> &mm, array_1d<double> &yy, array_1d<doub
 	exit(1);
     }
 
-    int nrhs,ldb;
-    double *bb;
+    index_t nrhs,ldb;
+    value_t *bb;
     char *T;
 
-    bb=new double[mm.get_rows()];
+    bb=new value_t[mm.get_rows()];
 
     for(i=0;i<mm.get_rows();i++){
         bb[i]=yy.get_data(i);

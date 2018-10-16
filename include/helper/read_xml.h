@@ -49,19 +49,19 @@ void load_minimizer_xml(
         std::string name = pt.get<std::string>("name");
         // Load specific values depending on the method
         if(name == MAPSNAME) {
-            double tolerance    = pt.get<double>("tolerance");
-            int max_iter        = pt.get<int>("max_iter");
-            int min_iter        = pt.get<int>("min_iter");
-            int max_points      = pt.get<int>("max_points");
-            int seed            = pt.get<int>("seed");
+            value_t tolerance    = pt.get<value_t>("tolerance");
+            index_t max_iter        = pt.get<index_t>("max_iter");
+            index_t min_iter        = pt.get<index_t>("min_iter");
+            index_t max_points      = pt.get<index_t>("max_points");
+            index_t seed            = pt.get<index_t>("seed");
             bool dump_points    = pt.get<bool>("dump_points");
 
-            int n_start_points      = pt.get<int>("n_start_points");
-            int size_sub_pop        = pt.get<int>("size_sub_pop");
-            int max_sub_pops        = pt.get<int>("max_sub_pops");
-            int n_selected          = pt.get<int>("n_selected");
-            int n_sub_selected      = pt.get<int>("n_sub_selected");
-            double size_factor      = pt.get<double>("size_factor");
+            index_t n_start_points      = pt.get<index_t>("n_start_points");
+            index_t size_sub_pop        = pt.get<index_t>("size_sub_pop");
+            index_t max_sub_pops        = pt.get<index_t>("max_sub_pops");
+            index_t n_selected          = pt.get<index_t>("n_selected");
+            index_t n_sub_selected      = pt.get<index_t>("n_sub_selected");
+            value_t size_factor      = pt.get<value_t>("size_factor");
             MAPS minimizer(tolerance, max_iter, min_iter, max_points,
                 n_start_points, size_sub_pop, max_sub_pops, n_selected, size_factor,
                 seed, dump_points);
@@ -72,15 +72,15 @@ void load_minimizer_xml(
         }
 
         if(name == POLY) {
-            double tolerance    = pt.get<double>("tolerance");
-            int max_iter        = pt.get<int>("max_iter");
-            int min_iter        = pt.get<int>("min_iter");
-            int max_points      = pt.get<int>("max_points");
-            int seed            = pt.get<int>("seed");
+            value_t tolerance    = pt.get<value_t>("tolerance");
+            index_t max_iter        = pt.get<index_t>("max_iter");
+            index_t min_iter        = pt.get<index_t>("min_iter");
+            index_t max_points      = pt.get<index_t>("max_points");
+            index_t seed            = pt.get<index_t>("seed");
             bool dump_points    = pt.get<bool>("dump_points");
 
-            int n_prior             = pt.get<int>("n_prior");
-            int n_grade             = pt.get<int>("n_grade");
+            index_t n_prior             = pt.get<index_t>("n_prior");
+            index_t n_grade             = pt.get<index_t>("n_grade");
             std::string values      = pt.get<std::string>("grade_frac");
             v_d grade_frac;
             std::vector<std::string> values_split;
@@ -88,11 +88,11 @@ void load_minimizer_xml(
             boost::split(values_split, values, boost::is_any_of(" "));
             for(std::string &item: values_split)
                 grade_frac.push_back(std::stod(item));
-            int n_live              = pt.get<int>("n_live");
-            int feedback            = pt.get<int>("feedback");
-            int max_dead            = pt.get<int>("max_dead");
-            double boost_posterior  = pt.get<double>("boost_posterior");
-            int num_repeats         = pt.get<int>("num_repeats");
+            index_t n_live              = pt.get<index_t>("n_live");
+            index_t feedback            = pt.get<index_t>("feedback");
+            index_t max_dead            = pt.get<index_t>("max_dead");
+            value_t boost_posterior  = pt.get<value_t>("boost_posterior");
+            index_t num_repeats         = pt.get<index_t>("num_repeats");
             bool posteriors         = pt.get<bool>("posteriors");
             bool equals             = pt.get<bool>("equals");
             bool cluster_posteriors = pt.get<bool>("cluster_posteriors");
@@ -109,18 +109,18 @@ void load_minimizer_xml(
         }
 
         if(name == MULTI) {
-            double tolerance    = pt.get<double>("tolerance");
-            int max_iter        = pt.get<int>("max_iter");
-            int seed            = pt.get<int>("seed");
+            value_t tolerance    = pt.get<value_t>("tolerance");
+            index_t max_iter        = pt.get<index_t>("max_iter");
+            index_t seed            = pt.get<index_t>("seed");
             bool dump_points    = pt.get<bool>("dump_points");
 
             bool ins                 = pt.get<bool>("ins");
             bool mode_separation     = pt.get<bool>("mode_separation");
             bool const_eff           = pt.get<bool>("const_eff");
-            int n_live               = pt.get<int>("n_live");
-            double enlargement       = pt.get<double>("enlargement");
-            int feedback_interval    = pt.get<int>("feedback_interval");
-            int max_modes            = pt.get<int>("max_modes");
+            index_t n_live               = pt.get<index_t>("n_live");
+            value_t enlargement       = pt.get<value_t>("enlargement");
+            index_t feedback_interval    = pt.get<index_t>("feedback_interval");
+            index_t max_modes            = pt.get<index_t>("max_modes");
             bool feedback            = pt.get<bool>("feedback");
 
             MultiNest minimizer(tolerance, max_iter, ins, mode_separation,
@@ -134,9 +134,9 @@ void load_minimizer_xml(
         }
 
         if(name == SAMPLE) {
-            int max_iter        = pt.get<int>("max_iter");
-            int max_points      = pt.get<int>("max_points");
-            int seed            = pt.get<int>("seed");
+            index_t max_iter        = pt.get<index_t>("max_iter");
+            index_t max_points      = pt.get<index_t>("max_points");
+            index_t seed            = pt.get<index_t>("seed");
             bool dump_points    = pt.get<bool>("dump_points");
 
             SampleSpace minimizer(max_iter, max_points, seed, dump_points);
@@ -148,12 +148,12 @@ void load_minimizer_xml(
         }
 
         if(name == SCAN) {
-            int n_points_per_dim = pt.get<int>("n_points_per_dim");
-            int max_points       = pt.get<int>("max_points");
-            int seed;
+            index_t n_points_per_dim = pt.get<index_t>("n_points_per_dim");
+            index_t max_points       = pt.get<index_t>("max_points");
+            index_t seed;
             // Those have default values 
             try{
-                 seed = pt.get<int>("seed");
+                 seed = pt.get<index_t>("seed");
             } catch(const boost::property_tree::ptree_bad_path &e) {
                 // seed = NULL;
             }
@@ -169,12 +169,12 @@ void load_minimizer_xml(
         }
 
         if(name == DALEX) {
-            int max_iter        = pt.get<int>("max_iter");
-            int max_points       = pt.get<int>("max_points");
-            int seed;
+            index_t max_iter        = pt.get<index_t>("max_iter");
+            index_t max_points       = pt.get<index_t>("max_points");
+            index_t seed;
             // Those have default values 
             try{
-                 seed = pt.get<int>("seed");
+                 seed = pt.get<index_t>("seed");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
             bool dump_points;
             try{
@@ -191,31 +191,31 @@ void load_minimizer_xml(
         }
 
         if(name == GD) {
-            int max_iter        = pt.get<int>("max_iter");
-            int min_iter        = pt.get<int>("min_iter");
-            int max_points       = pt.get<int>("max_points");
+            index_t max_iter        = pt.get<index_t>("max_iter");
+            index_t min_iter        = pt.get<index_t>("min_iter");
+            index_t max_points       = pt.get<index_t>("max_points");
 
             // Those have default values 
-            double conv_crit;
+            value_t conv_crit;
             try{
-                conv_crit = pt.get<double>("conv_crit");
+                conv_crit = pt.get<value_t>("conv_crit");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
-            int n_gradients;
+            index_t n_gradients;
             try{
-                 n_gradients = pt.get<int>("n_gradients");
+                 n_gradients = pt.get<index_t>("n_gradients");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
-            int seed;
+            index_t seed;
             try{
-                 seed = pt.get<int>("seed");
+                 seed = pt.get<index_t>("seed");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
             bool dump_points;
             try{
                  bool dump_points    = pt.get<bool>("dump_points");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
 
-            double stepsize;
+            value_t stepsize;
             try{
-                 stepsize = pt.get<double>("stepsize");
+                 stepsize = pt.get<value_t>("stepsize");
             } catch(const boost::property_tree::ptree_bad_path &e) { }
 
             GradientDescent minimizer(max_iter, min_iter, max_points, 
@@ -280,7 +280,7 @@ void load_likelihood_xml(
         for(std::string &item: values_split)
             upper.push_back(std::stod(item));
 
-        int n_dims = upper.size();
+        index_t n_dims = upper.size();
         test_func.set_func(func_name, n_dims);
         test_funcs.push_back(test_func);
         lower_bounds.push_back(lower);

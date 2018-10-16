@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import sys
 
 cm = plt.cm.get_cmap('jet')
-nDims = int(sys.argv[3])
+nDims = index_t(sys.argv[3])
 
 print("Using data from {}".format(sys.argv[1]))
 print("Save picture as {}".format(sys.argv[2]))

@@ -23,16 +23,16 @@ as provided in aps_cmb_module.cpp
 */
 
 extern "C" void \
-camb_wrap_(double*,double*,double*,double*,double*,double*);
+camb_wrap_(value_t*,value_t*,value_t*,value_t*,value_t*,value_t*);
 
-extern "C" void wmaplikeness_(double*,double*,double*,double*,double*);
+extern "C" void wmaplikeness_(value_t*,value_t*,value_t*,value_t*,value_t*);
 
 class wmap_likelihood : public chisquared{
 
 public:
     wmap_likelihood();
     ~wmap_likelihood();
-    virtual double operator()(array_1d<double>&);
+    virtual value_t operator()(array_1d<value_t>&);
 };
 
 
@@ -41,7 +41,7 @@ class wmap_2d_likelihood : public chisquared{
 public:
     wmap_2d_likelihood();
     ~wmap_2d_likelihood();
-    virtual double operator()(array_1d<double>&);
+    virtual value_t operator()(array_1d<value_t>&);
 
 private:
     wmap_likelihood _wmap;

@@ -6,27 +6,27 @@
 class chiSquaredData : public chisquared{
 
     public:
-        chiSquaredData(int, int, double, int, double);
+        chiSquaredData(index_t, index_t, value_t, index_t, value_t);
         ~chiSquaredData(){};
 
-        void set_width(int, int, double);
+        void set_width(index_t, index_t, value_t);
 
-        virtual double operator()(const array_1d<double>&);
+        virtual value_t operator()(const array_1d<value_t>&);
         void write_data();
         void print_mins();
         
-        virtual void convert_params(const array_1d<double>&, array_1d<double>&, int);
+        virtual void convert_params(const array_1d<value_t>&, array_1d<value_t>&, index_t);
 
     protected:
-        int _ndata;
-        double _sig;
-        double _xmax,_dx;
-        array_1d<double> _x_values,_y_values,_sigma;
-        array_1d<double> _wave_phase,_wave_lambda,_env_d_center,_env_width;
-        array_1d<double> _wave_amp;
-        array_1d<double> _param_buffer;
+        index_t _ndata;
+        value_t _sig;
+        value_t _xmax,_dx;
+        array_1d<value_t> _x_values,_y_values,_sigma;
+        array_1d<value_t> _wave_phase,_wave_lambda,_env_d_center,_env_width;
+        array_1d<value_t> _wave_amp;
+        array_1d<value_t> _param_buffer;
 
-        double data_function(array_1d<double>&, double);
+        value_t data_function(array_1d<value_t>&, value_t);
         
         void initialize_data();
 
@@ -36,14 +36,14 @@ class jellyBeanData : public chiSquaredData{
 
     public:
         ~jellyBeanData(){}
-        jellyBeanData(int,int,double,int,double);
+        jellyBeanData(index_t,index_t,value_t,index_t,value_t);
         
-        virtual void convert_params(const array_1d<double>&, array_1d<double>&, int);
+        virtual void convert_params(const array_1d<value_t>&, array_1d<value_t>&, index_t);
 
 
     protected:
-        double _parabola_curvature;
-        array_2d<double> _parabola_centers,_parabola_x,_parabola_y;
+        value_t _parabola_curvature;
+        array_2d<value_t> _parabola_centers,_parabola_x,_parabola_y;
 
 };
 
@@ -51,12 +51,12 @@ class ellipseData : public chiSquaredData{
 
     public:
         ~ellipseData(){}
-        ellipseData(int, int, int, double);
+        ellipseData(index_t, index_t, index_t, value_t);
 
-        virtual void convert_params(const array_1d<double>&, array_1d<double>&, int);
+        virtual void convert_params(const array_1d<value_t>&, array_1d<value_t>&, index_t);
     
     protected:
-        array_1d<double> _dir,_projected;
+        array_1d<value_t> _dir,_projected;
         
 
 };
@@ -64,8 +64,8 @@ class ellipseData : public chiSquaredData{
 class nonGaussianEllipseData : public ellipseData{
     public:
         ~nonGaussianEllipseData(){}
-        nonGaussianEllipseData(int, int, int, double);
-        virtual void convert_params(const array_1d<double>&, array_1d<double>&, int);
+        nonGaussianEllipseData(index_t, index_t, index_t, value_t);
+        virtual void convert_params(const array_1d<value_t>&, array_1d<value_t>&, index_t);
 };
 
 #endif

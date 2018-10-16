@@ -9,12 +9,12 @@ from matplotlib.mlab import griddata
 import sys
 
 cm = plt.cm.get_cmap('jet')
-nDims = int(sys.argv[3])
+nDims = index_t(sys.argv[3])
 three_d = False # Old attempt
-project = int(sys.argv[4]) > 0
-contour = int(sys.argv[5]) > 0
-video = int(sys.argv[6]) > 0
-min_plot_llh = -1*int(sys.argv[7])
+project = index_t(sys.argv[4]) > 0
+contour = index_t(sys.argv[5]) > 0
+video = index_t(sys.argv[6]) > 0
+min_plot_llh = -1*index_t(sys.argv[7])
 print("Using data from {}".format(sys.argv[1]))
 print("Save picture as {}".format(sys.argv[2]))
 print("Number of dimensions is {}".format(nDims))
@@ -61,7 +61,7 @@ if video:
     imgs = []
     def update_contour(i, par_pairs, x):
         bins = 4
-        parameter_idx = int((i/bins)%(len(par_pairs)/2))
+        parameter_idx = index_t((i/bins)%(len(par_pairs)/2))
         p1, p2 = par_pairs[parameter_idx]
 
         if p1 == p2 or p1 < p2:
@@ -108,7 +108,7 @@ if video:
     for i in range(1000):
         te = ax.text(90, 90, text)
         add_this = update_contour(i, list(product(dim_idx, dim_idx)), x)
-        if isinstance(add_this, int):
+        if isinstance(add_this, index_t):
             continue
         imgs.append(add_this + [te])
     anime = animation.ArtistAnimation(fig, imgs)

@@ -40,18 +40,18 @@ class integrableJellyBean : public jellyBeanData{
 class integrableJellyBeanXX : public chisquared{
 
     public:
-        integrableJellyBeanXX(int ii_dim): chisquared(ii_dim){
+        integrableJellyBeanXX(index_t ii_dim): chisquared(ii_dim){
 
-            int dxx=ii_dim-4;
+            index_t dxx=ii_dim-4;
 
-            int i;
+            index_t i;
             for(i=0;i<dxx;i++){
                 _dxx_center.set(i,_dice->doub()*(10.0)-5.0);
                 _dxx_widths.set(i,_dice->doub()*0.9+0.1);
             }
-            array_1d<double> trial;
-            int j,k;
-            double component;
+            array_1d<value_t> trial;
+            index_t j,k;
+            value_t component;
             while(_dxx_bases.get_rows()<dxx){
                 for(i=0;i<dxx;i++){
                     trial.set(i,normal_deviate(_dice,0.0,1.0));
@@ -73,19 +73,19 @@ class integrableJellyBeanXX : public chisquared{
 
         }
 
-        virtual double operator()(const array_1d<double> &pt){
+        virtual value_t operator()(const array_1d<value_t> &pt){
             _called++;
-            array_1d<double> four_d_pt;
-            int i;
+            array_1d<value_t> four_d_pt;
+            index_t i;
             for(i=0;i<4;i++){
                 four_d_pt.set(i,pt.get_data(i));
             }
-            double d4_val = _d4_chisq(four_d_pt);
-            double dxx_val = 0.0;
-            double component;
-            int ix;
-            int dxx=_dxx_center.get_dim();
-            double ratio;
+            value_t d4_val = _d4_chisq(four_d_pt);
+            value_t dxx_val = 0.0;
+            value_t component;
+            index_t ix;
+            index_t dxx=_dxx_center.get_dim();
+            value_t ratio;
             for(ix=0;ix<dxx;ix++){
                 component=0.0;
                 for(i=0;i<dxx;i++){
@@ -100,9 +100,9 @@ class integrableJellyBeanXX : public chisquared{
 
     private:
         integrableJellyBean _d4_chisq;
-        array_1d<double> _dxx_center;
-        array_2d<double> _dxx_bases;
-        array_1d<double> _dxx_widths;
+        array_1d<value_t> _dxx_center;
+        array_2d<value_t> _dxx_bases;
+        array_1d<value_t> _dxx_widths;
 
 };
 
@@ -127,7 +127,7 @@ class gaussianJellyBean12 : public jellyBeanData{
         gaussianJellyBean12() :
         jellyBeanData(12,1,1.0,100,0.4){
             Ran constructor_dice(44);
-            int i;
+            index_t i;
 
             _widths.set(0,0,100.0);
             _widths.set(0,1,2.0);
@@ -146,7 +146,7 @@ class gaussianJellyBean16 : public jellyBeanData{
         gaussianJellyBean16() :
         jellyBeanData(16,1,1.0,100,0.4){
             Ran constructor_dice(44);
-            int i;
+            index_t i;
 
             _widths.set(0,0,20.0);
             _widths.set(0,1,2.0);
@@ -165,7 +165,7 @@ class gaussianJellyBean8 : public jellyBeanData{
         gaussianJellyBean8() :
         jellyBeanData(8,1,1.0,100,0.4){
             Ran constructor_dice(44);
-            int i;
+            index_t i;
 
             _widths.set(0,0,100.0);
             _widths.set(0,1,2.0);
@@ -182,12 +182,12 @@ class nonGaussianLump8 : public gaussianJellyBean8{
     public:
         nonGaussianLump8(){}
 
-    virtual void convert_params(const array_1d<double> &pt_in, array_1d<double> &out, int ic){
-        array_1d<double> pt;
+    virtual void convert_params(const array_1d<value_t> &pt_in, array_1d<value_t> &out, index_t ic){
+        array_1d<value_t> pt;
         pt.set_name("convert_params_pt");
         project_to_basis(pt_in,pt);
 
-        int ix;
+        index_t ix;
         for(ix=0;ix<_dim;ix++){
             if(ix%4==3){
                 if(pt.get_data(ix)>_centers.get_data(ic,ix)){
@@ -202,7 +202,7 @@ class nonGaussianLump8 : public gaussianJellyBean8{
             }
         }
 
-        double xx;
+        value_t xx;
         for(ix=0;ix<_dim;ix++){
             if(ix%4!=2){
                 out.multiply_val(ix,0.01);
@@ -225,12 +225,12 @@ class nonGaussianLump12 : public gaussianJellyBean12{
     public:
         nonGaussianLump12(){}
 
-    virtual void convert_params(const array_1d<double> &pt_in, array_1d<double> &out, int ic){
-        array_1d<double> pt;
+    virtual void convert_params(const array_1d<value_t> &pt_in, array_1d<value_t> &out, index_t ic){
+        array_1d<value_t> pt;
         pt.set_name("convert_params_pt");
         project_to_basis(pt_in,pt);
 
-        int ix;
+        index_t ix;
         for(ix=0;ix<_dim;ix++){
             if(ix%4==3){
                 if(pt.get_data(ix)>_centers.get_data(ic,ix)){
@@ -245,7 +245,7 @@ class nonGaussianLump12 : public gaussianJellyBean12{
             }
         }
 
-        double xx;
+        value_t xx;
         for(ix=0;ix<_dim;ix++){
             if(ix%4!=2){
                 out.multiply_val(ix,0.01);
@@ -271,7 +271,7 @@ class gaussianJellyBean24 : public jellyBeanData{
         gaussianJellyBean24() :
         jellyBeanData(24,1,1.0,100,0.4){
             Ran constructor_dice(99);
-            int i;
+            index_t i;
 
             _widths.set(0,0,250.0);
             _widths.set(0,1,2.0);
@@ -290,12 +290,12 @@ class nonGaussianLump24 : public gaussianJellyBean24{
     public:
         nonGaussianLump24(){}
 
-    virtual void convert_params(const array_1d<double> &pt_in, array_1d<double> &out, int ic){
-        array_1d<double> pt;
+    virtual void convert_params(const array_1d<value_t> &pt_in, array_1d<value_t> &out, index_t ic){
+        array_1d<value_t> pt;
         pt.set_name("convert_params_pt");
         project_to_basis(pt_in,pt);
 
-        int ix;
+        index_t ix;
         for(ix=0;ix<_dim;ix++){
             if(ix%4==3){
                 if(pt.get_data(ix)>_centers.get_data(ic,ix)){
@@ -310,7 +310,7 @@ class nonGaussianLump24 : public gaussianJellyBean24{
             }
         }
 
-        double xx;
+        value_t xx;
         for(ix=0;ix<_dim;ix++){
             if(ix%4!=2){
                 out.multiply_val(ix,0.01);

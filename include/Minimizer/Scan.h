@@ -8,7 +8,7 @@
 class Scan : public Minimizer {
 public:
 
-    Scan(int n_points_per_dim, int max_points, int seed=1025, bool dump_points=false);
+    Scan(index_t n_points_per_dim, index_t max_points, index_t seed=1025, bool dump_points=false);
 
     virtual std::unique_ptr<Minimizer> clone() const override {
         return std::make_unique<Scan>(*this);
@@ -20,14 +20,14 @@ public:
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
                              v_d upper_bounds);
 
-    void scan_space(uint32_t nDims);
-    void scan_space_tmp(uint32_t nDims);
+    void scan_space(index_t nDims);
+    void scan_space_tmp(index_t nDims);
 
     /// Transform point from hypercube to physical space
-    v_d to_physics(v_d cube, uint32_t nDims);
+    v_d to_physics(v_d cube, index_t nDims);
 
 private:
-    int n_points;
+    index_t n_points;
 };
 
 #endif

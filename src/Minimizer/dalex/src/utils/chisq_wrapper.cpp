@@ -25,8 +25,8 @@ chisq_wrapper::chisq_wrapper(){
     _timingname[0]=0;
     _last_written=0;
     _write_every=50000;
-    _time_started=double(time(NULL));
-    _time_batch=double(time(NULL));
+    _time_started=value_t(time(NULL));
+    _time_batch=value_t(time(NULL));
     _last_time_spent=0.0;
     _search_type=-1;
     _search_type_log.set_name("chisq_wrapper_search_type_log");
@@ -42,11 +42,11 @@ chisq_wrapper::~chisq_wrapper(){
     }
 }
 
-void chisq_wrapper::set_confidence_limit(double cc){
+void chisq_wrapper::set_confidence_limit(value_t cc){
     _confidence_limit=cc;
 }
 
-void chisq_wrapper::set_dof(int dd){
+void chisq_wrapper::set_dof(index_t dd){
     _dof=dd;
 }
 
@@ -54,56 +54,56 @@ void chisq_wrapper::set_chisquared(chisquared *xx){
     _chifn=xx;
 }
 
-int chisq_wrapper::get_seed(){
+index_t chisq_wrapper::get_seed(){
     return _seed;
 }
 
-void chisq_wrapper::set_seed(int i){
+void chisq_wrapper::set_seed(index_t i){
     _seed=i;
 }
 
-void chisq_wrapper::set_target(double xx){
+void chisq_wrapper::set_target(value_t xx){
     _target=xx;
     _adaptive_target=0;
 }
 
-void chisq_wrapper::set_ddmin(double dd){
+void chisq_wrapper::set_ddmin(value_t dd){
     _ddmin=dd;
 }
 
-void chisq_wrapper::set_min(array_1d<double> &vv){
+void chisq_wrapper::set_min(array_1d<value_t> &vv){
     if(_kptr!=NULL){
         printf("WARNING in chisq_wrapper setting min but kptr not null\n");
         exit(1);
     }
 
-    int i;
+    index_t i;
     _range_min.reset();
     for(i=0;i<vv.get_dim();i++){
         _range_min.set(i,vv.get_data(i));
     }
 }
 
-void chisq_wrapper::set_max(array_1d<double> &vv){
+void chisq_wrapper::set_max(array_1d<value_t> &vv){
     if(_kptr!=NULL){
         printf("WARNINGin chisq_wrapper setting max but kptr not null\n");
         exit(1);
     }
 
-    int i;
+    index_t i;
     _range_max.reset();
     for(i=0;i<vv.get_dim();i++){
         _range_max.set(i,vv.get_data(i));
     }
 }
 
-void chisq_wrapper::set_characteristic_length(int dex, double xx){
+void chisq_wrapper::set_characteristic_length(index_t dex, value_t xx){
     if(_kptr!=NULL){
         printf("WARNING in chisq_wrapper setting characteristic_length but kptr not null\n");
         exit(1);
     }
 
-    int i;
+    index_t i;
     if(dex>_characteristic_length.get_dim()){
         for(i=_characteristic_length.get_dim();i<dex;i++){
             _characteristic_length.set(i,-1.0);
@@ -113,7 +113,7 @@ void chisq_wrapper::set_characteristic_length(int dex, double xx){
     _characteristic_length.set(dex,xx);
 }
 
-double chisq_wrapper::get_characteristic_length(int dex){
+value_t chisq_wrapper::get_characteristic_length(index_t dex){
     if(dex<0 || dex>=_characteristic_length.get_dim() ||
        _characteristic_length.get_data(dex)<0.0){
 
@@ -130,7 +130,7 @@ double chisq_wrapper::get_characteristic_length(int dex){
 
 }
 
-void chisq_wrapper::set_deltachi(double xx){
+void chisq_wrapper::set_deltachi(value_t xx){
     if(_adaptive_target!=1){
         printf("WARNING chisq_wrapper trying to set detlachi, but not an adaptive target\n");
         exit(1);
@@ -138,7 +138,7 @@ void chisq_wrapper::set_deltachi(double xx){
     _deltachi=xx;
 }
 
-void chisq_wrapper::initialize(int npts){
+void chisq_wrapper::initialize(index_t npts){
     if(_chifn==NULL){
         printf("WARNING calling chisq_wrapper_initialize with null chifn\n");
         exit(1);
@@ -164,16 +164,16 @@ void chisq_wrapper::initialize(int npts){
     }
 
     if(_dice==NULL){
-        if(_seed<0)_seed=int(time(NULL));
+        if(_seed<0)_seed=index_t(time(NULL));
         _dice=new Ran(_seed);
     }
 
-    array_2d<double> data;
-    array_1d<double> vv;
+    array_2d<value_t> data;
+    array_1d<value_t> vv;
     vv.set_name("chisq_wrapper_initialize_vv");
     data.set_name("chisq_wrapper_data");
-    int i,j;
-    double mu;
+    index_t i,j;
+    value_t mu;
 
     _fn.reset();
     data.set_cols(_chifn->get_dim());
@@ -196,7 +196,7 @@ void chisq_wrapper::initialize(int npts){
         data.add_row(vv);
     }
 
-    array_1d<double> temp_max,temp_min;
+    array_1d<value_t> temp_max,temp_min;
     temp_max.set_name("chisq_wrapper_initialize_temp_max");
     temp_min.set_name("chisq_wrapper_initialize_temp_min");
     for(i=0;i<_chifn->get_dim();i++){
@@ -256,23 +256,23 @@ void chisq_wrapper::is_it_safe(char *word){
     }
 }
 
-double chisq_wrapper::target(){
+value_t chisq_wrapper::target(){
     return _target;
 }
 
-double chisq_wrapper::chimin(){
+value_t chisq_wrapper::chimin(){
     return _chimin;
 }
 
-int chisq_wrapper::mindex(){
+index_t chisq_wrapper::mindex(){
     return _mindex;
 }
 
-double chisq_wrapper::get_deltachi(){
+value_t chisq_wrapper::get_deltachi(){
     return _deltachi;
 }
 
-int chisq_wrapper::in_bounds(int dex, double val){
+index_t chisq_wrapper::in_bounds(index_t dex, value_t val){
     is_it_safe("in_bounds");
     if(dex<0 || dex>_chifn->get_dim()){
         printf("WARNING asked for in_bounds on dex %d but %d\n",dex,_chifn->get_dim());
@@ -289,10 +289,10 @@ int chisq_wrapper::in_bounds(int dex, double val){
     return 1;
 }
 
-int chisq_wrapper::in_bounds(const array_1d<double> &pt){
+index_t chisq_wrapper::in_bounds(const array_1d<value_t> &pt){
     is_it_safe("in_bounds");
 
-    int i;
+    index_t i;
     for(i=0;i<pt.get_dim();i++){
         if(_chifn->get_max(i)>-1.0*exception_value && pt.get_data(i)>_chifn->get_max(i)){
             return 0;
@@ -305,7 +305,7 @@ int chisq_wrapper::in_bounds(const array_1d<double> &pt){
 
 }
 
-int chisq_wrapper::is_valid(const array_1d<double> &pt, int *neighdex){
+index_t chisq_wrapper::is_valid(const array_1d<value_t> &pt, index_t *neighdex){
     is_it_safe("is_valid");
 
     neighdex[0]=-1;
@@ -324,22 +324,22 @@ int chisq_wrapper::is_valid(const array_1d<double> &pt, int *neighdex){
 
 }
 
-double chisq_wrapper::operator()(const array_1d<double> &pt){
-    double mu;
-    int dex;
-    int i;
+value_t chisq_wrapper::operator()(const array_1d<value_t> &pt){
+    value_t mu;
+    index_t dex;
+    index_t i;
     evaluate(pt,&mu,&dex);
     return mu;
 }
 
-double chisq_wrapper::raw_evaluate(const array_1d<double> &pt){
+value_t chisq_wrapper::raw_evaluate(const array_1d<value_t> &pt){
     return _chifn[0](pt);
 }
 
-void chisq_wrapper::evaluate(const array_1d<double> &pt, double *value, int *dex){
+void chisq_wrapper::evaluate(const array_1d<value_t> &pt, value_t *value, index_t *dex){
     is_it_safe("evaluate");
 
-    int validity,neighdex;
+    index_t validity,neighdex;
     validity=is_valid(pt,&neighdex);
 
     dex[0]=-1;
@@ -355,7 +355,7 @@ void chisq_wrapper::evaluate(const array_1d<double> &pt, double *value, int *dex
         return;
     }
 
-    double mu;
+    value_t mu;
     mu=_chifn[0](pt);
     value[0]=mu;
     _called++;
@@ -381,27 +381,27 @@ void chisq_wrapper::evaluate(const array_1d<double> &pt, double *value, int *dex
 
 }
 
-int chisq_wrapper::get_called(){
+index_t chisq_wrapper::get_called(){
     is_it_safe("get_called");
     return _chifn->get_called();
 }
 
-double chisq_wrapper::get_time_spent(){
+value_t chisq_wrapper::get_time_spent(){
     is_it_safe("get_time_spent");
     return _chifn->get_time_spent();
 }
 
-int chisq_wrapper::get_pts(){
+index_t chisq_wrapper::get_pts(){
     is_it_safe("get_pts");
     return _kptr->get_pts();
 }
 
-int chisq_wrapper::get_dim(){
+index_t chisq_wrapper::get_dim(){
     is_it_safe("get_dim");
     return _kptr->get_dim();
 }
 
-double chisq_wrapper::random_double(){
+value_t chisq_wrapper::random_double(){
     if(_dice==NULL){
         printf("WARNING chisq_wrapper random_double dice is null\n");
         exit(1);
@@ -410,7 +410,7 @@ double chisq_wrapper::random_double(){
     return _dice->doub();
 }
 
-int chisq_wrapper::random_int(){
+index_t chisq_wrapper::random_int(){
     if(_dice==NULL){
         printf("WARNING chisq_wrapper random_int dice is null\n");
         exit(1);
@@ -419,7 +419,7 @@ int chisq_wrapper::random_int(){
     return _dice->int32();
 }
 
-double chisq_wrapper::get_fn(int dex){
+value_t chisq_wrapper::get_fn(index_t dex){
     if(dex<0 || dex>=_fn.get_dim()){
         printf("WARNING asking for fn %d but %d\n",dex,_fn.get_dim());
     }
@@ -428,7 +428,7 @@ double chisq_wrapper::get_fn(int dex){
 }
 
 
-double chisq_wrapper::get_pt(int dex, int idim){
+value_t chisq_wrapper::get_pt(index_t dex, index_t idim){
     is_it_safe("get_pt");
 
     if(dex<0 || dex>=_fn.get_dim()){
@@ -448,7 +448,7 @@ double chisq_wrapper::get_pt(int dex, int idim){
     return _kptr->get_pt(dex,idim);
 }
 
-array_1d<double> chisq_wrapper::get_pt(int dex){
+array_1d<value_t> chisq_wrapper::get_pt(index_t dex){
     is_it_safe("get_pt(dex)");
     if(dex<0 || dex>=_fn.get_dim()){
         printf("WARNING asking wrapper for pt %d but only have %d\n",
@@ -459,7 +459,7 @@ array_1d<double> chisq_wrapper::get_pt(int dex){
     return _kptr->get_pt(dex);
 }
 
-void chisq_wrapper::nn_srch(array_1d<double> &vv, int kk, array_1d<int> &neigh, array_1d<double> &dd){
+void chisq_wrapper::nn_srch(array_1d<value_t> &vv, index_t kk, array_1d<index_t> &neigh, array_1d<value_t> &dd){
     is_it_safe("nn_srch");
     _kptr->nn_srch(vv,kk,neigh,dd);
 }
@@ -474,12 +474,12 @@ kd_tree* chisq_wrapper::get_tree(){
     return _kptr;
 }
 
-array_1d<double>* chisq_wrapper::get_fn_arr(){
+array_1d<value_t>* chisq_wrapper::get_fn_arr(){
     is_it_safe("get_fn_arr");
     return &_fn;
 }
 
-double chisq_wrapper::get_min(int dex){
+value_t chisq_wrapper::get_min(index_t dex){
     if(dex<0 or dex>=_range_min.get_dim()){
         printf("WARNING asked chisq_wrapper for min %d of %d\n",
         dex,_range_min.get_dim());
@@ -490,7 +490,7 @@ double chisq_wrapper::get_min(int dex){
     return _range_min.get_data(dex);
 }
 
-double chisq_wrapper::get_max(int dex){
+value_t chisq_wrapper::get_max(index_t dex){
     if(dex<0 or dex>=_range_max.get_dim()){
         printf("WARNING asked chisq_wrapper for max %d of %d\n",
         dex,_range_max.get_dim());
@@ -501,47 +501,47 @@ double chisq_wrapper::get_max(int dex){
     return _range_max.get_data(dex);
 }
 
-void chisq_wrapper::get_min(array_1d<double> &vv){
-    int i;
+void chisq_wrapper::get_min(array_1d<value_t> &vv){
+    index_t i;
     vv.set_dim(_range_min.get_dim());
     for(i=0;i<_range_min.get_dim();i++){
         vv.set(i,_range_min.get_data(i));
     }
 }
 
-void chisq_wrapper::get_max(array_1d<double> &vv){
-    int i;
+void chisq_wrapper::get_max(array_1d<value_t> &vv){
+    index_t i;
     vv.set_dim(_range_max.get_dim());
     for(i=0;i<_range_max.get_dim();i++){
         vv.set(i,_range_max.get_data(i));
     }
 }
 
-double chisq_wrapper::distance(array_1d<double> &p1, array_1d<double> &p2){
+value_t chisq_wrapper::distance(array_1d<value_t> &p1, array_1d<value_t> &p2){
     is_it_safe("distance(arr,arr)");
     return _kptr->distance(p1,p2);
 }
 
-double chisq_wrapper::distance(array_1d<double> &p, int dex){
+value_t chisq_wrapper::distance(array_1d<value_t> &p, index_t dex){
     is_it_safe("distance(arr,i)");
     return _kptr->distance(p,dex);
 }
 
-double chisq_wrapper::distance(int i1, int i2){
+value_t chisq_wrapper::distance(index_t i1, index_t i2){
     is_it_safe("distance(i,i)");
     return _kptr->distance(i1,i2);
 }
 
-void chisq_wrapper::find_gradient(array_1d<double> &pt, array_1d<double> &grad){
+void chisq_wrapper::find_gradient(array_1d<value_t> &pt, array_1d<value_t> &grad){
     is_it_safe("find_gradient");
 
-    double fCenter;
-    int iCenter;
+    value_t fCenter;
+    index_t iCenter;
     evaluate(pt,&fCenter,&iCenter);
 
-    int ix,i;
-    double x2,dx;
-    array_1d<double> trial;
+    index_t ix,i;
+    value_t x2,dx;
+    array_1d<value_t> trial;
     trial.set_name("chisq_wrapper_gradient_trial");
 
     for(i=0;i<_kptr->get_dim();i++){
@@ -591,7 +591,7 @@ void chisq_wrapper::copy(chisq_wrapper &in){
     _mindex=in._mindex;
 
 
-    int i,j;
+    index_t i,j;
 
     _range_max.reset();
     _range_min.reset();
@@ -614,14 +614,14 @@ void chisq_wrapper::copy(chisq_wrapper &in){
 
     printf("making kptr\n");
     _kptr=new kd_tree(in._kptr[0]);
-    if(_seed<0)_seed=int(time(NULL));
+    if(_seed<0)_seed=index_t(time(NULL));
     _dice=new Ran(_seed);
     printf("done copying\n");
 }
 
-int chisq_wrapper::could_it_go_lower(double chimin){
+index_t chisq_wrapper::could_it_go_lower(value_t chimin){
 
-    double tol=1.0;
+    value_t tol=1.0;
 
     if(chimin<tol){
         return 0;
@@ -629,7 +629,7 @@ int chisq_wrapper::could_it_go_lower(double chimin){
 
     if(_adaptive_target==1){
         if(_expected_min<0.0 && _dof>0){
-            _expected_min=_distribution.maximum_likelihood_chisquared_value(double(_dof));
+            _expected_min=_distribution.maximum_likelihood_chisquared_value(value_t(_dof));
         }
 
         if(_expected_min<0.0){
@@ -646,7 +646,7 @@ int chisq_wrapper::could_it_go_lower(double chimin){
     }
     else{
         if(_expected_delta<0.0 && _confidence_limit>0.0){
-            _expected_delta=_distribution.confidence_limit(double(_kptr->get_dim()),_confidence_limit);
+            _expected_delta=_distribution.confidence_limit(value_t(_kptr->get_dim()),_confidence_limit);
         }
 
         if(_expected_delta<0.0){
@@ -683,9 +683,9 @@ void chisq_wrapper::write_pts(){
 
     FILE *output;
 
-    int this_batch=get_pts()-_last_written;
+    index_t this_batch=get_pts()-_last_written;
 
-    int i,j;
+    index_t i,j;
     output=fopen(_outname,"w");
     fprintf(output,"# ");
     for(i=0;i<get_dim();i++){
@@ -713,17 +713,17 @@ void chisq_wrapper::write_pts(){
         get_called(),
         chimin(),
         target(),
-        double(time(NULL))-_time_started,
-        (double(time(NULL))-_time_batch)/double(this_batch),
+        value_t(time(NULL))-_time_started,
+        (value_t(time(NULL))-_time_batch)/value_t(this_batch),
         get_time_spent(),
-        get_time_spent()/double(get_pts()),
-        (double(time(NULL))-_time_batch-get_time_spent()+_last_time_spent)/double(this_batch));
+        get_time_spent()/value_t(get_pts()),
+        (value_t(time(NULL))-_time_batch-get_time_spent()+_last_time_spent)/value_t(this_batch));
 
     fprintf(output,"\n");
     fclose(output);
 
     _last_written=get_pts();
-    _time_batch=double(time(NULL));
+    _time_batch=value_t(time(NULL));
     _last_time_spent=get_time_spent();
 
 }

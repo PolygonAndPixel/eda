@@ -5,24 +5,24 @@
 
 class cost_fn : public function_wrapper{
     public:
-        cost_fn(chisq_wrapper*, array_1d<int>&);
-        cost_fn(chisq_wrapper*, array_1d<int>&, int);
+        cost_fn(chisq_wrapper*, array_1d<index_t>&);
+        cost_fn(chisq_wrapper*, array_1d<index_t>&, index_t);
         cost_fn(){_chifn=NULL;};
         ~cost_fn(){};
-        void build(chisq_wrapper*, array_1d<int>&, int);
-        virtual double operator()(const array_1d<double>&);
-        virtual int get_called();
-        void multiply_norm(double dd){
+        void build(chisq_wrapper*, array_1d<index_t>&, index_t);
+        virtual value_t operator()(const array_1d<value_t>&);
+        virtual index_t get_called();
+        void multiply_norm(value_t dd){
             _scalar_norm*=dd;
         }
-        double nn_distance(const array_1d<double>&);
-        void set_envelope(double dd){
+        value_t nn_distance(const array_1d<value_t>&);
+        void set_envelope(value_t dd){
             _envelope=dd;
         }
 
-        int get_cached_values(const int dex, double *fn){
+        index_t get_cached_values(const index_t dex, value_t *fn){
 
-            int i;
+            index_t i;
             for(i=0;i<_pt_cache.get_dim();i++){
                 if(_pt_cache.get_data(i)==dex){
                     fn[0]=_fn_cache.get_data(i);
@@ -34,15 +34,15 @@ class cost_fn : public function_wrapper{
         }
 
     private:
-        array_1d<int> _associates;
-        array_1d<double> _median_associate;
-        double _scalar_norm;
+        array_1d<index_t> _associates;
+        array_1d<value_t> _median_associate;
+        value_t _scalar_norm;
         chisq_wrapper *_chifn;
-        int _called;
-        double _envelope;
+        index_t _called;
+        value_t _envelope;
 
-        array_1d<int> _pt_cache;
-        array_1d<double> _fn_cache;
+        array_1d<index_t> _pt_cache;
+        array_1d<value_t> _fn_cache;
 
 };
 

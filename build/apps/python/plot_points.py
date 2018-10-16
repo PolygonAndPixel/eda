@@ -10,8 +10,8 @@ import sys
 
 cm = plt.cm.get_cmap('jet_r')
 nDims = 2
-three_d = int(sys.argv[3]) > 0
-contour = int(sys.argv[4]) > 0
+three_d = index_t(sys.argv[3]) > 0
+contour = index_t(sys.argv[4]) > 0
 print("Using data from {}".format(sys.argv[1]))
 print("Save picture as {}".format(sys.argv[2]))
 print("Using 3d projection: {}".format(three_d))
@@ -52,7 +52,7 @@ x = np.asarray(x)
 llh = np.asarray(llh)
 
 if len(x[:,0]) > 3000 and contour:
-    step = int((len(x[:,0]) + 3000)/3000)
+    step = index_t((len(x[:,0]) + 3000)/3000)
     x = x[0::step,:]
     llh = llh[0::step]
 

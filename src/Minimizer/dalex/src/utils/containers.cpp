@@ -1,16 +1,16 @@
 #include "containers.h"
 
-template class asymm_array_2d<int>;
-template class asymm_array_2d<double>;
-template class array_2d<int>;
-template class array_2d<double>;
-template class array_1d<int>;
-template class array_1d<double>;
+template class asymm_array_2d<index_t>;
+template class asymm_array_2d<value_t>;
+template class array_2d<index_t>;
+template class array_2d<value_t>;
+template class array_1d<index_t>;
+template class array_1d<value_t>;
 
 
 template <typename T>
-void merge_sort(array_1d<T> &in, array_1d<int> &dexes,
-                int start, int end){
+void merge_sort(array_1d<T> &in, array_1d<index_t> &dexes,
+                index_t start, index_t end){
 
     if(end>=dexes.get_dim()){
         printf("WARNING in merge_sort end is %d but dexes has %d\n",
@@ -24,7 +24,7 @@ void merge_sort(array_1d<T> &in, array_1d<int> &dexes,
     in.set_where("merge_sort");
 
     T nn;
-    int i1,i2,el;
+    index_t i1,i2,el;
 
     el=end-start+1;
 
@@ -48,7 +48,7 @@ void merge_sort(array_1d<T> &in, array_1d<int> &dexes,
         return;
     }
 
-    int i_mid,*i_use;
+    index_t i_mid,*i_use;
 
     i_mid=(start+end)/2;
 
@@ -56,7 +56,7 @@ void merge_sort(array_1d<T> &in, array_1d<int> &dexes,
     merge_sort(in,dexes,i_mid+1,end);
 
     array_1d<T> buffer;
-    array_1d<int> dex_buffer;
+    array_1d<index_t> dex_buffer;
 
     buffer.set_where("merge_sort");
     dex_buffer.set_where("merge_sort");
@@ -100,9 +100,9 @@ void merge_sort(array_1d<T> &in, array_1d<int> &dexes,
 }
 
 template <typename T>
-void sort(const array_1d<T> &in, array_1d<T> &sorted, array_1d<int> &dexes){
+void sort(const array_1d<T> &in, array_1d<T> &sorted, array_1d<index_t> &dexes){
     sorted.set_dim(in.get_dim());
-    int i;
+    index_t i;
     for(i=0;i<in.get_dim();i++){
         sorted.set(i,in.get_data(i));
     }
@@ -110,7 +110,7 @@ void sort(const array_1d<T> &in, array_1d<T> &sorted, array_1d<int> &dexes){
 }
 
 template <typename T>
-double sort_and_check(const array_1d<T> &in, array_1d<T> &sorted, array_1d<int> &dexes){
+value_t sort_and_check(const array_1d<T> &in, array_1d<T> &sorted, array_1d<index_t> &dexes){
 
     if(in.get_dim()!=dexes.get_dim()){
         printf("WARNING in sort_and_check in.dim %d dexes.dim %d\n",
@@ -125,8 +125,8 @@ double sort_and_check(const array_1d<T> &in, array_1d<T> &sorted, array_1d<int> 
     dexes.set_where("sort_and_check");
     in.set_where("sort_and_check");
 
-    array_1d<int> dex_buffer;
-    int i,j;
+    array_1d<index_t> dex_buffer;
+    index_t i,j;
 
     dex_buffer.set_where("sort_and_check");
 
@@ -142,9 +142,9 @@ double sort_and_check(const array_1d<T> &in, array_1d<T> &sorted, array_1d<int> 
 
     merge_sort(sorted,dexes,0,in.get_dim()-1);
 
-    double err,maxerr,aa,bb;
+    value_t err,maxerr,aa,bb;
 
-    int ifailure;
+    index_t ifailure;
 
     for(i=0;i<in.get_dim();i++){
         if(i<in.get_dim()-1){
@@ -176,8 +176,8 @@ double sort_and_check(const array_1d<T> &in, array_1d<T> &sorted, array_1d<int> 
             throw ifailure;
         }
 
-        aa=double(sorted.get_data(i));
-        bb=double(in.get_data(j));
+        aa=value_t(sorted.get_data(i));
+        bb=value_t(in.get_data(j));
 
         err=fabs(aa-bb);
         if(fabs(aa)>0.0)err=err/fabs(aa);
@@ -194,15 +194,15 @@ double sort_and_check(const array_1d<T> &in, array_1d<T> &sorted, array_1d<int> 
         try{
           in.die(0);
         }
-        catch(int iex){
+        catch(index_t iex){
            try{
                sorted.die(0);
            }
-           catch(int jex){
+           catch(index_t jex){
                try{
                    dexes.die(0);
                }
-               catch(int kex){
+               catch(index_t kex){
 
                };
            }
@@ -220,28 +220,28 @@ double sort_and_check(const array_1d<T> &in, array_1d<T> &sorted, array_1d<int> 
 }
 
 template <typename T>
-int get_dex(const array_1d<T> &xx, T target){
-    int i;
+index_t get_dex(const array_1d<T> &xx, T target){
+    index_t i;
 
     for(i=0;i<xx.get_dim()-1 && xx.get_data(i)<target;i++);
 
     if(i==0){
         if(target>xx.get_data(1)){
             printf("WARNING spuriously got zero in get_dex\n");
-            printf("%e %e\n",double(target),double(xx.get_data(1)));
+            printf("%e %e\n",value_t(target),value_t(xx.get_data(1)));
             exit(1);
         }
     }
     else if(i==xx.get_dim()-1){
         if(target<xx.get_data(i-1)){
             printf("WARNING spuriously got max in get_dex\n");
-            printf("%e %e\n",double(target),double(xx.get_data(i-1)));
+            printf("%e %e\n",value_t(target),value_t(xx.get_data(i-1)));
             exit(1);
         }
     }
     else if(target>xx.get_data(i) || target<xx.get_data(i-1)){
         printf("WARNING getdex failed %e -- %e %e\n",
-        double(target),double(xx.get_data(i-1)),double(xx.get_data(i)));
+        value_t(target),value_t(xx.get_data(i-1)),value_t(xx.get_data(i)));
         printf("%d %d\n",i,xx.get_dim()-1);
         exit(1);
     }
@@ -255,15 +255,15 @@ int get_dex(const array_1d<T> &xx, T target){
     return i;
 }
 
-template void merge_sort<double>(array_1d<double>&,array_1d<int>&,int,int);
-template void merge_sort<int>(array_1d<int>&,array_1d<int>&,int,int);
+template void merge_sort<value_t>(array_1d<value_t>&,array_1d<index_t>&,index_t,index_t);
+template void merge_sort<index_t>(array_1d<index_t>&,array_1d<index_t>&,index_t,index_t);
 
-template double sort_and_check<double>(const array_1d<double>&,array_1d<double>&,array_1d<int>&);
-template double sort_and_check<int>(const array_1d<int>&,array_1d<int>&,array_1d<int>&);
+template value_t sort_and_check<value_t>(const array_1d<value_t>&,array_1d<value_t>&,array_1d<index_t>&);
+template value_t sort_and_check<index_t>(const array_1d<index_t>&,array_1d<index_t>&,array_1d<index_t>&);
 
-template void sort<double>(const array_1d<double>&,array_1d<double>&,array_1d<int>&);
-template void sort<int>(const array_1d<int>&,array_1d<int>&,array_1d<int>&);
+template void sort<value_t>(const array_1d<value_t>&,array_1d<value_t>&,array_1d<index_t>&);
+template void sort<index_t>(const array_1d<index_t>&,array_1d<index_t>&,array_1d<index_t>&);
 
 
-template int get_dex(const array_1d<int>&,int);
-template int get_dex(const array_1d<double>&,double);
+template index_t get_dex(const array_1d<index_t>&,index_t);
+template index_t get_dex(const array_1d<value_t>&,value_t);

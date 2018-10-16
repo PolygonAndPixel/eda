@@ -26,16 +26,16 @@ public:
     ~chisq_wrapper();
     void copy(chisq_wrapper&);
 
-    void initialize(int);
+    void initialize(index_t);
 
     void write_pts();
-    int get_search_type_log(int ii){
+    index_t get_search_type_log(index_t ii){
         return _search_type_log.get_data(ii);
     }
-    int get_search_type(){
+    index_t get_search_type(){
         return _search_type;
     }
-    void set_search_type(int ii){
+    void set_search_type(index_t ii){
         if(ii!=_type_init && ii!=_type_refine &&
            ii!=_type_init_tendril && ii!=_type_tendril &&
            ii!=_type_find_bases && ii!=_type_tendril_seed &&
@@ -48,11 +48,11 @@ public:
         }
         _search_type=ii;
     }
-    void set_write_every(int ii){
+    void set_write_every(index_t ii){
         _write_every=ii;
     }
     void set_outname(char *nn){
-        int i;
+        index_t i;
         for(i=0;i<letters-1 && nn[i]!=0;i++){
             _outname[i]=nn[i];
         }
@@ -60,7 +60,7 @@ public:
     }
 
     void set_timingname(char *nn){
-        int i;
+        index_t i;
         for(i=0;i<letters-1 && nn[i]!=0;i++){
             _timingname[i]=nn[i];
         }
@@ -69,86 +69,86 @@ public:
 
     void set_chisquared(chisquared*);
 
-    void set_target(double);
-    void set_seed(int);
-    void set_deltachi(double);
-    void set_characteristic_length(int, double);
-    double get_characteristic_length(int);
-    void set_min(array_1d<double>&);
-    void set_max(array_1d<double>&);
-    void set_ddmin(double);
+    void set_target(value_t);
+    void set_seed(index_t);
+    void set_deltachi(value_t);
+    void set_characteristic_length(index_t, value_t);
+    value_t get_characteristic_length(index_t);
+    void set_min(array_1d<value_t>&);
+    void set_max(array_1d<value_t>&);
+    void set_ddmin(value_t);
 
-    int could_it_go_lower(double);
+    index_t could_it_go_lower(value_t);
 
-    double target();
-    double chimin();
-    int mindex();
-    double get_deltachi();
-    int get_pts();
-    virtual int get_dim();
-    virtual int get_called();
-    virtual double get_time_spent();
+    value_t target();
+    value_t chimin();
+    index_t mindex();
+    value_t get_deltachi();
+    index_t get_pts();
+    virtual index_t get_dim();
+    virtual index_t get_called();
+    virtual value_t get_time_spent();
 
-    double random_double();
-    int random_int();
+    value_t random_double();
+    index_t random_int();
 
-    double raw_evaluate(const array_1d<double>&);
-    void evaluate(const array_1d<double>&, double*, int*);
-    virtual double operator()(const array_1d<double>&);
-    double get_fn(int);
-    double get_pt(int,int);
-    array_1d<double> get_pt(int);
+    value_t raw_evaluate(const array_1d<value_t>&);
+    void evaluate(const array_1d<value_t>&, value_t*, index_t*);
+    virtual value_t operator()(const array_1d<value_t>&);
+    value_t get_fn(index_t);
+    value_t get_pt(index_t,index_t);
+    array_1d<value_t> get_pt(index_t);
 
-    double distance(array_1d<double>&,int);
-    double distance(array_1d<double>&,array_1d<double>&);
-    double distance(int,int);
+    value_t distance(array_1d<value_t>&,index_t);
+    value_t distance(array_1d<value_t>&,array_1d<value_t>&);
+    value_t distance(index_t,index_t);
 
-    void nn_srch(array_1d<double>&,int,array_1d<int>&,array_1d<double>&);
+    void nn_srch(array_1d<value_t>&,index_t,array_1d<index_t>&,array_1d<value_t>&);
 
     Ran* get_dice();
 
-    void get_min(array_1d<double>&);
-    void get_max(array_1d<double>&);
-    virtual double get_min(int);
-    virtual double get_max(int);
+    void get_min(array_1d<value_t>&);
+    void get_max(array_1d<value_t>&);
+    virtual value_t get_min(index_t);
+    virtual value_t get_max(index_t);
 
-    void find_gradient(array_1d<double>&,array_1d<double>&);
+    void find_gradient(array_1d<value_t>&,array_1d<value_t>&);
 
-    int in_bounds(const array_1d<double>&);
-    int in_bounds(int, double);
+    index_t in_bounds(const array_1d<value_t>&);
+    index_t in_bounds(index_t, value_t);
 
-    void set_confidence_limit(double);
-    void set_dof(int);
-    int get_seed();
+    void set_confidence_limit(value_t);
+    void set_dof(index_t);
+    index_t get_seed();
 
     kd_tree* get_tree();
-    array_1d<double>* get_fn_arr();
+    array_1d<value_t>* get_fn_arr();
 
 private:
-    double _chimin,_deltachi,_target,_ddmin;
-    double _expected_min,_expected_delta,_confidence_limit;
-    int _adaptive_target,_seed,_called,_mindex,_iWhere;
-    int _dof;
-    int _search_type;
-    array_1d<int> _search_type_log;
+    value_t _chimin,_deltachi,_target,_ddmin;
+    value_t _expected_min,_expected_delta,_confidence_limit;
+    index_t _adaptive_target,_seed,_called,_mindex,_iWhere;
+    index_t _dof;
+    index_t _search_type;
+    array_1d<index_t> _search_type_log;
 
-    array_1d<double> _characteristic_length,_range_min,_range_max,_fn;
+    array_1d<value_t> _characteristic_length,_range_min,_range_max,_fn;
 
     chisquared *_chifn;
     kd_tree *_kptr;
     Ran *_dice;
 
-    int is_valid(const array_1d<double>&, int*);
+    index_t is_valid(const array_1d<value_t>&, index_t*);
     void is_it_safe(char*);
 
-    array_1d<double> _valid_dd;
-    array_1d<int> _valid_neigh;
+    array_1d<value_t> _valid_dd;
+    array_1d<index_t> _valid_neigh;
 
     chisquared_distribution _distribution;
 
     char _outname[letters],_timingname[letters];
-    int _last_written,_write_every;
-    double _time_started,_last_time_spent,_time_batch;
+    index_t _last_written,_write_every;
+    value_t _time_started,_last_time_spent,_time_batch;
 
 };
 

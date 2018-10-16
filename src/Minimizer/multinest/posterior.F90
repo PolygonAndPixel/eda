@@ -6,13 +6,13 @@ module posterior
 
   implicit none
 
-  double precision, dimension(:,:,:), allocatable :: evdatp
+  value_t precision, dimension(:,:,:), allocatable :: evdatp
   integer, dimension(:), allocatable :: nbranchp,nPtPerNode,ncon,nSamp,clstrdNode
-  double precision, dimension(:,:), allocatable :: branchp
-  double precision, dimension(:,:), allocatable :: pts,pts2,consP,unconsP,pwt,pNwt
+  value_t precision, dimension(:,:), allocatable :: branchp
+  value_t precision, dimension(:,:), allocatable :: pts,pts2,consP,unconsP,pwt,pNwt
   logical, dimension(:), allocatable :: check
   integer nClst,nUncon
-  double precision, dimension(:,:), allocatable :: stMu,stSigma
+  value_t precision, dimension(:,:), allocatable :: stMu,stSigma
 
 contains
 
@@ -23,7 +23,7 @@ contains
  !subroutine pos_samp
   	implicit none
 
-	double precision Ztol !null evidence
+	value_t precision Ztol !null evidence
     integer n_accepted
 	integer nIter !globff (total no. replacements)
 	character(LEN=100)root !base root
@@ -35,28 +35,28 @@ contains
 	logical outfile !write output files?
 	integer i,j,k,i1,ios,ic_n,m,indx
 	integer ic_npt(ic_n),ic_nptloc(ic_n),ic_nBrnch(ic_n)
-	double precision ic_Z(ic_n),ic_info(ic_n),ic_vnow(ic_n),ic_brnch(ic_n,ic_n),phyP(nPar,nLpt),l(nLpt),evDataAll(:)
+	value_t precision ic_Z(ic_n),ic_info(ic_n),ic_vnow(ic_n),ic_brnch(ic_n,ic_n),phyP(nPar,nLpt),l(nLpt),evDataAll(:)
 	logical IS !importance sampling?
-	double precision IS_Z(2) !importance sampling log(Z) estimate & its standard deviation
+	value_t precision IS_Z(2) !importance sampling log(Z) estimate & its standard deviation
 	logical ic_reme(ic_n)
   	character(len=100) evfile,livefile,postfile,resumefile
       	character(len=100) sepFile,statsFile,postfile4,strictSepFile,summaryFile
   	character(len=32) fmt,fmt2
       	logical l1
-      	double precision d1,d2,urv
-      	double precision ltmp(nPar+2),ic_zloc(ic_n),ic_infoloc(ic_n),gzloc,ginfoloc
+      	value_t precision d1,d2,urv
+      	value_t precision ltmp(nPar+2),ic_zloc(ic_n),ic_infoloc(ic_n),gzloc,ginfoloc
 	integer phyID(nLpt)
 	integer context
 
       	!posterior info
-      	double precision lognpost,globZ,globInfo,gZold,maxWt
+      	value_t precision lognpost,globZ,globInfo,gZold,maxWt
       	integer npost !no. of equally weighted posterior samples
-      	double precision, dimension(:,:), allocatable :: wt,temp !probability weight of each posterior sample
-      	double precision, dimension(:), allocatable :: ic_zold,llike !local evidence
+      	value_t precision, dimension(:,:), allocatable :: wt,temp !probability weight of each posterior sample
+      	value_t precision, dimension(:), allocatable :: ic_zold,llike !local evidence
 
 	! parameters for dumper
-	double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-	double precision maxLogLike, logZ, INSlogZ, logZerr
+	value_t precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
+	value_t precision maxLogLike, logZ, INSlogZ, logZerr
 	integer nSamples
 
 	INTERFACE
@@ -64,8 +64,8 @@ contains
     		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, &
                 paramConstr, maxLogLike, logZ, INSlogZ, logZerr, n_accepted,context_pass)
 			integer nSamples, nlive, nPar, context_pass
-			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, INSlogZ, logZerr
+			value_t precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
+			value_t precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 
@@ -165,7 +165,7 @@ contains
 			i=i+1
 			if(i*(nPar+3)>size(evDataAll)) exit
 			ltmp(1:nPar+2)=evDataAll((i-1)*(nPar+3)+1:i*(nPar+3)-1)
-			i1=int(evDataAll(i*(nPar+3)))
+			i1=index_t(evDataAll(i*(nPar+3)))
 		endif
 
 		nPtPerNode(i1)=nPtPerNode(i1)+1
@@ -234,7 +234,7 @@ contains
       				!find the multiplicity
       				d1=wt(i,j)*npost
             			!calculate the integer part of multiplicity
-        	    		k=int(d1)
+        	    		k=index_t(d1)
             			!calculate the remaining part of multiplicity
             			d2=d1-dble(k)
             			!increase the multiplicity by one with probability d2
@@ -393,7 +393,7 @@ contains
       	!work variables
       	integer i,j,k,i1,i2,node
 
-      	node=int(branchp(br,brNum))
+      	node=index_t(branchp(br,brNum))
 
       	!find starting node
       	i1=1
@@ -448,12 +448,12 @@ contains
 	integer npt !total no. of points
 	integer nPar !dimensionality
 	integer nCls !no. of modes
-	double precision pt(nPar+2,npt) !points
+	value_t precision pt(nPar+2,npt) !points
 	integer nCon(nCls) !no. of constrained points
-	double precision pwt(npt,nCls) !ptrobability weights
-	double precision locZ(nCls), locInfo(nCls) !local evidence
+	value_t precision pwt(npt,nCls) !ptrobability weights
+	value_t precision locZ(nCls), locInfo(nCls) !local evidence
 	integer locNpt(nCls)
-	double precision Ztol
+	value_t precision Ztol
 	integer funit1 !file having strictly separated samples
 	integer funit2 !file having separated samples
 	integer funit3 !stats file
@@ -461,8 +461,8 @@ contains
 	logical multimodal
 	!work variables
 	integer i,j,k,indx(1),nliveP
-	double precision d1,d2,d3,mean(nCls,nPar),sigma(nCls,nPar),maxLike(nPar),MAP(nPar)
-	double precision old_slocZ,sinfo,slocZ
+	value_t precision d1,d2,d3,mean(nCls,nPar),sigma(nCls,nPar),maxLike(nPar),MAP(nPar)
+	value_t precision old_slocZ,sinfo,slocZ
 	character*30 fmt,stfmt
 
 	nliveP=sum(locNpt(1:nCls))
@@ -582,16 +582,16 @@ contains
 	integer npt !total no. of constrained points
 	integer gnpt !total no. of  points
 	integer nptx(n) !no. of points in each cluster
-	double precision pt(nPar+2,gnpt) !points
-	double precision mean(n,nCdim),sigma(n,nCdim)
-	double precision locEv(n) !local evidence
-	double precision nullEv !null evidence
-	double precision wt(gnpt,n)
-	double precision nWt(gnpt,n),llike(n)
+	value_t precision pt(nPar+2,gnpt) !points
+	value_t precision mean(n,nCdim),sigma(n,nCdim)
+	value_t precision locEv(n) !local evidence
+	value_t precision nullEv !null evidence
+	value_t precision wt(gnpt,n)
+	value_t precision nWt(gnpt,n),llike(n)
 
 	!work variables
 	integer i,j,k,l,m
-	double precision tP(nPar+2,npt),tWt(npt,n)
+	value_t precision tP(nPar+2,npt),tWt(npt,n)
 	logical check(n),flag
 
 
@@ -681,15 +681,15 @@ contains
       	!input variables
       	integer n !no. of points
 	integer d !dimensionality
-	double precision p(d,n) !points
-	double precision LX(2,n) !log-like & log-dX of points
-	double precision wt(n)
-	double precision nWt(n)
+	value_t precision p(d,n) !points
+	value_t precision LX(2,n) !log-like & log-dX of points
+	value_t precision wt(n)
+	value_t precision nWt(n)
 
       	!output variables
-      	double precision mean(d) !mean
-      	double precision sigma(d) !standard deviations
-      	double precision Z !local evidence
+      	value_t precision mean(d) !mean
+      	value_t precision sigma(d) !standard deviations
+      	value_t precision Z !local evidence
 
 
       	!work variables

@@ -8,7 +8,7 @@
 class SampleSpace : public Minimizer {
 public:
 
-    SampleSpace(int max_iter,  int max_points, int seed=1025,
+    SampleSpace(index_t max_iter,  index_t max_points, index_t seed=1025,
                 bool dump_points=false);
 
     virtual std::unique_ptr<Minimizer> clone() const override {
@@ -21,10 +21,10 @@ public:
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
                              v_d upper_bounds);
 
-    void sample_space(uint32_t nDims);
+    void sample_space(index_t nDims);
 
     /// Transform point from hypercube to physical space
-    v_d to_physics(v_d cube, uint32_t nDims);
+    v_d to_physics(v_d cube, index_t nDims);
 
 private:
 

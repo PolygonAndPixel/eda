@@ -24,7 +24,7 @@ aps_extractor::aps_extractor(){
 aps_extractor::~aps_extractor(){}
 
 void aps_extractor::show_minpt(){
-    int i;
+    index_t i;
     printf("\nminpt\n");
     for(i=0;i<nparams;i++){
         printf("%e\n",min_pt.get_data(i));
@@ -39,17 +39,17 @@ void aps_extractor::validate(){
     }
 }
 
-void aps_extractor::set_target(double tt){
+void aps_extractor::set_target(value_t tt){
     chi_target=tt;
     asserted=1;
 }
 
-void aps_extractor::set_delta_chi(double nn){
+void aps_extractor::set_delta_chi(value_t nn){
     delta_chi=nn;
 }
 
 void aps_extractor::set_filename(char *word){
-    int i;
+    index_t i;
     for(i=0;i<letters && word[i]!=0;i++){
         filename[i]=word[i];
     }
@@ -68,7 +68,7 @@ void aps_extractor::learn_nparams(){
 
     FILE *input=fopen(filename,"r");
     char word[letters];
-    int ct=0;
+    index_t ct=0;
     fscanf(input,"%s",word);
     while(compare_char(word,"ling")==0 && compare_char(word, "log")==0){
         fscanf(input,"%s",word);
@@ -85,9 +85,9 @@ void aps_extractor::learn_chimin(){
     learn_nparams();
 
     FILE *input=fopen(filename,"r");
-    int i,ct=0;
-    double nn;
-    array_1d<double> vv;
+    index_t i,ct=0;
+    value_t nn;
+    array_1d<value_t> vv;
     char word[letters];
 
     min_pt.reset();
@@ -119,7 +119,7 @@ void aps_extractor::learn_chimin(){
 
 }
 
-void aps_extractor::set_cutoff(int ii){
+void aps_extractor::set_cutoff(index_t ii){
     cutoff=ii;
     chi_min=-1.0;
 }
@@ -129,15 +129,15 @@ void aps_extractor::write_good_points(char *outname){
         learn_chimin();
     }
 
-    int i,ct=0;
+    index_t i,ct=0;
     FILE *output=fopen(outname,"w");
     FILE *input=fopen(filename,"r");
 
     char word[letters];
     for(i=0;i<nparams+extra_words;i++)fscanf(input,"%s",word);
 
-    double nn;
-    array_1d<double> vv;
+    value_t nn;
+    array_1d<value_t> vv;
     while(fscanf(input,"%le",&nn)>0 && (ct<cutoff || cutoff<0)){
         ct++;
         vv.set(0,nn);
@@ -164,20 +164,20 @@ void aps_extractor::write_good_points(char *outname){
     printf("wrote good pts with chi_min %e target %e\n",chi_min,chi_target);
 }
 
-void aps_extractor::write_good_points(char *outname, int ix, int iy){
+void aps_extractor::write_good_points(char *outname, index_t ix, index_t iy){
     if(chi_min<0.0){
         learn_chimin();
     }
 
-    int i,ct=0,j;
+    index_t i,ct=0,j;
     FILE *input=fopen(filename,"r");
 
     char word[letters];
     for(i=0;i<nparams+extra_words;i++)fscanf(input,"%s",word);
 
-    double nn;
-    array_1d<double> vv;
-    array_2d<double> to_plot;
+    value_t nn;
+    array_1d<value_t> vv;
+    array_2d<value_t> to_plot;
 
     to_plot.set_cols(2);
     while(fscanf(input,"%le",&nn)>0 && (ct<cutoff || cutoff<0)){
@@ -209,14 +209,14 @@ void aps_extractor::write_good_points(char *outname, int ix, int iy){
 void aps_extractor::plot_chimin(char *outname){
     learn_nparams();
 
-    double temp_min=-1.0;
-    int ct=0;
+    value_t temp_min=-1.0;
+    index_t ct=0;
     FILE *output=fopen(outname,"w");
     FILE *input=fopen(filename,"r");
     char word[letters];
-    int i;
+    index_t i;
     for(i=0;i<nparams+extra_words;i++)fscanf(input,"%s",word);
-    double nn;
+    value_t nn;
     while(fscanf(input,"%le",&nn)>0){
         for(i=1;i<nparams;i++)fscanf(input,"%le",&nn);
         ct++;
@@ -235,12 +235,12 @@ void aps_extractor::plot_chimin(char *outname){
     fclose(input);
 }
 
-void aps_extractor::sample_posterior(char *outname, int nsamples){
-    array_2d<double> dummy;
+void aps_extractor::sample_posterior(char *outname, index_t nsamples){
+    array_2d<value_t> dummy;
     sample_posterior(outname,dummy,nsamples,1);
 }
 
-void aps_extractor::sample_posterior(array_2d<double> &samples, int nsamples){
+void aps_extractor::sample_posterior(array_2d<value_t> &samples, index_t nsamples){
     char *dummy;
     sample_posterior(dummy,samples,nsamples,2);
 }
@@ -282,20 +282,20 @@ void aps_extractor::make_boxes(){
     box_max.set_cols(nparams);
     box_min.set_cols(nparams);
 
-    array_2d<double> data;
+    array_2d<value_t> data;
 
     data.set_name("data");
 
     FILE *input;
-    array_1d<double> vv;
+    array_1d<value_t> vv;
 
     char word[letters];
-    int i,ct=0;
+    index_t i,ct=0;
 
     /*read in the data (the raw APS outputs)*/
     input=fopen(filename,"r");
     for(i=0;i<nparams+extra_words;i++)fscanf(input,"%s",word);
-    double nn,chimin=exception_value;
+    value_t nn,chimin=exception_value;
     while(fscanf(input,"%le",&nn)>0 && (ct<cutoff || cutoff<0)){
         ct++;
         vv.set(0,nn);
@@ -314,16 +314,16 @@ void aps_extractor::make_boxes(){
     /*arrange the data in k-d tree for nearest neighbor searching*/
     kd_tree kd(data);
 
-    array_1d<double> dd;
-    array_1d<int> neigh;
+    array_1d<value_t> dd;
+    array_1d<index_t> neigh;
 
-    int j,k;
-    int n_neigh=3*nparams+1,found_it;
-    array_1d<double> smallest_radius;
-    array_1d<double> r_dim,r_dim_sorted;
-    array_1d<int> r_dex;
-    double mm;
-    int found_n_neigh;
+    index_t j,k;
+    index_t n_neigh=3*nparams+1,found_it;
+    array_1d<value_t> smallest_radius;
+    array_1d<value_t> r_dim,r_dim_sorted;
+    array_1d<index_t> r_dex;
+    value_t mm;
+    index_t found_n_neigh;
 
     for(i=0;i<nparams;i++)smallest_radius.set(i,1.0e30);
 
@@ -491,8 +491,8 @@ void aps_extractor::make_boxes(){
 
 
     /*symmetrize the hyperboxes*/
-    double lv,lp,total_p=0.0;
-    double dmin,dmax;
+    value_t lv,lp,total_p=0.0;
+    value_t dmin,dmax;
     for(i=0;i<data.get_rows();i++){
         for(j=0;j<nparams;j++){
             dmin=data.get_data(i,j)-box_min.get_data(i,j);
@@ -539,7 +539,7 @@ void aps_extractor::make_boxes(){
 
 
     /*sort the boxes by chisquared; l_prob_dexes will be in ascending order of chisquared*/
-    array_1d<double> sorted_prob;
+    array_1d<value_t> sorted_prob;
     for(i=0;i<l_probability.get_dim();i++)l_prob_dexes.set(i,i);
 
     sort(chisq,sorted_prob,l_prob_dexes);
@@ -549,19 +549,19 @@ void aps_extractor::make_boxes(){
 
 }
 
-void aps_extractor::sample_posterior(char *outname,array_2d<double> &samples, int nsamples, int which_output){
+void aps_extractor::sample_posterior(char *outname,array_2d<value_t> &samples, index_t nsamples, index_t which_output){
 
     /*
     draw random samples from the posterior described by the hyperbox scheme described in the paper
 
     outname is the file to which the code writes the samples
 
-    samples is an array_2d<double> where the samples will be stored
+    samples is an array_2d<value_t> where the samples will be stored
 
     nsamples is the number of samples desired
 
     which_output determines whether you are asking the routine to write to a file, or just store the samples in
-    the array_2d<double> (there are wrappers for this routine)
+    the array_2d<value_t> (there are wrappers for this routine)
 
     NOTE: this is not the Bayesian inference method described in the paper.  It does not seem to work
     as well.  For the method described in the paper, see draw_bayesian_bounds.
@@ -575,10 +575,10 @@ void aps_extractor::sample_posterior(char *outname,array_2d<double> &samples, in
 
     FILE *output;
     Ran chaos(99);
-    int cc,nchains=1,ii,i,j,k;
-    double roll,sum,rr;
+    index_t cc,nchains=1,ii,i,j,k;
+    value_t roll,sum,rr;
 
-    array_1d<double> pt;
+    array_1d<value_t> pt;
 
 
     if(which_output==1){
@@ -610,7 +610,7 @@ void aps_extractor::sample_posterior(char *outname,array_2d<double> &samples, in
         }
 
 
-        /*either write the sample to the output file, or store it in the array_2d<double> as desired*/
+        /*either write the sample to the output file, or store it in the array_2d<value_t> as desired*/
         if(which_output==1){
             fprintf(output,"%d %e ",1,chisq.get_data(k));
             for(j=0;j<nparams;j++){
@@ -628,7 +628,7 @@ void aps_extractor::sample_posterior(char *outname,array_2d<double> &samples, in
     }
 }
 
-void aps_extractor::draw_bayesian_bounds(char *filename, int ix, int iy, double limit){
+void aps_extractor::draw_bayesian_bounds(char *filename, index_t ix, index_t iy, value_t limit){
 
     /*
     List the pixels in a 2-dimensional Bayesian credible limit as described in the paper
@@ -645,8 +645,8 @@ void aps_extractor::draw_bayesian_bounds(char *filename, int ix, int iy, double 
         make_boxes();
     }
 
-    int i,j,ibox;
-    double sum=0.0;
+    index_t i,j,ibox;
+    value_t sum=0.0;
 
     /*
     to_plot will store all of the pixels found in the two-dimensional sub-space.
@@ -654,7 +654,7 @@ void aps_extractor::draw_bayesian_bounds(char *filename, int ix, int iy, double 
     posterior probability.  They will be fed to the routine plot_thinned_data so that
     we do not print too many redundant, overlapping pixels
     */
-    array_2d<double> to_plot;
+    array_2d<value_t> to_plot;
 
     to_plot.set_cols(2);
 
@@ -691,7 +691,7 @@ void aps_extractor::draw_bayesian_bounds(char *filename, int ix, int iy, double 
     plot_thinned_data(to_plot,filename);
 }
 
-void aps_extractor::plot_thinned_data(array_2d<double> &to_plot, char *filename){
+void aps_extractor::plot_thinned_data(array_2d<value_t> &to_plot, char *filename){
     /*
     Because the points written by write_good_points() and draw_bayesian_bounds() are
     likely to overlap a lot, this routine thins them out so that it plots points that
@@ -702,8 +702,8 @@ void aps_extractor::plot_thinned_data(array_2d<double> &to_plot, char *filename)
     */
 
     /*find the maximums and minimums of the dimensions in to_plot*/
-    array_1d<double> max,min,center;
-    int i,j;
+    array_1d<value_t> max,min,center;
+    index_t i,j;
     for(i=0;i<to_plot.get_rows();i++){
         if(i==0 || to_plot.get_data(i,0)>max.get_data(0))max.set(0,to_plot.get_data(i,0));
         if(i==0 || to_plot.get_data(i,1)>max.get_data(1))max.set(1,to_plot.get_data(i,1));
@@ -716,9 +716,9 @@ void aps_extractor::plot_thinned_data(array_2d<double> &to_plot, char *filename)
     center.set(1,0.5*(max.get_data(1)+min.get_data(1)));
 
     /*sort the points by their distance from the center of the points in to_plot*/
-    array_1d<double> dd;
-    array_1d<int> dex;
-    double nn;
+    array_1d<value_t> dd;
+    array_1d<index_t> dex;
+    value_t nn;
     for(i=0;i<to_plot.get_rows();i++){
 
         nn=0.0;
@@ -730,7 +730,7 @@ void aps_extractor::plot_thinned_data(array_2d<double> &to_plot, char *filename)
 
     }
 
-    array_1d<double> sorted;
+    array_1d<value_t> sorted;
     sort(dd,sorted,dex);
 
     /*
@@ -740,13 +740,13 @@ void aps_extractor::plot_thinned_data(array_2d<double> &to_plot, char *filename)
     we will only output points that are at least a normalized parameter space distance of 0.05 from
     each other
     */
-    array_2d<double> been_plotted;
+    array_2d<value_t> been_plotted;
     kd_tree *been_plotted_tree;
     been_plotted_tree=NULL;
 
-    int chosen,plot_it;
-    array_1d<int> neigh;
-    array_1d<double> ddneigh;
+    index_t chosen,plot_it;
+    array_1d<index_t> neigh;
+    array_1d<value_t> ddneigh;
 
     FILE *output;
     output=fopen(filename,"w");

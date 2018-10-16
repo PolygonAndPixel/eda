@@ -475,7 +475,7 @@ module array_module
 
         narray(cluster_id) = narray(cluster_id) + 1         ! Increase the number of points in the cluster
 
-        ! If this takes us over the size of the array, then double it
+        ! If this takes us over the size of the array, then value_t it
         if(narray(cluster_id) > size(array,2) ) call reallocate(array, new_size2=size(array,2)*2 )
 
         array(:,narray(cluster_id),cluster_id) = point       ! Add the point to the end position
@@ -490,7 +490,7 @@ module array_module
 
         narray = narray + 1         ! Increase the number of points
 
-        ! If this takes us over the size of the array, then double it
+        ! If this takes us over the size of the array, then value_t it
         if(narray > size(array,2) ) call reallocate(array, new_size2=size(array,2)*2 )
 
         array(:,narray) = point       ! Add the point to the end position

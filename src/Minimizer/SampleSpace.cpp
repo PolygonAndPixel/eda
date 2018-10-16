@@ -12,9 +12,9 @@
 
 /** Constructor and destructor **/
 SampleSpace::SampleSpace(
-    int max_iter,
-    int max_points,
-    int seed,
+    index_t max_iter,
+    index_t max_points,
+    index_t seed,
     bool dump_points) : Minimizer(0, max_iter, 0, max_points, seed, dump_points)
 {
 
@@ -27,9 +27,9 @@ SampleSpace::SampleSpace(
  *                           free parameter for minimization
  * */
 void SampleSpace::sample_space(
-    uint32_t nDims){
+    index_t nDims){
 
-    uint32_t c = 1;
+    index_t c = 1;
     v_d cube(nDims);
 
     if(dump_points_) {
@@ -37,16 +37,16 @@ void SampleSpace::sample_space(
         std::ofstream ofile((base_dir_+file_name_).c_str(),
             std::ofstream::out  | std::ofstream::app);
 
-        for(uint32_t j=0; j<nDims; j++) ofile << "Param" << j << "\t";
+        for(index_t j=0; j<nDims; j++) ofile << "Param" << j << "\t";
         // ofile << "X\tY\tZ\tT\tZenith\tAzimuth\tEnergy";
         ofile << std::endl;
         ofile.close();
     }
-    for(uint32_t i=0; i<max_iter_; i++, c++) {
+    for(index_t i=0; i<max_iter_; i++, c++) {
         for(auto &c: cube) c = uf(intgen);
 
         v_d theta = to_physics(cube, nDims);
-        double current_result = get_llh(theta);
+        value_t current_result = get_llh(theta);
         if(dump_points_) {
             results.insert(results.end(), theta.begin(), theta.end());
             results.push_back(current_result);
@@ -58,7 +58,7 @@ void SampleSpace::sample_space(
         }
 
         if(dump_points_ && (c%max_points_ == 0 || i == max_iter_-1)) {
-            uint32_t d = 1;
+            index_t d = 1;
             std::ofstream ofile((base_dir_+file_name_).c_str(),
                 std::ofstream::out  | std::ofstream::app);
             for(v_d::iterator p=results.begin();
@@ -92,11 +92,11 @@ std::string SampleSpace::get_name() {
  * */
 v_d SampleSpace::to_physics(
     v_d cube,
-    uint32_t nDims) {
+    index_t nDims) {
 
     v_d theta;
     
-    for (uint32_t i=0; i<nDims; i++) {
+    for (index_t i=0; i<nDims; i++) {
         theta.push_back(this->lower_bnds[i]
         + (this->upper_bnds[i] - this->lower_bnds[i])
         * cube[i]);

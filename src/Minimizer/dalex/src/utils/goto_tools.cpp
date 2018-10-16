@@ -6,17 +6,17 @@
 
 
 void transcribe(char *w1, char *w2){
-    int i;
+    index_t i;
     for(i=0;i<letters-1 && w1[i]!=0;i++){
         w2[i]=w1[i];
     }
     w2[i]=0;
 }
 
-double normal_deviate(Ran *chaos, double mu, double sig){
+value_t normal_deviate(Ran *chaos, value_t mu, value_t sig){
 
- int i;
- double x1,x2,y1,y2;
+ index_t i;
+ value_t x1,x2,y1,y2;
 
  x1=chaos->doub();
  x2=chaos->doub();
@@ -31,22 +31,22 @@ double normal_deviate(Ran *chaos, double mu, double sig){
 
 
 void kill(char *words){
- double junk;
+ value_t junk;
  FILE *output;
 
  //write the character string words[] to the terminal
- //then hang, waiting for an input double
+ //then hang, waiting for an input value_t
 
  printf("%s\n",words);
  scanf("%lf",&junk);
 }
 
 /*just going to lift this out of Numerical Recipes p 109*/
-void polint(double *xa, double *ya, int n, double x, double *y, double *dy){
+void polint(value_t *xa, value_t *ya, index_t n, value_t x, value_t *y, value_t *dy){
 /*recall: because this is from NR, it has arrays start at element unity*/
-	int i,m,ns=1,isfd;
-	double den,dif,dift,ho,hp,w;
-	double c[n+1],d[n+1];
+	index_t i,m,ns=1,isfd;
+	value_t den,dif,dift,ho,hp,w;
+	value_t c[n+1],d[n+1];
 	char scream[100];
 	dif=fabs(x-xa[1]);
 	for(i=1;i<=n;i++){
@@ -81,7 +81,7 @@ void polint(double *xa, double *ya, int n, double x, double *y, double *dy){
 }
 
 
-double interpolate(double *x, double *y, double target, int el){
+value_t interpolate(value_t *x, value_t *y, value_t target, index_t el){
 
   //this is a wrapper for the Numerical Recipes polynomial interpolation
   //routine polint()
@@ -96,14 +96,14 @@ double interpolate(double *x, double *y, double target, int el){
 
   //x[] must be monotonic, but it can be either ascending or descending
 
- double *xt,*yt;
- double xint[5],yint[5],err,ans;
- int i,n,min;
+ value_t *xt,*yt;
+ value_t xint[5],yint[5],err,ans;
+ index_t i,n,min;
 
 
  if(x[0]>x[1]){
-  xt=new double[el];
-  yt=new double[el];
+  xt=new value_t[el];
+  yt=new value_t[el];
   for(i=0;i<el;i++){
    xt[i]=x[el-1-i];
    yt[i]=y[el-1-i];
@@ -143,16 +143,16 @@ double interpolate(double *x, double *y, double target, int el){
 
 //the routines below are just the merge sort routine from Numerical Recipes;
 
-int scanner(double *m, int *indices, int index, int el){
+index_t scanner(value_t *m, index_t *indices, index_t index, index_t el){
 /*this will take the matrix m and put everything in it with value
 greater than element m[index] to the right of that element
 and everything less than m[index] to the left; it then returns
 the new index of that anchored element (which you now *know* is in
 the right spot*/
 
-	double toobig,toosmall;
-	int i,j,n,k,pp;
-	int itoobig,itoosmall;
+	value_t toobig,toosmall;
+	index_t i,j,n,k,pp;
+	index_t itoobig,itoosmall;
         FILE *output;
 
 	itoobig=0;
@@ -204,9 +204,9 @@ the right spot*/
 	return index;
 }
 
-void sort(double *m, int *indices, int el){
-	double *newm,junk;
-	int k,i,*newi,ii,diff;
+void sort(value_t *m, index_t *indices, index_t el){
+	value_t *newm,junk;
+	index_t k,i,*newi,ii,diff;
 	
 	if(el==2){
 	 if(m[0]>m[1]){
@@ -245,9 +245,9 @@ void sort(double *m, int *indices, int el){
 	}
 }
 
-void check_sort(double *sorted, double *unsorted, int *inn, int *inn_0, int n){
-    int i,j;
-    double diff;
+void check_sort(value_t *sorted, value_t *unsorted, index_t *inn, index_t *inn_0, index_t n){
+    index_t i,j;
+    value_t diff;
 
     for(i=0;i<n;i++){
         for(j=0;j<n && inn_0[j]!=inn[i];j++);
@@ -273,10 +273,10 @@ void check_sort(double *sorted, double *unsorted, int *inn, int *inn_0, int n){
 }
 
 
-void sort_and_check(double *list, double *sorted, int *inn, int n){
-    int i,*inn_0;
+void sort_and_check(value_t *list, value_t *sorted, index_t *inn, index_t n){
+    index_t i,*inn_0;
 
-    inn_0=new int[n];
+    inn_0=new index_t[n];
     for(i=0;i<n;i++){
         sorted[i]=list[i];
 	inn_0[i]=inn[i];
@@ -292,11 +292,11 @@ void sort_and_check(double *list, double *sorted, int *inn, int n){
 
 
 void naive_gaussian_solver(
-array_1d<double> &aa_in, array_1d<double> &bb_in,
-array_1d<double> &xx, int params){
+array_1d<value_t> &aa_in, array_1d<value_t> &bb_in,
+array_1d<value_t> &xx, index_t params){
 
 
-    array_1d<double> buffer,aa,bb;
+    array_1d<value_t> buffer,aa,bb;
     buffer.set_dim(params);
     aa.set_dim(params*params);
     bb.set_dim(params);
@@ -305,12 +305,12 @@ array_1d<double> &xx, int params){
     aa.set_name("naive_aa");
     bb.set_name("naive_bb");
 
-    array_1d<int> dexes;
+    array_1d<index_t> dexes;
     dexes.set_dim(params);
 
     dexes.set_name("naive_dexes");
 
-    int i,k;
+    index_t i,k;
     for(i=0;i<params*params;i++){
         aa.set(i,aa_in.get_data(i));
 
@@ -320,9 +320,9 @@ array_1d<double> &xx, int params){
         dexes.set(i,i);
     }
 
-    double amax,nn;
-    int imax,ii,j;
-    int row,col,rowmax,colmax;
+    value_t amax,nn;
+    index_t imax,ii,j;
+    index_t row,col,rowmax,colmax;
 
     for(ii=0;ii<params;ii++){
         for(row=ii;row<params;row++){
@@ -382,8 +382,8 @@ array_1d<double> &xx, int params){
 	
     }
 
-    double err,maxerr,mindiag=-1.0,minfail,mm;
-    int ifail;
+    value_t err,maxerr,mindiag=-1.0,minfail,mm;
+    index_t ifail;
 
 
     maxerr=-1.0;
@@ -462,9 +462,9 @@ array_1d<double> &xx, int params){
 }
 
 
-double compare_arr(array_1d<double> &v1, array_1d<double> &v2){
-    double err=0.0,maxerr=-1.0;
-    int i,dim;
+value_t compare_arr(array_1d<value_t> &v1, array_1d<value_t> &v2){
+    value_t err=0.0,maxerr=-1.0;
+    index_t i,dim;
 
     if(v1.get_dim()!=v2.get_dim()){
         //printf("WARNING in compare_arr the two arrays do not have same dim\n");
@@ -489,7 +489,7 @@ double compare_arr(array_1d<double> &v1, array_1d<double> &v2){
 
 }
 
-int compare_int_arr(array_1d<int> &p1, array_1d<int> &p2){
+index_t compare_int_arr(array_1d<index_t> &p1, array_1d<index_t> &p2){
     /*
     returns 0 if the arrays have different contents (order does not matter)
 
@@ -499,7 +499,7 @@ int compare_int_arr(array_1d<int> &p1, array_1d<int> &p2){
         return 0;
     }
 
-    int i,j,ans=1,found_it;
+    index_t i,j,ans=1,found_it;
 
     for(i=0;i<p1.get_dim() && ans==1;i++){
         found_it=0;
@@ -515,17 +515,17 @@ int compare_int_arr(array_1d<int> &p1, array_1d<int> &p2){
 
 }
 
-double bisection(function_wrapper &fn,
-                 array_1d<double> &_lowball,
-                 array_1d<double> &_highball,
-                 double target, double tol,
-                 array_1d<double> &found){
+value_t bisection(function_wrapper &fn,
+                 array_1d<value_t> &_lowball,
+                 array_1d<value_t> &_highball,
+                 value_t target, value_t tol,
+                 array_1d<value_t> &found){
 
 
 
-   double mu;
-   int i;
-   array_1d<double> trial,lowball,highball;
+   value_t mu;
+   index_t i;
+   array_1d<value_t> trial,lowball,highball;
    trial.set_name("global_bisection_trial");
    lowball.set_name("global_bisection_lowball");
    highball.set_name("global_bisection_highball");
@@ -535,8 +535,8 @@ double bisection(function_wrapper &fn,
        highball.set(i,_highball.get_data(i));
    }
 
-   double flow=fn(lowball);
-   double fhigh=fn(highball);
+   value_t flow=fn(lowball);
+   value_t fhigh=fn(highball);
 
 
    if(flow>fhigh){
@@ -559,7 +559,7 @@ double bisection(function_wrapper &fn,
        exit(1);
    }
 
-   double fout;
+   value_t fout;
    if(target-flow>fhigh-target){
        for(i=0;i<lowball.get_dim();i++){
            found.set(i,highball.get_data(i));
@@ -573,9 +573,9 @@ double bisection(function_wrapper &fn,
        fout=flow;
    }
 
-   double err=fabs(fout-target);
-   int ct;
-   double ftrial;
+   value_t err=fabs(fout-target);
+   index_t ct;
+   value_t ftrial;
    for(ct=0;ct<200 && err>tol;ct++){
        for(i=0;i<lowball.get_dim();i++){
            trial.set(i,0.5*(lowball.get_data(i)+highball.get_data(i)));
@@ -614,9 +614,9 @@ double bisection(function_wrapper &fn,
 
 }
 
-double integrate_cos_n(double b1, double b2, int n){
+value_t integrate_cos_n(value_t b1, value_t b2, index_t n){
 
-    double upper,lower;
+    value_t upper,lower;
 
     if(n<0){
         printf("integrate_cos_n cannot handle n<0\n");
@@ -632,30 +632,30 @@ double integrate_cos_n(double b1, double b2, int n){
     else{
         upper=power(cos(b2),n-1)*sin(b2);
         lower=power(cos(b1),n-1)*sin(b1);
-        return (upper-lower)/double(n)+\
-                double(n-1)*integrate_cos_n(b1, b2, n-2)/double(n);
+        return (upper-lower)/value_t(n)+\
+                value_t(n-1)*integrate_cos_n(b1, b2, n-2)/value_t(n);
     }
 }
 
 ellipse_sampler::ellipse_sampler(){
     _dice=NULL;
     _steps=1000;
-    _dx=1.0/double(_steps);
+    _dx=1.0/value_t(_steps);
     _initialized=0;
 
     _cos_n_grid.set_name("ellipse_n_cos_grid");
     _dim_record.set_name("ellipse_dim_record");
 }
 
-void ellipse_sampler::initialize(int dd, int seed){
+void ellipse_sampler::initialize(index_t dd, index_t seed){
     _dim=dd;
     if(_dice!=NULL){
         delete _dice;
     }
     _dice=new Ran(seed);
     _cos_n_grid.set_dim(_dim+1,_steps);
-    int i,j;
-    double theta;
+    index_t i,j;
+    value_t theta;
     for(i=0;i<_cos_n_grid.get_rows();i++){
         for(j=0;j<_steps;j++){
             theta=asin(j*_dx);
@@ -666,15 +666,15 @@ void ellipse_sampler::initialize(int dd, int seed){
     _initialized=1;
 }
 
-void ellipse_sampler::get_pt(array_1d<double> &out){
+void ellipse_sampler::get_pt(array_1d<value_t> &out){
     _dim_record.reset_preserving_room();
-    double remainder=1.0;
-    double sqrt_remainder=1.0;
-    int dim_used,dim_left;
-    int i_dim,i;
-    int i_max_vol;
-    double max_vol;
-    double roll,coord;
+    value_t remainder=1.0;
+    value_t sqrt_remainder=1.0;
+    index_t dim_used,dim_left;
+    index_t i_dim,i;
+    index_t i_max_vol;
+    value_t max_vol;
+    value_t roll,coord;
     for(dim_used=0;dim_used<_dim;dim_used++){
         dim_left=_dim-dim_used-1;
         i_dim=-1;
@@ -682,7 +682,7 @@ void ellipse_sampler::get_pt(array_1d<double> &out){
             i_dim=_dice->int32()%_dim;
         }
         _dim_record.add(i_dim);
-        i_max_vol=int(sqrt_remainder/_dx);
+        i_max_vol=index_t(sqrt_remainder/_dx);
         if(i_max_vol==_cos_n_grid.get_cols()){
             i_max_vol--;
         }

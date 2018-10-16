@@ -9,14 +9,14 @@
 
 void kill(char*);
 
-double raiseup(double,double);
+value_t raiseup(value_t,value_t);
 
-inline double power(double arg,int raised){
+inline value_t power(value_t arg,index_t raised){
 
   //return arg raised to the integer power 'raised'
 
-  int n;
-  double ans;
+  index_t n;
+  value_t ans;
 
   if(raised==0)return 1.0;
   else{ans=1.0;
@@ -58,45 +58,45 @@ void thework(){
   x^=(x<<4);
 }
 
-double doub(){
+value_t doub(){
   thework();
   return x*5.42101086242752217e-20;
 }
 
-int int32(){
+index_t int32(){
   thework();
-  int ans=int(x);
+  index_t ans=index_t(x);
   if(ans<0)ans=-1*ans;
   return ans;
 }
 
 };
 
-void polint(double*,double*,int,double,double*,double*);
+void polint(value_t*,value_t*,index_t,value_t,value_t*,value_t*);
 
-double interpolate(double*,double*,double,int);
+value_t interpolate(value_t*,value_t*,value_t,index_t);
 
-void sort(double*,int*,int);
+void sort(value_t*,index_t*,index_t);
 
-void check_sort(double*,int*,int);
+void check_sort(value_t*,index_t*,index_t);
 
-void sort_and_check(double*,double*,int*,int);
+void sort_and_check(value_t*,value_t*,index_t*,index_t);
 
-double normal_deviate(Ran*,double,double);
+value_t normal_deviate(Ran*,value_t,value_t);
 
-void naive_gaussian_solver(array_1d<double>&,array_1d<double>&,
-array_1d<double>&,int);
+void naive_gaussian_solver(array_1d<value_t>&,array_1d<value_t>&,
+array_1d<value_t>&,index_t);
 
-double compare_arr(array_1d<double>&,array_1d<double>&);
+value_t compare_arr(array_1d<value_t>&,array_1d<value_t>&);
 
-int compare_int_arr(array_1d<int>&, array_1d<int>&);
+index_t compare_int_arr(array_1d<index_t>&, array_1d<index_t>&);
 
-double bisection(function_wrapper&,array_1d<double>&,array_1d<double>&,double,double,array_1d<double>&);
+value_t bisection(function_wrapper&,array_1d<value_t>&,array_1d<value_t>&,value_t,value_t,array_1d<value_t>&);
 
-double integrate_cos_n(double, double, int);
+value_t integrate_cos_n(value_t, value_t, index_t);
 
-inline void expand_grid(int ii ,array_1d<int> &grid_ct, array_1d<int> &out){
-    int ix,iy,denom,subtract;
+inline void expand_grid(index_t ii ,array_1d<index_t> &grid_ct, array_1d<index_t> &out){
+    index_t ix,iy,denom,subtract;
 
     for(ix=0;ix<grid_ct.get_dim();ix++){
         denom=1;
@@ -112,10 +112,10 @@ inline void expand_grid(int ii ,array_1d<int> &grid_ct, array_1d<int> &out){
 }
 
 
-inline void expand_grid(long int ii ,array_1d<int> &grid_ct, array_1d<int> &out){
-    int ix,iy;
+inline void expand_grid(long index_t ii ,array_1d<index_t> &grid_ct, array_1d<index_t> &out){
+    index_t ix,iy;
 
-    long int denom,subtract,quotient;
+    long index_t denom,subtract,quotient;
 
     for(ix=0;ix<grid_ct.get_dim();ix++){
         denom=1;
@@ -123,7 +123,7 @@ inline void expand_grid(long int ii ,array_1d<int> &grid_ct, array_1d<int> &out)
             denom*=grid_ct.get_data(iy);
         }
         quotient=ii/denom;
-        iy=int(quotient);
+        iy=index_t(quotient);
         out.set(ix,iy);
         subtract=ii/denom;
         ii-=subtract*denom;
@@ -133,19 +133,19 @@ inline void expand_grid(long int ii ,array_1d<int> &grid_ct, array_1d<int> &out)
 
 struct chisquared_distribution{
 
-    double _fix;
+    value_t _fix;
 
-    double _pdf_fn(double x, double dof,double *lnpdf){
-        double logans;
+    value_t _pdf_fn(value_t x, value_t dof,value_t *lnpdf){
+        value_t logans;
         logans=-0.5*x+(0.5*dof-1.0)*log(x)-_fix;
 
         lnpdf[0]=logans;
         return exp(logans);
     }
 
-    double maximum_likelihood_chisquared_value(double dof){
+    value_t maximum_likelihood_chisquared_value(value_t dof){
         _fix=0.0;
-        double x,lnpdf,pdf,maxpdf,x_max;
+        value_t x,lnpdf,pdf,maxpdf,x_max;
         maxpdf=-1.0;
         for(x=0.0;x<dof+1000.0;x+=1.0){
             pdf=_pdf_fn(x,dof,&lnpdf);
@@ -158,13 +158,13 @@ struct chisquared_distribution{
         return x_max;
     }
 
-    double confidence_limit(double dof, double pct){
+    value_t confidence_limit(value_t dof, value_t pct){
         _fix=0.0;
 
-        double x,pdf,pdfold,xold,total,lim,ans,lnpdf;
-        double maxf,maxx,lmax=-1.0e10;
-        double start,step,stop,target;
-        double x1,x2;
+        value_t x,pdf,pdfold,xold,total,lim,ans,lnpdf;
+        value_t maxf,maxx,lmax=-1.0e10;
+        value_t start,step,stop,target;
+        value_t x1,x2;
 
         maxf=-1.0e20;
 
@@ -230,19 +230,19 @@ class ellipse_sampler{
             }
         }
 
-        int is_initialized(){return _initialized;}
+        index_t is_initialized(){return _initialized;}
 
-        void initialize(int, int);
-        void get_pt(array_1d<double>&);
+        void initialize(index_t, index_t);
+        void get_pt(array_1d<value_t>&);
 
     private:
-        int _initialized;
-        int _dim;
-        int _steps;
-        double _dx;
-        array_1d<int> _dim_record;
+        index_t _initialized;
+        index_t _dim;
+        index_t _steps;
+        value_t _dx;
+        array_1d<index_t> _dim_record;
         Ran *_dice;
-        array_2d<double> _cos_n_grid;
+        array_2d<value_t> _cos_n_grid;
 };
 
 #endif

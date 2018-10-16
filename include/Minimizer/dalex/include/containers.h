@@ -52,12 +52,12 @@ outer subroutine, unless you explicitly tell it.
 
 #define letters 500
 
-inline int compare_char(char *s1, char *s2){
+inline index_t compare_char(char *s1, char *s2){
     //are two character strings the same?
     //if so, return 1
     //if not, return 0
 
-    int i;
+    index_t i;
     //printf("\ncomparing %s %s\n",s1,s2);
     for(i=0;i<letters && (s1[i]!=0 || s2[i]!=0);i++){
      if(s1[i]!=s2[i])return 0;
@@ -71,7 +71,7 @@ class array_1d{
     /*
     This is a class of 1-dimensional arrays with elements of type T.
 
-    Presently, the code will compile with T set to double or int
+    Presently, the code will compile with T set to value_t or index_t
     To change that, change the 'template class' statements in
     containers.cpp
 
@@ -98,7 +98,7 @@ public:
         name_set=0;
         where_set=0;
         data=new T[room];
-        int i;
+        index_t i;
         for(i=0;i<room;i++){
             data[i]=in.data[i];
         }
@@ -124,8 +124,8 @@ public:
         return data;
     }
 
-    inline int contains(T val){
-        int i;
+    inline index_t contains(T val){
+        index_t i;
         for(i=0;i<dim;i++){
             if(data[i]==val){
                 return 1;
@@ -134,8 +134,8 @@ public:
         return 0;
     }
 
-    /*return the element of the array specified by int*/
-    inline T get_data(int dex) const{
+    /*return the element of the array specified by index_t*/
+    inline T get_data(index_t dex) const{
 
         if(data==NULL){
             printf("dying from get_data because data is null\n");
@@ -151,14 +151,14 @@ public:
 
     }
 
-    inline void set_room(int room_in){
+    inline void set_room(index_t room_in){
         if(room_in<room){
             printf("dying from set_room; room is %d trying %d\n",
             room,room_in);
             die(0);
         }
         T *buffer;
-        int i;
+        index_t i;
 
         if(data!=NULL){
             buffer=new T[dim];
@@ -211,13 +211,13 @@ public:
         dim++;
     }
 
-    /*set the element of the array specified by the int index to the value T.
+    /*set the element of the array specified by the index_t index to the value T.
     If you try to set an index that is beyond the current size of the array,
     zeros will be added to fill in between the current size of the array
     and the element you are setting*/
-    inline void set(int dex, T val){
+    inline void set(index_t dex, T val){
 
-        int i;
+        index_t i;
 
         if(dex<0){
             printf("dying from set with negative dex\n");
@@ -232,9 +232,9 @@ public:
         }
     }
 
-    /*add the value T to the element of the array indexed by int, i.e.
-    array[int] = array[int] + T*/
-    inline void add_val(int dex, T val){
+    /*add the value T to the element of the array indexed by index_t, i.e.
+    array[index_t] = array[index_t] + T*/
+    inline void add_val(index_t dex, T val){
 
         if(dex<0 || dex>=dim){
             printf("dying from add_val\n");
@@ -245,8 +245,8 @@ public:
 
     }
 
-    /*subtract the value T from the element of the array indexed by int*/
-    inline void subtract_val(int dex, T val){
+    /*subtract the value T from the element of the array indexed by index_t*/
+    inline void subtract_val(index_t dex, T val){
 
         if(dex<0 || dex>=dim){
             printf("dying from subtract_val");
@@ -256,9 +256,9 @@ public:
         data[dex]-=val;
     }
 
-    /*divide the element of the array indexed by int by the value T, i.e.
-    array[iint] = array[int]/T */
-    inline void divide_val(int dex, T val){
+    /*divide the element of the array indexed by index_t by the value T, i.e.
+    array[iint] = array[index_t]/T */
+    inline void divide_val(index_t dex, T val){
 
         if(dex<0 || dex>=dim){
             printf("dying from divide_val\n");
@@ -269,8 +269,8 @@ public:
 
     }
 
-    /*multiply the element of the array indexed by int by the value T*/
-    inline void multiply_val(int dex, T val){
+    /*multiply the element of the array indexed by index_t by the value T*/
+    inline void multiply_val(index_t dex, T val){
 
         if(dex<0 || dex>=dim){
             printf("dying from multiply_val\n");
@@ -284,18 +284,18 @@ public:
 
     /*set all of the elements of the array to zero*/
     void zero(){
-        int i;
+        index_t i;
         for(i=0;i<room;i++)data[i]=0;
     }
 
-    /*remove the element indexed by int from the array; shift all of the elements
-    with indexes greater than int down to fill in the gap*/
-    void remove(int dex){
+    /*remove the element indexed by index_t from the array; shift all of the elements
+    with indexes greater than index_t down to fill in the gap*/
+    void remove(index_t dex){
         if(dex<0 || dex>=dim){
             return;
         }
 
-        int i;
+        index_t i;
         for(i=dex+1;i<dim;i++){
             data[i-1]=data[i];
         }
@@ -303,9 +303,9 @@ public:
     }
 
 
-    /*set the length of the array to int; if the array is already carrying data
+    /*set the length of the array to index_t; if the array is already carrying data
     this will not delete that data*/
-    void set_dim(int ii){
+    void set_dim(index_t ii){
 
         if(ii<0){
             printf("tried to set dim %d\n",dim);
@@ -318,7 +318,7 @@ public:
         }
 
         T *buffer;
-        int j,new_room;
+        index_t j,new_room;
 
         if(data!=NULL && room<ii){
             buffer=new T[room];
@@ -355,7 +355,7 @@ public:
     /*increase the length of the array by one by adding a zero to the end of the
     array*/
     void increment_dim(){
-        int i=dim;
+        index_t i=dim;
         add(0);
 
         if(dim!=i+1){
@@ -365,14 +365,14 @@ public:
     }
 
     /*return the length of the array*/
-    inline int get_dim() const{
+    inline index_t get_dim() const{
        return dim;
     }
 
     /*set the name of the array, so that, if it causes an exception to be thrown,
     you will know which array threw the exception*/
     void set_name(char *word){
-        int i,ct=0;
+        index_t i,ct=0;
 
 
         if(name!=NULL && name_set==1)delete [] name;
@@ -401,7 +401,7 @@ public:
     to previous settings upon leaving a subroutine*/
     void set_where(char *word) const{
 
-        int i,ct=0;
+        index_t i,ct=0;
 
         if(where_am_i!=NULL && where_set==1){
             delete [] where_am_i;
@@ -431,7 +431,7 @@ public:
 
     /*throw an exception; the argument is the element of the array that was asked for when
     the exception is thrown*/
-    void die(int ii) const{
+    void die(index_t ii) const{
         printf("\nWARNING 1d array\n");
 
         if(name!=NULL)printf("in 1_d array %s\n",name);
@@ -444,7 +444,7 @@ public:
             printf("data is null\n\n");
         }
 
-        int ifail=1;
+        index_t ifail=1;
 
         throw ifail;
 
@@ -514,7 +514,7 @@ public:
 
     /*calculate the Euclidean norm of the array and divide all of the elements thereby.
     Return the calculated norm*/
-    inline double normalize(){
+    inline value_t normalize(){
 
         if(dim<0){
             printf("WARNING 1d array has dim %d\n",dim);
@@ -525,8 +525,8 @@ public:
             return 0.0;
         }
 
-        double ans;
-        int i;
+        value_t ans;
+        index_t i;
         ans=0.0;
         for(i=0;i<dim;i++){
             ans+=data[i]*data[i];
@@ -550,7 +550,7 @@ public:
     }
 
     /*return the Euclidean norm of the array without normalizing the array*/
-    inline double get_norm(){
+    inline value_t get_norm(){
 
         if(dim<0){
             printf("WARNING 1d array has dim %d\n",dim);
@@ -561,8 +561,8 @@ public:
             return 0.0;
         }
 
-        int i;
-        double ans=0.0;
+        index_t i;
+        value_t ans=0.0;
         for(i=0;i<dim;i++){
             ans+=data[i]*data[i];
         }
@@ -573,7 +573,7 @@ public:
 
     /*return the square of the Euclidean norm of the array without normalizing
     the array*/
-    inline double get_square_norm(){
+    inline value_t get_square_norm(){
 
         if(dim<0){
             printf("WARNING 1d array has dim %d\n",dim);
@@ -584,8 +584,8 @@ public:
             return 0.0;
         }
 
-        int i;
-        double ans=0.0;
+        index_t i;
+        value_t ans=0.0;
         for(i=0;i<dim;i++){
             ans+=data[i]*data[i];
         }
@@ -594,8 +594,8 @@ public:
 
     }
 
-    /*add room for int new elements in the array*/
-    void add_room(int ii){
+    /*add room for index_t new elements in the array*/
+    void add_room(index_t ii){
 
         if(data==NULL && dim>0){
            printf("dying from add_room\n");
@@ -618,7 +618,7 @@ public:
         }
 
         T *buffer;
-        int i,old_room=room;
+        index_t i,old_room=room;
 
         if(data==NULL){
             room=ii;
@@ -640,7 +640,7 @@ public:
     /*return the amount of room allotted for elements in the array.
     This is not the same as get_dim() which returns the number of occupied
     spaces in the array*/
-    int get_room(){
+    index_t get_room(){
         return room;
     }
 
@@ -661,7 +661,7 @@ public:
         dim=in.dim;
         room=in.room;
         name_set=in.name_set;
-        int i;
+        index_t i;
         if(in.name!=NULL){
            for(i=0;in.name[i]!=0;i++);
            name=new char[i+1];
@@ -700,10 +700,10 @@ private:
     name_set is a flag that keeps track of whether name was set for this array as itself,
     or as part of an array_2d
     */
-    int dim,room,name_set;
+    index_t dim,room,name_set;
 
     /*where_set is like name_set for where_am_i*/
-    mutable int where_set;
+    mutable index_t where_set;
 
     /*the name of this array (for diagnostic purposes)*/
     char *name;
@@ -729,11 +729,11 @@ public:
     will throw an exception.
 
     If you use the constructor that takes no arguments, you must specify the
-    number of columns, either by using set_cols(int), set_dim(int,int) or by first adding
+    number of columns, either by using set_cols(index_t), set_dim(index_t,index_t) or by first adding
     a row to your blank array_2d with add_row(array_1d<T>&).
     */
-    array_2d(int r,int c){
-        int i,j;
+    array_2d(index_t r,index_t c){
+        index_t i,j;
         _rows=0;
         _cols=c;
         _room=r*c;
@@ -755,7 +755,7 @@ public:
     }
 
     ~array_2d(){
-        int i;
+        index_t i;
 
         if(_data!=NULL){
             delete [] _data;
@@ -768,7 +768,7 @@ public:
 
 
     /*set the dimensions of the array_2d. rows first, columns second*/
-    inline void set_dim(int ir, int ic){
+    inline void set_dim(index_t ir, index_t ic){
 
         if(ir<0 || ic<0){
             printf("tried to set dimensions %d %d\n",ir,ic);
@@ -805,7 +805,7 @@ public:
             die(ir,ic);
         }
 
-        int i;
+        index_t i;
         if(_data!=NULL){
             delete [] _data;
         }
@@ -815,7 +815,7 @@ public:
         _cols=ic;
         _data=new T[_room];
 
-        int j,dex;
+        index_t j,dex;
         for(i=0;i<_rows;i++){
             for(j=0;j<_cols;j++){
                 dex=i*_cols+j;
@@ -832,7 +832,7 @@ public:
     /*set the number of columns of the array_2d. Once this is set, it cannot
     be changed without first calling reset() and deleting the contents of the
     array_2d*/
-    inline void set_cols(int ii){
+    inline void set_cols(index_t ii){
         reset();
 
         _room=100*ii;
@@ -845,7 +845,7 @@ public:
 
     /*return the element of the array_2d indexed by the two arguments (rows first,
     columns second)*/
-    inline T get_data(int ir, int ic) const{
+    inline T get_data(index_t ir, index_t ic) const{
 
         if(_data==NULL){
             printf("dying from get_data\n");
@@ -867,7 +867,7 @@ public:
 
     /*set the name member variable (for diagnostic purposes)*/
     void set_name(char *word){
-        int i,ct=0;
+        index_t i,ct=0;
 
         for(i=0;word[i]!=0;i++)ct++;
         ct++;
@@ -885,7 +885,7 @@ public:
     /*set where_am_i (for diagnostic purposes)*/
     void set_where(char *word) const{
 
-        int i,ct=0;
+        index_t i,ct=0;
 
         for(i=0;word[i]!=0;i++)ct++;
         ct++;
@@ -904,7 +904,7 @@ public:
     }
 
 
-    void set_row_room(int row_room_in){
+    void set_row_room(index_t row_room_in){
 
         if(row_room_in*_cols<_room){
             printf("dying from set_row_room; row_roomis %d trying to set %d\n",
@@ -918,7 +918,7 @@ public:
         }
 
         T *buffer;
-        int i,j;
+        index_t i,j;
 
         if(_data!=NULL){
             buffer=new T[_room];
@@ -989,7 +989,7 @@ public:
             die(-1,-1);
         }
 
-        int i,j;
+        index_t i,j;
 
         if(_data==NULL){
             set_row_room(100);
@@ -1003,7 +1003,7 @@ public:
             try{
                 _data[_rows*_cols+i]=in.get_data(i);
             }
-            catch(int iex){
+            catch(index_t iex){
                 printf("dying from array_2d add_row when actually copying data\n");
                 die(_rows,i);
             }
@@ -1012,8 +1012,8 @@ public:
         _rows++;
     }
 
-    /*set the row indexed by int to the array_1d provided*/
-    void set_row(int dex, const array_1d<T> &in){
+    /*set the row indexed by index_t to the array_1d provided*/
+    void set_row(index_t dex, const array_1d<T> &in){
 
         if(dex<0){
             printf("tried to set to negative row\n");
@@ -1056,7 +1056,7 @@ public:
             die(dex,0);
         }
 
-        int i;
+        index_t i;
         if(dex>=_rows){
             for(i=_rows;i<dex+1;i++)add_row(in);
         }
@@ -1065,7 +1065,7 @@ public:
                 try{
                     _data[dex*_cols+i]=in.get_data(i);
                 }
-                catch(int ifail){
+                catch(index_t ifail){
                     die(dex,_cols);
                 }
             }
@@ -1079,7 +1079,7 @@ public:
     the array_2d until there is room.  If you try to set a column
     that is beyond the current size of this array_2d, the code
     will throw an exception.*/
-    inline void set(int ir, int ic, T val){
+    inline void set(index_t ir, index_t ic, T val){
 
         if(ir<0){
             printf("tried to set to negative row\n");
@@ -1092,7 +1092,7 @@ public:
         }
 
         if(_cols<=0){
-            printf("\nYou cannot use set(int,int) on a 2d array if cols are zero\n");
+            printf("\nYou cannot use set(index_t,index_t) on a 2d array if cols are zero\n");
             die(ir,ic);
         }
 
@@ -1101,7 +1101,7 @@ public:
             die(ir,ic);
         }
 
-        int i;
+        index_t i;
         array_1d<T> vector;
         if(ir>=_rows){
             for(i=0;i<_cols;i++)vector.set(i,0);
@@ -1115,7 +1115,7 @@ public:
 
     /*set all of the elements of this array_2d to zero*/
     void zero(){
-        int i;
+        index_t i;
         for(i=0;i<_room;i++){
             _data[i]=0;
         }
@@ -1125,7 +1125,7 @@ public:
     add the provided value to the indexed element, i.e.
     array[int1][int2] = array[int1][int2]+T
     */
-    inline void add_val(int ir, int ic, T val){
+    inline void add_val(index_t ir, index_t ic, T val){
 
         if(ir>=_rows || ic>=_cols || _data==NULL || ir<0 || ic<0){
             printf("dying from add_val\n");
@@ -1135,7 +1135,7 @@ public:
     }
 
     /*subtract the provided value from the indexed element*/
-    inline void subtract_val(int ir, int ic, T val){
+    inline void subtract_val(index_t ir, index_t ic, T val){
 
         if(ir>=_rows || ic>=_cols || _data==NULL || ir<0 || ic<0){
             printf("dying from subtract_val\n");
@@ -1145,7 +1145,7 @@ public:
     }
 
     /*multiply the indexed element by the provided value*/
-    inline void multiply_val(int ir, int ic, T val){
+    inline void multiply_val(index_t ir, index_t ic, T val){
 
         if(ir>=_rows || ic>=_cols || _data==NULL || ir<0 || ic<0){
             printf("dying from multiply_val\n");
@@ -1155,7 +1155,7 @@ public:
     }
 
     /*divide the indexed element by the provided value*/
-    inline void divide_val(int ir, int ic, T val){
+    inline void divide_val(index_t ir, index_t ic, T val){
 
         if(ir>=_rows || ic>=_cols || _data==NULL || ir<0 || ic<0){
             printf("dying from divide_val\n");
@@ -1172,7 +1172,7 @@ public:
 
         //set_name("resetting");
 
-        int i;
+        index_t i;
 
         if(_data==NULL && (_rows>0 || _cols>0 || _room>0)){
             printf("resetting but data is null and something is wrong\n");
@@ -1220,18 +1220,18 @@ public:
     }
 
     /*return the number of rows*/
-    inline int get_rows() const{
+    inline index_t get_rows() const{
         return _rows;
     }
 
     /*return the number of columns*/
-    inline int get_cols() const{
+    inline index_t get_cols() const{
         return _cols;
     }
 
     /*throw an exception; the arguments are for indicating which element
     the code tried to access when the exception was thrown*/
-    void die(int ir, int ic) const{
+    void die(index_t ir, index_t ic) const{
         printf("\nWARNING 2d array\n");
 
         if(_name!=NULL)printf("in 2d_array %s\n",_name);
@@ -1245,18 +1245,18 @@ public:
             printf("data is null\n");
         }
 
-        int ifail=1;
+        index_t ifail=1;
 
         throw ifail;
     }
 
-    /*remove the row indexed by the int.  All of the rows with
+    /*remove the row indexed by the index_t.  All of the rows with
     indexes greater than the argument are shifted to fill in the gap*/
-    void remove_row(int dex){
+    void remove_row(index_t dex){
 
         if(dex<0 || dex>=_rows)return;
 
-        int i,j;
+        index_t i,j;
         for(i=dex+1;i<_rows;i++){
             for(j=0;j<_cols;j++){
                 _data[(i-1)*_cols+j]= _data[i*_cols+j];
@@ -1273,14 +1273,14 @@ public:
 
     *myArray2d(i) behaves just like an array_1d
     */
-    inline array_1d<T> operator()(int dex) const{
+    inline array_1d<T> operator()(index_t dex) const{
 
         if(dex<0 || dex>=_rows){
             printf("WARNING asked for row %d but only have %d\n",dex,_rows);
             die(-1,-1);
         }
         array_1d<T> vv;
-        int i;
+        index_t i;
         vv.set_dim(_cols);
         for(i=0;i<_cols;i++){
             vv.set(i,_data[dex*_cols+i]);
@@ -1290,15 +1290,15 @@ public:
     }
 
 
-    inline double normalize_row(int dex){
+    inline value_t normalize_row(index_t dex){
         if(dex>=_rows){
             printf("WARNING trying to normalize row %d; only have %d\n",
                    dex,_rows);
 
             die(dex,0);
         }
-        double ans=0.0;
-        int i;
+        value_t ans=0.0;
+        index_t i;
         for(i=0;i<_cols;i++){
             ans+=_data[dex*_cols+i]*_data[dex*_cols+i];
         }
@@ -1311,7 +1311,7 @@ public:
 
 private:
 
-   int _rows,_cols,_room;
+   index_t _rows,_cols,_room;
 
    T *_data;
 
@@ -1344,13 +1344,13 @@ public:
     }
 
     ~asymm_array_2d(){
-        int i;
+        index_t i;
 
         for(i=0;i<row_room;i++){
             try{
                 data[i].assert_name_null();
             }
-            catch(int iex){
+            catch(index_t iex){
                 printf("in asymm 2d destructor\n");
                 die(0);
             }
@@ -1358,7 +1358,7 @@ public:
             try{
                 data[i].assert_where_null();
             }
-            catch(int iex){
+            catch(index_t iex){
                 printf("in asymm 2d destructor\n");
                 die(0);
             }
@@ -1380,7 +1380,7 @@ public:
 
     /*set the name of this asymm_array_2d for diagnostic purposes*/
     void set_name(char *word){
-        int i,ct=0;
+        index_t i,ct=0;
 
         for(i=0;word[i]!=0;i++)ct++;
         ct++;
@@ -1397,7 +1397,7 @@ public:
             try{
                 data[i].assert_name(name);
             }
-            catch(int iex){
+            catch(index_t iex){
                 printf("in asymm 2d set name\n");
                 die(0);
             }
@@ -1409,7 +1409,7 @@ public:
     /*set the location of this asymm_array_2d for diagnostic purposes*/
     void set_where(char *word) const{
 
-        int i,ct=0;
+        index_t i,ct=0;
 
         for(i=0;word[i]!=0;i++)ct++;
         ct++;
@@ -1424,7 +1424,7 @@ public:
             try{
                 data[i].assert_where(where_am_i);
             }
-            catch(int iex){
+            catch(index_t iex){
                 printf("in asymm 2d set where\n");
                 die(0);
             }
@@ -1443,7 +1443,7 @@ public:
         }
 
         array_1d<T> *buffer;
-        int i,j;
+        index_t i,j;
 
         if(rows==row_room){
             buffer=new array_1d<T>[rows];
@@ -1480,7 +1480,7 @@ public:
                 try{
                     data[i].assert_name(name);
                 }
-                catch(int iex){
+                catch(index_t iex){
                     printf("in asymm 2d add row (asserting name)\n");
                     die(0);
                 }
@@ -1488,7 +1488,7 @@ public:
                 try{
                     data[i].assert_where(where_am_i);
                 }
-                catch(int iex){
+                catch(index_t iex){
                     printf("in asymm 2d add row (asserting where)\n");
                     die(0);
                 }
@@ -1501,9 +1501,9 @@ public:
     If you set a row beyond the current size of this asymm_array_2d,
     then empty rows will be used to fill in the gaps
     */
-    void set_row(int ir, const array_1d<T> &vv){
+    void set_row(index_t ir, const array_1d<T> &vv){
 
-        int i;
+        index_t i;
         array_1d<T> empty;
 
         while(rows<=ir){
@@ -1518,17 +1518,17 @@ public:
     }
 
     /*
-    remove the row indexed by int.  Rows with indexes greater than the provided
+    remove the row indexed by index_t.  Rows with indexes greater than the provided
     index will be shifted down to fill in the gap
     */
-    void remove_row(int dex){
+    void remove_row(index_t dex){
 
         if(dex<0 || dex>=rows){
             printf("WARNING asking to remove %d from asymm\n",dex);
             die(dex);
         }
 
-        int i,j;
+        index_t i,j;
         for(i=dex;i<rows-1;i++){
             data[i].set_dim(data[i+1].get_dim());
             for(j=0;j<data[i+1].get_dim();j++){
@@ -1542,7 +1542,7 @@ public:
 
     /*set all of the elements in this asymm_array_2d to zero*/
     void zero(){
-        int i;
+        index_t i;
         for(i=0;i<row_room;i++)data[i].zero();
     }
 
@@ -1556,10 +1556,10 @@ public:
     index as each row in asymm_array_2d is allowed to have a different
     number of columns.
     */
-    inline void set(int ir, int ic, T val){
+    inline void set(index_t ir, index_t ic, T val){
 
         array_1d<T> empty;
-        int i;
+        index_t i;
 
         while(rows<=ir){
             add_row(empty);
@@ -1572,7 +1572,7 @@ public:
     /*
     Return the indexed element
     */
-    inline T get_data(int ir, int ic) const{
+    inline T get_data(index_t ir, index_t ic) const{
 
         if(ir<0 || ir>=rows){
             printf("WARNING asking for asymm 2d data %d %d but rows %d\n",
@@ -1584,7 +1584,7 @@ public:
         try{
            return data[ir].get_data(ic);
         }
-        catch(int iex){
+        catch(index_t iex){
             printf("tried to get asymm 2d data %d %d\n",ir,ic);
 	    die(ir);
         }
@@ -1592,9 +1592,9 @@ public:
         return data[ir].get_data(ic);
     }
 
-    /*add T to the end of the row specified by int*/
-    inline void add(int dex, T val){
-        int i;
+    /*add T to the end of the row specified by index_t*/
+    inline void add(index_t dex, T val){
+        index_t i;
         if(dex<0){
             printf("in asymm 2d add\n");
             die(dex);
@@ -1611,7 +1611,7 @@ public:
     /*add the value T onto the indexed element, i.e.
     asymm_array[int1][int2] = asymm_array[int1][int2] + T
     */
-    inline void add_val(int ir, int ic, T val){
+    inline void add_val(index_t ir, index_t ic, T val){
         if(ir<0 || ir>=rows){
             printf("in asymm 2d add_val\n");
 	    die(ir);
@@ -1621,7 +1621,7 @@ public:
     }
 
     /*subtract the value T from the indexed element*/
-    inline void subtract_val(int ir, int ic, T val){
+    inline void subtract_val(index_t ir, index_t ic, T val){
         if(ir<0 || ir>=rows){
             printf("in asymm 2d subtract_val\n");
             die(ir);
@@ -1631,7 +1631,7 @@ public:
     }
 
     /*divide the indexed element by the value T*/
-    inline void divide_val(int ir, int ic, T val){
+    inline void divide_val(index_t ir, index_t ic, T val){
         if(ir<0 || ir>=rows){
             printf("in asymm 2d divide_val\n");
             die(ir);
@@ -1641,7 +1641,7 @@ public:
     }
 
     /*multiply the indexed elmement by the value T*/
-    inline void multiply_val(int ir, int ic, T val){
+    inline void multiply_val(index_t ir, index_t ic, T val){
         if(ir<0 || ir>=rows){
             printf("in asymm 2d multiply_val\n");
             die(ir);
@@ -1651,7 +1651,7 @@ public:
     }
 
     /*replace the indexed row with the provided array_1d*/
-    void replace_row(int dex, array_1d<T> &pt){
+    void replace_row(index_t dex, array_1d<T> &pt){
         if(dex<0 || dex>=rows){
             printf("WARNING trying to replace row %d in asymm, but only have %d\n",
             dex,rows);
@@ -1660,18 +1660,18 @@ public:
         }
 
         data[dex].reset();
-        int i;
+        index_t i;
         for(i=0;i<pt.get_dim();i++){
             data[dex].add(pt.get_data(i));
         }
 
     }
 
-    inline int get_rows() const{
+    inline index_t get_rows() const{
         return rows;
     }
 
-    inline int get_cols(int dex) const{
+    inline index_t get_cols(index_t dex) const{
 
         if(data==NULL){
             return 0;
@@ -1695,7 +1695,7 @@ public:
 
     /*throw an exception; the argument indicates the row index being
     called for when the exception was thrown*/
-    void die(int ir) const{
+    void die(index_t ir) const{
         printf("\nWARNING asymm 2d array\n");
 
         if(name!=NULL)printf("in 2d_array %s\n",name);
@@ -1709,7 +1709,7 @@ public:
             printf("data is null\n");
         }
 
-        int ifail=1;
+        index_t ifail=1;
 
         throw ifail;
     }
@@ -1721,7 +1721,7 @@ public:
 
         //set_name("resetting");
 
-        int i;
+        index_t i;
 
         if(data==NULL && (rows>0 || row_room>0)){
             printf("resetting but data is null and something is wrong\n");
@@ -1747,14 +1747,14 @@ public:
     }
 
     void reset_preserving_room(){
-        int i;
+        index_t i;
         for(i=0;i<rows;i++){
             data[i].reset_preserving_room();
         }
         rows=0;
     }
 
-    /*return a pointer to the row indexed by int, i.e.
+    /*return a pointer to the row indexed by index_t, i.e.
 
     myAsymmArray(i) is a pointer to the array_1d in the ith row
 
@@ -1763,7 +1763,7 @@ public:
     *myAsymmArray(i) behaves like an array_1d
 
     */
-    inline array_1d<T>* operator()(int dex){
+    inline array_1d<T>* operator()(index_t dex){
 
         if(dex<0 || dex>=rows){
             printf("WARNING asked for row %d but only have %d\n",dex,rows);
@@ -1780,7 +1780,7 @@ private:
     row_room is the number of array_1d's allocated for rows (so
     the code knows how much room it has when you call add_row)
     */
-    int rows,row_room;
+    index_t rows,row_room;
 
     /*this will be allocated as an array of array_1d's for storing the
     rows of this asymm_array_2d*/
@@ -1807,7 +1807,7 @@ The user should not call this routine; it is called by sort_and_check, which
 the user should call
 */
 template <typename T>
-void merge_sort(const array_1d<T>&,array_1d<int>&,int,int);
+void merge_sort(const array_1d<T>&,array_1d<index_t>&,index_t,index_t);
 
 
 
@@ -1816,7 +1816,7 @@ The first array_1d<T> is the input data
 
 The second array_1d<T> will store the sorted output
 
-The array_1d<int> are unique id's associated with each element of the input data.
+The array_1d<index_t> are unique id's associated with each element of the input data.
 It will be rearranged to preserve the relationship between these indexes and the
 sorted data.
 
@@ -1828,10 +1828,10 @@ The routine returns the maximum error fabs(input(unique_id=i)-output(unique_id=i
 If this maximum error is greater than 10^-12, then the code throws an exception
 */
 template <typename T>
-double sort_and_check(const array_1d<T>&, array_1d<T>&, array_1d<int>&);
+value_t sort_and_check(const array_1d<T>&, array_1d<T>&, array_1d<index_t>&);
 
 template <typename T>
-void sort(const array_1d<T>&, array_1d<T>&, array_1d<int>&);
+void sort(const array_1d<T>&, array_1d<T>&, array_1d<index_t>&);
 
 
 /*return the index of the element of the array_1d that is closest in value to T;
@@ -1839,6 +1839,6 @@ void sort(const array_1d<T>&, array_1d<T>&, array_1d<int>&);
 ASSUMES THAT THE array_1d IS SORTED FROM LOWEST TO HIGHEST
 */
 template <typename T>
-int get_dex(const array_1d<T>&, T);
+index_t get_dex(const array_1d<T>&, T);
 
 #endif

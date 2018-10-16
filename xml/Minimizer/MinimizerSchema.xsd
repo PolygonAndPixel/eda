@@ -17,7 +17,7 @@
             <xs:sequence>
                 <!-- General parameters -->
                 <xs:element name="name" type="xs:string"/>
-                <xs:element name="tolerance" type="xs:double"/>
+                <xs:element name="tolerance" type="xs:value_t"/>
                 <xs:element name="max_iter" type="xs:integer"/>
                 <xs:element name="min_iter" type="xs:integer"/>
                 <xs:element name="max_points" type="xs:integer"/>
@@ -28,7 +28,7 @@
                 <xs:element name="size_sub_pop" type="xs:integer"/>
                 <xs:element name="max_sub_pops" type="xs:integer"/>
                 <xs:element name="n_sub_selected" type="xs:integer"/>
-                <xs:element name="size_factor" type="xs:double"/>
+                <xs:element name="size_factor" type="xs:value_t"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -38,7 +38,7 @@
             <xs:sequence>
                 <!-- General parameters -->
                 <xs:element name="name" type="xs:string"/>
-                <xs:element name="tolerance" type="xs:double"/>
+                <xs:element name="tolerance" type="xs:value_t"/>
                 <xs:element name="max_iter" type="xs:integer"/>
                 <xs:element name="seed" type="xs:integer"/>
                 <xs:element name="dump_points" type="xs:boolean"/>
@@ -47,7 +47,7 @@
                 <xs:element name="mode_separation" type="xs:boolean"/>
                 <xs:element name="const_eff" type="boolean"/>
                 <xs:element name="n_live" type="xs:integer"/>
-                <xs:element name="enlargement" type="xs:double"/>
+                <xs:element name="enlargement" type="xs:value_t"/>
                 <xs:element name="feedback_interval" type="xs:integer"/>
                 <xs:element name="max_modes" type="xs:integer"/>
                 <xs:element name="feedback" type="xs:boolean"/>>
@@ -60,7 +60,7 @@
             <xs:sequence>
                 <!-- General parameters -->
                 <xs:element name="name" type="xs:string"/>
-                <xs:element name="tolerance" type="xs:double"/>
+                <xs:element name="tolerance" type="xs:value_t"/>
                 <xs:element name="max_iter" type="xs:integer"/>
                 <xs:element name="min_iter" type="xs:integer"/>
                 <xs:element name="max_points" type="xs:integer"/>
@@ -73,7 +73,7 @@
                 <xs:element name="n_live" type="xs:integer"/>
                 <xs:element name="feedback" type="xs:integer"/>
                 <xs:element name="max_dead" type="xs:integer"/>
-                <xs:element name="boost_posterior" type="xs:double"/>
+                <xs:element name="boost_posterior" type="xs:value_t"/>
                 <xs:element name="num_repeats" type="xs:integer"/>
                 <xs:element name="posteriors" type="xs:boolean"/>
                 <xs:element name="equals" type="xs:boolean"/>

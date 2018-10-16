@@ -17,17 +17,17 @@ const bool DEBUG_FLAG (false);
 
 /** Constructor and destructor **/
 MAPS::MAPS(
-    double tolerance,
-    int max_iter,
-    int min_iter,
-    int max_points,
-    int n_start_points,
-    int size_sub_pop,
-    int max_sub_pops,
-    int n_selected,
-    int n_sub_selected,
-    double size_factor,
-    int seed,
+    value_t tolerance,
+    index_t max_iter,
+    index_t min_iter,
+    index_t max_points,
+    index_t n_start_points,
+    index_t size_sub_pop,
+    index_t max_sub_pops,
+    index_t n_selected,
+    index_t n_sub_selected,
+    value_t size_factor,
+    index_t seed,
     bool dump_points) : Minimizer(tolerance, max_iter, min_iter,
                                   max_points, seed, dump_points)
 {
@@ -62,11 +62,11 @@ std::string MAPS::get_name() {
  * */
 bool MAPS::check_premature(
     m_d pop,
-    uint32_t idx,
-    uint32_t ndims,
-    double epsilon) {
+    index_t idx,
+    index_t ndims,
+    value_t epsilon) {
 
-    double best_fit = pop[0][ndims];
+    value_t best_fit = pop[0][ndims];
     for(auto &p: pop) {
         if(best_fit > p[ndims]) best_fit = p[ndims];
     }
@@ -109,26 +109,26 @@ bool MAPS::check_premature(
 v_i MAPS::make_histogram(
     m_d pop,
     m_d direction,
-    uint32_t dim,
+    index_t dim,
     m_d &freq_pop) {
 
     // Project all the points to the new coordinate in the given direction
     v_d projected_pop = prod(pop, direction[dim]);
-    double max_value = projected_pop[0];
-    double min_value = projected_pop[0];
-    for(uint32_t d=1; d<projected_pop.size(); d++) {
+    value_t max_value = projected_pop[0];
+    value_t min_value = projected_pop[0];
+    for(index_t d=1; d<projected_pop.size(); d++) {
         if(projected_pop[d] > max_value) max_value = projected_pop[d];
         if(projected_pop[d] < min_value) min_value = projected_pop[d];
     }
-    uint32_t n_bins = SDIV(projected_pop.size(), 5);
+    index_t n_bins = SDIV(projected_pop.size(), 5);
     v_i freq(n_bins);
     freq_pop.resize(n_bins);
-    double width = (max_value-min_value) / (double)n_bins;
+    value_t width = (max_value-min_value) / (value_t)n_bins;
     auto not_projected = pop.begin();
     for(auto p=projected_pop.begin(); p<projected_pop.end();
         p++, not_projected++) {
 
-        uint32_t idx = (*p-min_value)/width;
+        index_t idx = (*p-min_value)/width;
         if(idx==n_bins) idx--;
         freq[idx]++;
         freq_pop[idx].insert(freq_pop[idx].end(), not_projected->begin(),
@@ -149,9 +149,9 @@ v_d MAPS::prod(
     v_d b) {
 
     v_d projected(a.size());
-    uint32_t i=0;
+    index_t i=0;
     for(auto m_iter=a.begin(); m_iter<a.end(); ++m_iter, ++i) {
-        double sum = 0;
+        value_t sum = 0;
         for(auto a_iter=m_iter->begin(), b_iter=b.begin();
             (a_iter<m_iter->end() && b_iter<b.end()); ++a_iter, ++b_iter) {
 
@@ -174,10 +174,10 @@ v_i MAPS::find_higher_bin(
     v_i freq) {
 
     bool reset_flag = false;
-    uint32_t num = 0;
-    uint32_t large = 1;
+    index_t num = 0;
+    index_t large = 1;
     v_i higher_bins(1);
-    for(uint32_t i=1; i<freq.size(); i++) {
+    for(index_t i=1; i<freq.size(); i++) {
         if(freq[i] > freq[large]) large = i;
 
         if(size_factor_ * freq[i] < freq[large]) {
@@ -211,19 +211,19 @@ std::vector<m_d> MAPS::confirm_bins(
     v_i higher_bins,
     v_i freq,
     m_d freq_pop,
-    uint32_t ndims) {
+    index_t ndims) {
 
     std::vector<m_d> sub_pops;
-    uint32_t n_bins = higher_bins.size();
-    for(uint32_t i=1; i<n_bins; i++) {
-        uint32_t left_frontier = n_bins;
-        uint32_t right_frontier = n_bins;
-        for(uint32_t j=higher_bins[i]; j>0; j--) {
+    index_t n_bins = higher_bins.size();
+    for(index_t i=1; i<n_bins; i++) {
+        index_t left_frontier = n_bins;
+        index_t right_frontier = n_bins;
+        for(index_t j=higher_bins[i]; j>0; j--) {
             if(size_factor_ * freq[j] < freq[higher_bins[i]]) {
                 left_frontier = j;
             }
         }
-        for(uint32_t j=higher_bins[i]; j<n_bins; j++) {
+        for(index_t j=higher_bins[i]; j<n_bins; j++) {
             if(size_factor_ * freq[j] < freq[higher_bins[i]]) {
                 right_frontier = j;
             }
@@ -232,8 +232,8 @@ std::vector<m_d> MAPS::confirm_bins(
         // been found
         if(left_frontier < n_bins && right_frontier < n_bins) {
             m_d tmp_pop;
-            for(uint32_t j=left_frontier; j<=right_frontier; j++) {
-                uint32_t d = 0;
+            for(index_t j=left_frontier; j<=right_frontier; j++) {
+                index_t d = 0;
                 v_d v(ndims+1);
                 for(auto val: freq_pop[j]) {
                     v[d] = val;
@@ -265,8 +265,8 @@ std::vector<m_d> MAPS::confirm_bins(
 std::vector<m_d> MAPS::iterative_observation(
     m_d sub_pop,
     m_d directions,
-    uint32_t dim,
-    uint32_t ndims) {
+    index_t dim,
+    index_t ndims) {
 
     m_d freq_pop;
     std::vector<m_d> fine_sub_pop;
@@ -297,21 +297,21 @@ std::vector<m_d> MAPS::iterative_observation(
  * */
 std::vector<m_d> MAPS::maintaining(
     m_d offspring,
-    uint32_t ndims) {
+    index_t ndims) {
 
     m_d eigen_v;
     v_d eigen_values(ndims);
     m_d cov(ndims, v_d(ndims));
     pca(offspring, eigen_v, cov, eigen_values, ndims);
 
-    double eigen_threshold = 0.85; // We want to take the eigenvectors that
+    value_t eigen_threshold = 0.85; // We want to take the eigenvectors that
                                    // make up 85%, see paper page 4
-    double eigen_sum = 0;
+    value_t eigen_sum = 0;
     for(auto &eigen: eigen_values) eigen_sum += abs(eigen);
 
     m_d directions;
     eigen_sum *= eigen_threshold;
-    double current_sum = 0;
+    value_t current_sum = 0;
     auto eigen_vec=eigen_v.begin();
     for(auto eigen=eigen_values.begin(); eigen<eigen_values.end();
         eigen++, eigen_vec++) {
@@ -337,14 +337,14 @@ std::vector<m_d> MAPS::maintaining(
  * */
 std::vector<m_d> MAPS::processing(
     std::vector<m_d> estimated_sub_pops,
-    uint32_t ndims) {
+    index_t ndims) {
 
     for(auto &pop: estimated_sub_pops) {
         m_d tmp_pop;
         // Sample size_sub_pop_ many points
-        for(uint32_t i=0; i<n_sub_selected_; i++) {
-            double rnd = uf(intgen);
-            uint32_t idx = round(rnd * (pop.size()-1));
+        for(index_t i=0; i<n_sub_selected_; i++) {
+            value_t rnd = uf(intgen);
+            index_t idx = round(rnd * (pop.size()-1));
             tmp_pop.push_back(pop[idx]);
         }
         // Truncatedly select n_sub_selected_ many points for this
@@ -361,10 +361,10 @@ std::vector<m_d> MAPS::processing(
        centers.push_back(get_center(pop));
     }
     std::vector<m_d> final_selected_pops;
-    uint32_t idx_current_pop = 0;
-    uint32_t idx_premature = 0;
+    index_t idx_current_pop = 0;
+    index_t idx_premature = 0;
 
-    std::vector<std::pair<uint32_t, double>> premature_list_tmp(premature_list_.size());
+    std::vector<std::pair<index_t, value_t>> premature_list_tmp(premature_list_.size());
     std::copy(premature_list_.begin(), premature_list_.end(), premature_list_tmp.begin());
 
     for(auto pop=estimated_sub_pops.begin();
@@ -388,7 +388,7 @@ std::vector<m_d> MAPS::processing(
         }
 
         // Check if population is similar to any other one
-        uint32_t compare_idx = 0;
+        index_t compare_idx = 0;
         bool break_up = false;
         for(auto c_iter=centers.begin(); c_iter<centers.end();
             ++c_iter, ++compare_idx) {
@@ -458,11 +458,11 @@ std::vector<m_d> MAPS::processing(
  * */
 v_d MAPS::to_physics(
     v_d cube,
-    uint32_t ndims) {
+    index_t ndims) {
 
     v_d theta(ndims);
 
-    for (int i=0; i<ndims; i++) {
+    for (index_t i=0; i<ndims; i++) {
         theta[i] = (this->lower_bnds[i]
             + (this->upper_bnds[i] - this->lower_bnds[i])
             * cube[i]);
@@ -493,7 +493,7 @@ void MAPS::pca(
     m_d & eigen_v,
     m_d & cov,
     v_d & eigen_values,
-    uint32_t ndims,
+    index_t ndims,
     bool real_cov) {
 
     cov = get_cov(in, ndims, true, real_cov);
@@ -516,7 +516,7 @@ void MAPS::pca(
     lapack_int lda = eigen_v.size();
     v_d flat_eigen_v(eigen_v.size() * eigen_v[0].size());
 
-    int info = LAPACKE_dsyev(
+    index_t info = LAPACKE_dsyev(
         LAPACK_ROW_MAJOR,               // The matrix layout
         eigen,                          // Calculate the eigenvectors too
         triang,                         // Store the output matrix as upper triangular matrix
@@ -525,9 +525,9 @@ void MAPS::pca(
         lda,                            // Leading order dimension
         &eigen_values[0]);              // The eigenvalues on output
 
-    uint32_t v_size = eigen_v[0].size();
-    for(uint32_t row=0; row<eigen_v.size(); ++row) {
-        for(uint32_t col=0; col<v_size; ++col) {
+    index_t v_size = eigen_v[0].size();
+    for(index_t row=0; row<eigen_v.size(); ++row) {
+        for(index_t col=0; col<v_size; ++col) {
             eigen_v[row][col] = flat_eigen_v[row*v_size + col];
         }
     }
@@ -554,28 +554,28 @@ bool MAPS::is_similar(
     v_d a,
     v_d b,
     m_d & cov,
-    double epsilon) {
+    value_t epsilon) {
 
     v_d a_b(a.size());
-    for(uint32_t i=0; i<a.size(); i++) {
+    for(index_t i=0; i<a.size(); i++) {
         a_b[i] = a[i] - b[i];
     }
     // If we use the identity matrix, we won't need any fancy inverse matrix.
     // Just use Euclidean distance.
     if(&cov == &cov_) {
-        double distance = 0.0;
+        value_t distance = 0.0;
         for(auto const &val : a_b) {
             distance += val*val;
         }
         return (sqrt(distance) < epsilon);
     }
-    int info = 0;
-    int lda = cov.size();
-    int nrhs = 1;
+    index_t info = 0;
+    index_t lda = cov.size();
+    index_t nrhs = 1;
     char triang = 'U';
-    double * L = new double[cov.size()*cov.size()];
+    value_t * L = new value_t[cov.size()*cov.size()];
     std::copy(&(cov[0][0]), &(cov[0][0])+(cov.size()*cov.size()), L);
-    double * y = new double[a_b.size()];
+    value_t * y = new value_t[a_b.size()];
     std::copy(&(a_b[0]), &(a_b[0])+a_b.size(), y);
     // http://www.netlib.org/lapack/explore-html/d1/d7a/group__double_p_ocomputational_ga167aa0166c4ce726385f65e4ab05e7c1.html
     // cov * x = a_b
@@ -599,8 +599,8 @@ bool MAPS::is_similar(
         std::cout << abs(info) << " is not positive definite!" << std::endl;
         return false;
     }
-    double distance = 0;
-    for(uint32_t i=0; i<a_b.size(); i++) {
+    value_t distance = 0;
+    for(index_t i=0; i<a_b.size(); i++) {
         distance += y[i]*y[i];
     }
 
@@ -623,8 +623,8 @@ bool MAPS::is_similar(
     m_d A,
     m_d B,
     m_d & cov,
-    uint32_t ndims,
-    double epsilon) {
+    index_t ndims,
+    value_t epsilon) {
 
     v_d a = get_center(A);
     v_d b = get_center(B);
@@ -645,7 +645,7 @@ v_d MAPS::get_center(
 
     v_d centre(pop[0].size(), 0.0);
     for(auto const &v : pop) {
-        for(uint32_t i=0; i<v.size(); i++) {
+        for(index_t i=0; i<v.size(); i++) {
             centre[i] += v[i];
         }
     }
@@ -675,7 +675,7 @@ v_d MAPS::get_center(
  * */
 m_d MAPS::get_cov(
     m_d pop,
-    uint32_t ndims,
+    index_t ndims,
     bool ignore_last_col,
     bool real_cov) {
 
@@ -689,7 +689,7 @@ m_d MAPS::get_cov(
         // Adjust data s.t. it is centered around 0
         v_d means(ndims);
         for(auto const &v : pop) {
-            uint32_t i = 0;
+            index_t i = 0;
             for(auto const &e : v) {
                 means[i] += e;
             }
@@ -699,17 +699,17 @@ m_d MAPS::get_cov(
         }
 
         for(auto &v : pop) {
-            for(uint32_t i=0; i<v.size(); i++) {
+            for(index_t i=0; i<v.size(); i++) {
                 v[i] -= means[i];
             }
         }
 
         // Calculate the symmetric covariance matrix
-        for(uint32_t row=0; row<ndims; row++) {
-            for(uint32_t col=0; col<ndims; col++) {
+        for(index_t row=0; row<ndims; row++) {
+            for(index_t col=0; col<ndims; col++) {
                 if(row <= col) {
-                    double cov_v = 0.0;
-                    for(uint32_t i=0; i<pop.size(); i++) {
+                    value_t cov_v = 0.0;
+                    for(index_t i=0; i<pop.size(); i++) {
                         cov_v += pop[i][row]*pop[i][col];
                     }
                     cov[row][col] = cov[row][col] = cov_v/pop.size();
@@ -728,15 +728,15 @@ m_d MAPS::get_cov(
  *                      free parameter for minimization
  * */
 void MAPS::execute_maps(
-    uint32_t ndims) {
+    index_t ndims) {
 
-    uint32_t n_iter = 0;
+    index_t n_iter = 0;
     premature_list_.clear();
     while(true) {
         n_iter++; // We count the initialization as additional iteration
         m_d init_samples(n_start_points_, v_d(ndims+1));
-        for(uint32_t i=0; i<n_start_points_; i++) {
-            for(uint32_t j=0; j<ndims; j++) {
+        for(index_t i=0; i<n_start_points_; i++) {
+            for(index_t j=0; j<ndims; j++) {
                 init_samples[i][j] = uf(intgen);
             }
             v_d phys = to_physics(init_samples[i], ndims);
@@ -770,16 +770,16 @@ void MAPS::execute_maps(
         // if estimated population is not full and mean != any of the
         // means of the estimated populations and in the premature populations
         // then add point to estimated population
-        uint32_t n_estimated_models = 0;
+        index_t n_estimated_models = 0;
         // what is offset for?
-        uint32_t offset = 0;
+        index_t offset = 0;
         // Precalculate the means of the populations to compare their
         // similarity later on
         m_d means;
         for(auto const &pop : sub_pops) {
             means.push_back(get_center(pop));
         }
-        uint32_t means_idx = 0;
+        index_t means_idx = 0;
         v_i means_est_idx;
 //         std::cout << "Amount of sub_pops: " << sub_pops.size() << std::endl;
         // Build the list of best individuals of each population
@@ -843,14 +843,14 @@ void MAPS::execute_maps(
                 std::cout << "Now3 " << estimated_pops[0][0].size() << std::endl << std::flush;
             }
             lh_bestFit_ = estimated_pops[0][0][ndims];
-            for(uint32_t d=0; d<ndims; d++) {
+            for(index_t d=0; d<ndims; d++) {
                 params_best_fit[d] = estimated_pops[0][0][d];
             }
             lh_worstFit_ = lh_bestFit_;
             for(auto const &e : estimated_pops) {
                 for(auto const &pop : e) {
                     if(lh_bestFit_ > pop[ndims]) {
-                        for(uint32_t d=0; d<ndims; d++) {
+                        for(index_t d=0; d<ndims; d++) {
                             params_best_fit[d] = pop[d];
                         }
                         lh_bestFit_ = pop[ndims];
@@ -885,8 +885,8 @@ void MAPS::execute_maps(
  * */
 m_d MAPS::truncatedly_select(
     m_d &pop,
-    uint32_t n,
-    uint32_t ndims) {
+    index_t n,
+    index_t ndims) {
 
     // Sort points descending of its fitness
     std::sort(pop.begin(), pop.end(),
@@ -895,7 +895,7 @@ m_d MAPS::truncatedly_select(
 
     m_d pop_out(n, v_d(n));
     // We truncatedly select R \leq N of them
-    for(uint32_t i=0; i<n; i++) {
+    for(index_t i=0; i<n; i++) {
         pop_out[i] = pop[i];
     }
     return pop_out;
@@ -914,20 +914,20 @@ m_d MAPS::truncatedly_select(
  * */
 m_d MAPS::evolve_population(
     m_d pop,
-    uint32_t ndims) {
+    index_t ndims) {
 /*
     m_d new_pop(pop.size(), v_d(pop[0].size()));
 
     // Metropolis Hastings using a normal distribution
     // For each point: Sample a new point and take the new one if it satisfies
     // the Metropolis criterion, else take the old point
-    uint32_t p=0;
-    double standard_deviation = 0.2;
+    index_t p=0;
+    value_t standard_deviation = 0.2;
 
     for(auto pop_iter=pop.begin(); pop_iter<pop.end(); pop_iter++, p++) {
         v_d new_p(ndims+1);
-        for(uint32_t i=0; i<ndims; i++) {
-            std::normal_distribution<double> distribution((*pop_iter)[i],
+        for(index_t i=0; i<ndims; i++) {
+            std::normal_distribution<value_t> distribution((*pop_iter)[i],
                 standard_deviation);
             do {
                 new_p[i] = distribution(intgen);
@@ -981,27 +981,27 @@ m_d MAPS::evolve_population(
     // the population and delete the worst point
     // Stop if m times in a row nothing had been accepted
     m_d cov = get_cov(pop, ndims, true, true);
-    double variance_2 = 0.1;
-    double multiplier = 1.0/(std::sqrt(variance_2*M_PI));
+    value_t variance_2 = 0.1;
+    value_t multiplier = 1.0/(std::sqrt(variance_2*M_PI));
     variance_2 = -1.0/variance_2;
-    uint32_t n_not_accepted = 0;
+    index_t n_not_accepted = 0;
     // The population is already sorted according to its likelihood
-    double worst_llh = pop[pop.size()-1][ndims];
+    value_t worst_llh = pop[pop.size()-1][ndims];
     while(n_not_accepted < 3) {
         v_d new_p(ndims+1);
         // Caclulate a random point inside an ellipsoid by
         // either rejection sampling (Box-Muller transform) or
         // using Cholesky decomposition
         // https://stats.stackexchange.com/questions/120179/generating-data-with-a-given-sample-covariance-matrix?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
-        for(uint32_t i=0; i<ndims; i++) {
+        for(index_t i=0; i<ndims; i++) {
             new_p[i] = uf(intgen)*2-1;
         }
     }
-    uint32_t p=0;
+    index_t p=0;
     for(auto pop_iter=pop.begin(); pop_iter<pop.end(); pop_iter++, p++) {
         v_d new_p(ndims+1);
-        for(uint32_t i=0; i<ndims; i++) {
-            double value = uf(intgen);
+        for(index_t i=0; i<ndims; i++) {
+            value_t value = uf(intgen);
             value = value - (*pop_iter)[i];
             new_p[i] = multiplier * std::exp(value*value*variance_2);
         }
@@ -1048,18 +1048,18 @@ m_d MAPS::evolve_population(
     // Variance starts with the diagonals of the covariance matrix
     // Scale variance with worst_llh/current_llh
     m_d cov = get_cov(pop, ndims, true, true);
-    uint32_t n_not_accepted = 0;
+    index_t n_not_accepted = 0;
     // The population is already sorted according to its likelihood
-    double worst_llh = pop[pop.size()-1][ndims];
-    double best_llh = pop[0][ndims];
+    value_t worst_llh = pop[pop.size()-1][ndims];
+    value_t best_llh = pop[0][ndims];
     v_d variance_base(ndims);
-    for(uint32_t i=0; i<ndims; ++i) {
+    for(index_t i=0; i<ndims; ++i) {
         variance_base[i] = cov[i][i];
     }
     v_d variance_scale(pop.size());
     v_d weight(pop.size());
-    double total_weights = 0;
-    for(uint32_t i=0; i<pop.size(); ++i) {
+    value_t total_weights = 0;
+    for(index_t i=0; i<pop.size(); ++i) {
         // Works only if all lh have the same sign
         variance_scale[i] = pop[i][ndims]/worst_llh;
         weight[i] = worst_llh/pop[i][ndims];
@@ -1067,17 +1067,17 @@ m_d MAPS::evolve_population(
     }
     while(n_not_accepted < 3) {
         v_d new_p(ndims+1);
-        double lh_distr = 0;
+        value_t lh_distr = 0;
         do {
-            for(uint32_t i=0; i<ndims; ++i) {
+            for(index_t i=0; i<ndims; ++i) {
                 new_p[i] = uf(intgen);
             }
             lh_distr = 0;
-            for(uint32_t i=0; i<pop.size(); ++i) {
-                for(uint32_t j=0; j<ndims; ++j) {
-                    double multiplier = 1.0/(std::sqrt(
+            for(index_t i=0; i<pop.size(); ++i) {
+                for(index_t j=0; j<ndims; ++j) {
+                    value_t multiplier = 1.0/(std::sqrt(
                         variance_base[j]*variance_scale[i]*M_PI*2));
-                    double relative_pos = new_p[j] - pop[i][j];
+                    value_t relative_pos = new_p[j] - pop[i][j];
                     lh_distr += multiplier * std::exp(relative_pos*relative_pos
                         * -1.0/(variance_base[j]*variance_scale[i]));
                 }
@@ -1145,14 +1145,14 @@ MAPS::Minimize(
     params_best_fit.resize(test_func_->get_ndims());
     // Build the identity covariance matrix
     cov_ = m_d(test_func_->get_ndims(), v_d(test_func_->get_ndims(), 0));
-    for(uint32_t row=0; row<test_func_->get_ndims(); row++) {
+    for(index_t row=0; row<test_func_->get_ndims(); row++) {
         cov_[row][row] = 1;
     }
     if(dump_points_) {
         std::ofstream ofile((base_dir_+file_name_).c_str(),
             std::ofstream::out  | std::ofstream::app);
 
-        for(int j=0; j<test_func_->get_ndims(); j++)
+        for(index_t j=0; j<test_func_->get_ndims(); j++)
             ofile << "Param" << j << "\t";
         ofile << std::endl;
         ofile.close();

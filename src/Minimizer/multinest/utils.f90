@@ -1,7 +1,7 @@
  module RandomNS
  integer :: rand_instNS = 0
- double precision, dimension(:), allocatable :: C, CD, CM, GSET
- double precision, dimension(:,:), allocatable :: U
+ value_t precision, dimension(:), allocatable :: C, CD, CM, GSET
+ value_t precision, dimension(:,:), allocatable :: U
  integer, dimension(:), allocatable :: I97, J97, ISET
  integer numNodes
 
@@ -37,7 +37,7 @@
       	ij = mod(ij + rand_instNS*100, 31328)+(k-1)*45
             call date_and_time(time=fred)
        	read (fred,'(e10.3)') klr
-       	kl = mod(int(klr*1000), 30081)       
+       	kl = mod(index_t(klr*1000), 30081)       
       end if
 
       !write(*,'(" randomNS seeds:",1I6,",",1I6," rand_instNS:",1I4)")') ij,kl,rand_instNS
@@ -51,11 +51,11 @@
   end subroutine killRandomNS
 
 
-  double precision function GAUSSIAN1NS(idg)
+  value_t precision function GAUSSIAN1NS(idg)
     implicit none
     integer idg,id !node no.
-    double precision urv
-    double precision R, V1, V2, FAC
+    value_t precision urv
+    value_t precision R, V1, V2, FAC
 
     id=idg+1
     if(ISET(id)==0) then
@@ -138,7 +138,7 @@
   
   
 
-  double precision function ranmarns(idg)
+  value_t precision function ranmarns(idg)
 ! This is the random number generator proposed by George Marsaglia in 
 ! Florida State University Report: FSU-SCRI-87-50
 ! It was slightly modified by F. James to produce an array of pseudorandom

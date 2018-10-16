@@ -13,9 +13,9 @@
 
 /** Constructor and destructor **/
 Scan::Scan(
-    int n_points_per_dim,
-    int max_points,
-    int seed,
+    index_t n_points_per_dim,
+    index_t max_points,
+    index_t seed,
     bool dump_points) : Minimizer(0, 0, 0, max_points, seed, dump_points)
 {
     n_points = n_points_per_dim;
@@ -26,7 +26,7 @@ Scan::Scan(
  *                           free parameter for minimization
  * */
 void Scan::scan_space(
-    uint32_t nDims){
+    index_t nDims){
 
     v_d cube(nDims, 0.0);
 
@@ -35,17 +35,17 @@ void Scan::scan_space(
         std::ofstream ofile((base_dir_+file_name_).c_str(),
             std::ofstream::out  | std::ofstream::app);
 
-        for(uint32_t j=0; j<nDims; j++) ofile << "Param" << j << "\t";
+        for(index_t j=0; j<nDims; j++) ofile << "Param" << j << "\t";
         // ofile << "X\tY\tZ\tT\tZenith\tAzimuth\tEnergy";
         ofile << std::endl;
         ofile.close();
     }
-    double delta = 1.0/n_points;
-    uint32_t i = 0;
+    value_t delta = 1.0/n_points;
+    index_t i = 0;
     while(cube[nDims-1] <= 1.0) {
         i++;
         v_d theta = to_physics(cube, nDims);
-        double current_result = get_llh(theta);
+        value_t current_result = get_llh(theta);
         if(dump_points_) {
             results.insert(results.end(), theta.begin(), theta.end());
             results.push_back(current_result);
@@ -56,17 +56,17 @@ void Scan::scan_space(
             result.params_best_fit = theta;
         }
         cube[0] += delta;
-        for(uint32_t j=0; j<nDims-1; j++) {
+        for(index_t j=0; j<nDims-1; j++) {
             if(cube[j] > 1.0) {
                 cube[j+1] += delta;
-                for(int k=j; (k>=0 && k>=j-1); k--) cube[k] = 0;
+                for(index_t k=j; (k>=0 && k>=j-1); k--) cube[k] = 0;
             } else {
                 break;
             }
         }
 
         if(dump_points_ && (i%max_points_ == 0 || cube[nDims-1] >= 1.0)) {
-            uint32_t d = 1;
+            index_t d = 1;
             std::ofstream ofile((base_dir_+file_name_).c_str(),
                 std::ofstream::out  | std::ofstream::app);
             for(auto & p: results) {
@@ -91,35 +91,35 @@ void Scan::scan_space(
  *                           free parameter for minimization
  * */
 void Scan::scan_space_tmp(
-    uint32_t nDims){
+    index_t nDims){
 
     v_d cube(nDims, 0.0);
-//     double x,
-//     double y,
-//     double z,
-//     double t,
-//     double theta,
-//     double phi,
-//     double length,
-//     double seg_length,
-//     int seed) {
+//     value_t x,
+//     value_t y,
+//     value_t z,
+//     value_t t,
+//     value_t theta,
+//     value_t phi,
+//     value_t length,
+//     value_t seg_length,
+//     index_t seed) {
 // // track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, 5.0, 5.0);
     if(dump_points_) {
         std::cout << "Saving files to " << base_dir_ << file_name_ << std::endl;
         std::ofstream ofile((base_dir_+file_name_).c_str(),
             std::ofstream::out  | std::ofstream::app);
 
-        for(uint32_t j=0; j<nDims; j++) ofile << "Param" << j << "\t";
+        for(index_t j=0; j<nDims; j++) ofile << "Param" << j << "\t";
         // ofile << "X\tY\tZ\tT\tZenith\tAzimuth\tEnergy";
         ofile << std::endl;
         ofile.close();
     }
-    uint32_t i = 0;
-    double delta = 1.0/n_points;
-    for(double a = 0; a <= 1.0; a += delta) {
+    index_t i = 0;
+    value_t delta = 1.0/n_points;
+    for(value_t a = 0; a <= 1.0; a += delta) {
         std::cout << a << "\n";
-        for(double b = 0; b <= 1.0; b += delta) {
-            for(double c = 0; c <= 1.0; c += delta) {
+        for(value_t b = 0; b <= 1.0; b += delta) {
+            for(value_t c = 0; c <= 1.0; c += delta) {
                 i++;
                 cube[0] = c;
                 cube[1] = b;
@@ -130,7 +130,7 @@ void Scan::scan_space_tmp(
                 theta[5] = 1.5;
                 theta[6] = 5.0;
 
-                double current_result = get_llh(theta);
+                value_t current_result = get_llh(theta);
                 if(dump_points_) {
                     results.insert(results.end(), theta.begin(), theta.end());
                     results.push_back(current_result);
@@ -141,7 +141,7 @@ void Scan::scan_space_tmp(
                     result.params_best_fit = theta;
                 }
                 if(dump_points_ && (i%max_points_ == 0 || a >= 1.0)) {
-                    uint32_t d = 1;
+                    index_t d = 1;
                     std::ofstream ofile((base_dir_+file_name_).c_str(),
                         std::ofstream::out  | std::ofstream::app);
                     for(auto & p: results) {
@@ -176,11 +176,11 @@ std::string Scan::get_name() {
  * */
 v_d Scan::to_physics(
     v_d cube,
-    uint32_t nDims) {
+    index_t nDims) {
 
     v_d theta;
     
-    for (uint32_t i=0; i<nDims; i++) {
+    for (index_t i=0; i<nDims; i++) {
         theta.push_back(this->lower_bnds[i]
         + (this->upper_bnds[i] - this->lower_bnds[i])
         * cube[i]);

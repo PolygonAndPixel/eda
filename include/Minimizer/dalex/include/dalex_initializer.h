@@ -29,8 +29,8 @@ class dalex_initializer{
             }
         }
 
-        double evaluate(array_1d<double> &pt, int *i_found, int i_point, double *mu_true_out){
-            double mu;
+        value_t evaluate(array_1d<value_t> &pt, index_t *i_found, index_t i_point, value_t *mu_true_out){
+            value_t mu;
             _chifn->evaluate(pt, &mu, i_found);
             mu_true_out[0]=mu;
             if(i_point>=0 && i_found[0]>=0){
@@ -53,7 +53,7 @@ class dalex_initializer{
 
     private:
         chisq_wrapper *_chifn;
-        array_1d<int> _particles,_local_min,_abs_min,_since_min;
+        array_1d<index_t> _particles,_local_min,_abs_min,_since_min;
 };
 
 

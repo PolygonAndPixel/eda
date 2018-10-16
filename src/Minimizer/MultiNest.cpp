@@ -14,17 +14,17 @@
 
 /** Constructor and destructor **/
 MultiNest::MultiNest(
-    double tolerance,
-    int max_iter,
+    value_t tolerance,
+    index_t max_iter,
     bool ins,
     bool mode_separation,
     bool const_eff,
-    int n_live,
-    double enlargement,
-    int feedback_interval,
-    int max_modes,
+    index_t n_live,
+    value_t enlargement,
+    index_t feedback_interval,
+    index_t max_modes,
     bool feedback,
-    int seed,
+    index_t seed,
     bool dump_points) : Minimizer(tolerance, max_iter, 0, 0, seed, dump_points)
 {
     // Various variables for the minimization routine in fortran.
@@ -37,7 +37,7 @@ MultiNest::MultiNest(
     feedback_interval_      = feedback_interval;
     max_modes_              = max_modes;
     feedback_               = feedback;
-    logZero_                = -std::numeric_limits<double>::max();
+    logZero_                = -std::numeric_limits<value_t>::max();
     base_dir_               = "tmp"; // temporary files are written here
 
 }
@@ -65,10 +65,10 @@ std::string MultiNest::get_name() {
  *                          MultiNest requirements).
  * */
 void MultiNest::fortran_get_llh(
-    double *cube,
-    int &n_dims,
-    int &n_pars,
-    double &llh,
+    value_t *cube,
+    index_t &n_dims,
+    index_t &n_pars,
+    value_t &llh,
     void *misc) {
 
     MultiNest *multiBase = static_cast<MultiNest*>(misc);
@@ -93,36 +93,36 @@ void MultiNest::fortran_get_llh(
  *                                  MultiNest requirements).
  * */
 void MultiNest::c_dumper(
-    int &n_samples,
-    int &n_live,
-    int &n_dims,
-    double **phys_live,
-    double **posterior,
-    double **param_constr,
-    double &llh_best_fit,
-    double &log_z,
-    double &ins_log_z,
-    double &log_z_err,
-    int &n_accepted,
+    index_t &n_samples,
+    index_t &n_live,
+    index_t &n_dims,
+    value_t **phys_live,
+    value_t **posterior,
+    value_t **param_constr,
+    value_t &llh_best_fit,
+    value_t &log_z,
+    value_t &ins_log_z,
+    value_t &log_z_err,
+    index_t &n_accepted,
     void *misc)
 {
     MultiNest *multiBase = static_cast<MultiNest*>(misc);
     multiBase->result.params_best_fit.resize(n_dims);
     v_d cube(n_dims);
-    for(uint32_t i=0; i<n_dims; ++i) {
+    for(index_t i=0; i<n_dims; ++i) {
         cube[i] = param_constr[0][2*n_dims + i];
     }
     multiBase->result.params_best_fit = multiBase->to_physics(cube, n_dims);
 
-    double worst_fit = llh_best_fit;
-    for(int k=0; k<n_live; k++) {
+    value_t worst_fit = llh_best_fit;
+    for(index_t k=0; k<n_live; k++) {
         if (worst_fit > phys_live[0][n_dims*n_live + k]) {
             worst_fit = phys_live[0][n_dims*n_live + k];
         }
     }
     worst_fit = -worst_fit;
     multiBase->result.best_fit  = -llh_best_fit;
-    multiBase->result.lh_efficiency = (double) n_accepted / (double) multiBase->result.n_lh_calls;
+    multiBase->result.lh_efficiency = (value_t) n_accepted / (value_t) multiBase->result.n_lh_calls;
 }
 
 /** Function to map from the unit hypercube to Theta in the physical space.
@@ -137,11 +137,11 @@ void MultiNest::c_dumper(
  * */
 v_d MultiNest::to_physics(
     v_d cube,
-    uint32_t n_dims) {
+    index_t n_dims) {
 
     v_d theta(n_dims);
 
-    for (int i=0; i<n_dims; i++) {
+    for (index_t i=0; i<n_dims; i++) {
         theta[i] = (this->lower_bnds[i]
             + (this->upper_bnds[i] - this->lower_bnds[i])
             * cube[i]);
@@ -173,7 +173,7 @@ MultiNest::Minimize(
 	seed_ = intgen()%30081; // Specified by MultiNest
 
     writefiles_ = dump_points_;
-    int n_dims = test_func_->get_ndims();
+    index_t n_dims = test_func_->get_ndims();
     /// run Fortran routines for minimization
     // Hack to pass a string to fortran.
     char *b_dir = new char[base_dir_.size()+file_name_.size()+1];
@@ -181,12 +181,12 @@ MultiNest::Minimize(
     std::copy(file_name_.begin(), file_name_.end(), b_dir+base_dir_.size());
     b_dir[base_dir_.size()+file_name_.size()] = '\0';
 
-    int pWrap[n_dims];
+    index_t pWrap[n_dims];
     // We don't use peridodicity
-    for(uint32_t i=0; i<n_dims; ++i) {
+    for(index_t i=0; i<n_dims; ++i) {
         pWrap[i] = 0;
     }
-    double Ztol = -1E90;
+    value_t Ztol = -1E90;
     nested::run(ins_, mmodal_, const_eff_, n_live_, precision_criterion_, //5
         enlargement_,  n_dims, n_dims, // 8
         n_dims, // Number of parameters on which clustering should be done

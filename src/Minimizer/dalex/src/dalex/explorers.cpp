@@ -1,20 +1,20 @@
 #include "explorers.h"
 
-void explorers::get_seed(array_2d<double> &seed){
+void explorers::get_seed(array_2d<value_t> &seed){
 
-    array_1d<int> mu_dex;
+    array_1d<index_t> mu_dex;
     mu_dex.set_name("exp_seed_mu_dex");
-    array_1d<double> mu_sorted;
+    array_1d<value_t> mu_sorted;
     mu_sorted.set_name("exp_mu_sorted");
 
-    int i;
+    index_t i;
     for(i=0;i<_mu_arr.get_dim();i++){
         mu_dex.set(i,i);
     }
     sort(_mu_arr,mu_sorted,mu_dex);
 
-    int j,k;
-    double rr;
+    index_t j,k;
+    value_t rr;
 
     for(i=0;i<_chifn->get_dim()+1;i++){
         seed.add_row(_particles(mu_dex.get_data(i)));
@@ -32,9 +32,9 @@ void explorers::get_seed(array_2d<double> &seed){
 
 void explorers::set_norm(){
 
-    int ip,ia;
-    double component;
-    int i,j;
+    index_t ip,ia;
+    value_t component;
+    index_t i,j;
 
     _min.reset_preserving_room();
     _max.reset_preserving_room();
@@ -84,12 +84,12 @@ void explorers::initialize(){
 
 
 void explorers::bump_particles(){
-    array_1d<double> dir, trial;
+    array_1d<value_t> dir, trial;
     dir.set_name("exp_bump_dir");
     trial.set_name("exp_bump_trial");
     _particles.reset_preserving_room();
 
-    int i,j;
+    index_t i,j;
     while(_particles.get_rows()<get_n_particles()){
         for(i=0;i<_chifn->get_dim();i++){
             dir.set(i,normal_deviate(_chifn->get_dice(),0.0,1.0));
@@ -109,10 +109,10 @@ void explorers::bump_particles(){
 }
 
 
-void explorers::kick(int dex){
-     array_1d<double> dir;
+void explorers::kick(index_t dex){
+     array_1d<value_t> dir;
      dir.set_name("explorers_kick_dir");
-     int i;
+     index_t i;
      for(i=0;i<_chifn->get_dim();i++){
          dir.set(i,normal_deviate(_chifn->get_dice(),0.0,1.0));
      }
@@ -120,7 +120,7 @@ void explorers::kick(int dex){
      for(i=0;i<_chifn->get_dim();i++){
          _particles.set(dex,i,_chifn->get_pt(_chifn->mindex(),i));
      }
-     int j;
+     index_t j;
      for(i=0;i<_chifn->get_dim();i++){
          for(j=0;j<_chifn->get_dim();j++){
              _particles.add_val(dex,j,0.5*dir.get_data(i)*_bases.get_data(i,j)*(_max.get_data(i)-_min.get_data(i)));
@@ -128,19 +128,19 @@ void explorers::kick(int dex){
      }
 }
 
-void explorers::sample(int n_steps){
+void explorers::sample(index_t n_steps){
     sample(n_steps, 0);
 }
 
-void explorers::sample(int n_steps, int with_kick){
+void explorers::sample(index_t n_steps, index_t with_kick){
 
     cost_fn dchifn(_chifn, _associates);
     dchifn.set_envelope(_envelope);
 
     ellipse local_ellipse;
-    array_2d<double> ellipse_pts;
+    array_2d<value_t> ellipse_pts;
     ellipse_pts.set_name("explorers_sample_ellipse_pts");
-    int i,j;
+    index_t i,j;
     for(i=0;i<_associates.get_dim();i++){
         ellipse_pts.add_row(_chifn->get_pt(_associates.get_data(i)));
     }
@@ -165,12 +165,12 @@ void explorers::sample(int n_steps, int with_kick){
 
     _mindex=-1;
 
-    double mu;
-    int i_step;
-    int i_dim,ip;
-    int accept_it;
-    double rr,roll,ratio;
-    array_1d<double> trial;
+    value_t mu;
+    index_t i_step;
+    index_t i_dim,ip;
+    index_t accept_it;
+    value_t rr,roll,ratio;
+    array_1d<value_t> trial;
     trial.set_name("exp_sample_trial");
 
     for(ip=0;ip<get_n_particles();ip++){
@@ -183,14 +183,14 @@ void explorers::sample(int n_steps, int with_kick){
     }
 
 
-    double needed_temp;
-    double old_temp;
-    array_1d<int> req_temp_dex;
-    array_1d<double> req_temp_sorted;
+    value_t needed_temp;
+    value_t old_temp;
+    array_1d<index_t> req_temp_dex;
+    array_1d<value_t> req_temp_sorted;
     req_temp_dex.set_name("exp_sample_req_temp_dex");
     req_temp_sorted.set_name("exp_sample_req_temp_sorted");
 
-    int has_been_adjusted;
+    index_t has_been_adjusted;
 
     printf("    starting sampling with %e -- %d\n",_mu_min,get_n_particles());
 

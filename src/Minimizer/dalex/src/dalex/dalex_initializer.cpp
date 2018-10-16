@@ -2,49 +2,49 @@
 
 void dalex_initializer::search(){
     safety_check();
-    int total_per=100*_chifn->get_dim();
-    int adjust_every=total_per/10;
-    int n_groups=2;
-    int n_particles=n_groups*(_chifn->get_dim()+1)+_chifn->get_dim()/2;
-    double global_norm=0.05;
+    index_t total_per=100*_chifn->get_dim();
+    index_t adjust_every=total_per/10;
+    index_t n_groups=2;
+    index_t n_particles=n_groups*(_chifn->get_dim()+1)+_chifn->get_dim()/2;
+    value_t global_norm=0.05;
 
-    array_1d<int> accepted,accepted_sorted,accepted_dex;
-    array_1d<int> total_accepted;
+    array_1d<index_t> accepted,accepted_sorted,accepted_dex;
+    array_1d<index_t> total_accepted;
     accepted.set_name("mcmc_init_accepted");
     accepted_sorted.set_name("mcmc_init_acc_sorted");
     accepted_dex.set_name("mcmc_init_acc_dex");
     total_accepted.set_name("total_accepted");
 
-    double _temp=1.0;
+    value_t _temp=1.0;
 
-    array_1d<double> trial,dir,norm;
+    array_1d<value_t> trial,dir,norm;
     trial.set_name("mcmc_init_trial");
     dir.set_name("mcmc_init_dir");
     norm.set_name("mcmc_init_norm");
 
-    double rr;
+    value_t rr;
 
-    int ip,i,j,k,i_step,i_found;
+    index_t ip,i,j,k,i_step,i_found;
 
     for(i=0;i<_chifn->get_dim();i++){
         norm.set(i,_chifn->get_characteristic_length(i));
     }
 
-    int adjusted=0;
-    double mu,mu_true,roll,ratio;
-    int accept_it;
-    int min_acc,max_acc,med_acc;
+    index_t adjusted=0;
+    value_t mu,mu_true,roll,ratio;
+    index_t accept_it;
+    index_t min_acc,max_acc,med_acc;
 
-    array_1d<double> min_vals,min_val_sorted;
-    array_1d<int> min_dexes;
+    array_1d<value_t> min_vals,min_val_sorted;
+    array_1d<index_t> min_dexes;
     min_vals.set_name("min_vals");
     min_val_sorted.set_name("min_val_sorted");
     min_dexes.set_name("min_dexes");
 
-    array_1d<int> current_particles;
+    array_1d<index_t> current_particles;
     current_particles.set_name("mcmc_init_current_particles");
 
-    asymm_array_2d<int> trails;
+    asymm_array_2d<index_t> trails;
     trails.set_name("mcmc_init_trails");
 
     for(i=0;i<n_particles;i++){
@@ -52,11 +52,11 @@ void dalex_initializer::search(){
         total_accepted.set(i,0);
     }
 
-    int i_best;
-    int n_cand=100;
+    index_t i_best;
+    index_t n_cand=100;
 
-    array_1d<double> c_v,c_v_s;
-    array_1d<int> c_v_d;
+    array_1d<value_t> c_v,c_v_s;
+    array_1d<index_t> c_v_d;
 
     for(ip=0;ip<n_particles;ip++){
         _chifn->set_search_type(-1*(ip+2));
@@ -80,26 +80,26 @@ void dalex_initializer::search(){
     }
 
 
-    double needed_temp;
-    array_1d<double> needed_temp_arr,needed_temp_sorted;
-    array_1d<int> needed_temp_dex;
-    double old_temp;
-    int has_been_adjusted;
-    int step_ct=0;
-    int needs_adjustment;
+    value_t needed_temp;
+    array_1d<value_t> needed_temp_arr,needed_temp_sorted;
+    array_1d<index_t> needed_temp_dex;
+    value_t old_temp;
+    index_t has_been_adjusted;
+    index_t step_ct=0;
+    index_t needs_adjustment;
 
-    array_1d<double> geo_center,local_min,local_max;
-    int min_pt_connected;
-    double dd_min,dd_best,dd;
+    array_1d<value_t> geo_center,local_min,local_max;
+    index_t min_pt_connected;
+    value_t dd_min,dd_best,dd;
 
-    int n_jumps=0;
-    int n_opt_out=0;
+    index_t n_jumps=0;
+    index_t n_opt_out=0;
 
-    array_2d<double> bases;
-    array_1d<double> vv;
+    array_2d<value_t> bases;
+    array_1d<value_t> vv;
 
-    int i_dim,i_half;
-    double sgn;
+    index_t i_dim,i_half;
+    value_t sgn;
 
     printf("starting steps with min %e\n",_chifn->chimin());
     for(i_step=0;i_step<total_per;i_step++){
@@ -316,9 +316,9 @@ void dalex_initializer::search(){
 
     _chifn->set_search_type(_type_init);
 
-    array_1d<int> connected;
-    double mu_min;
-    int dex_min;
+    array_1d<index_t> connected;
+    value_t mu_min;
+    index_t dex_min;
 
     for(i=0;i<_abs_min.get_dim();i++){
         if(i==0 || _chifn->get_fn(_abs_min.get_data(i))<mu_min){
@@ -327,8 +327,8 @@ void dalex_initializer::search(){
         }
     }
 
-    double min_disconnected=2.0*exception_value;
-    int n_disconnected=0;
+    value_t min_disconnected=2.0*exception_value;
+    index_t n_disconnected=0;
 
     for(i=0;i<_abs_min.get_dim();i++){
         if(_abs_min.get_data(i)==dex_min){
@@ -357,7 +357,7 @@ void dalex_initializer::search(){
     printf("min disconnected %e - %d\n",min_disconnected,n_disconnected);
     printf("jumped %d vs %d\n",n_jumps,n_opt_out);
 
-    array_1d<double> smin,smax;
+    array_1d<value_t> smin,smax;
     for(i=0;i<_chifn->get_dim();i++){
         smin.set(i,0.0);
         smax.set(i,_chifn->get_characteristic_length(i));
@@ -376,8 +376,8 @@ void dalex_initializer::search(){
         min_dexes.add(_abs_min.get_data(i));
     }
     sort(min_vals, min_val_sorted, min_dexes);
-    array_2d<double> seed;
-    array_1d<int> chosen;
+    array_2d<value_t> seed;
+    array_1d<index_t> chosen;
     for(i=0;i<_chifn->get_dim()+1;i++){
         seed.add_row(_chifn->get_pt(min_dexes.get_data(i)));
         chosen.add(min_dexes.get_data(i));

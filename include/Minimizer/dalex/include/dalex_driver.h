@@ -17,48 +17,48 @@ public:
     dalex_driver();
     ~dalex_driver();
 
-    void initialize(int);
+    void initialize(index_t);
 
-    void set_seed(int);
-    void set_min(array_1d<double>&);
-    void set_max(array_1d<double>&);
-    void set_characteristic_length(int,double);
-    void set_deltachi(double);
-    void set_target(double);
-    void set_write_every(int);
+    void set_seed(index_t);
+    void set_min(array_1d<value_t>&);
+    void set_max(array_1d<value_t>&);
+    void set_characteristic_length(index_t,value_t);
+    void set_deltachi(value_t);
+    void set_target(value_t);
+    void set_write_every(index_t);
     void set_outname(char*);
     void set_timingname(char*);
 
     void set_chisquared(chisquared*);
 
-    void search(int);
+    void search(index_t);
 
     void mcmc_init();
 
-    int get_dim();
-    int get_called();
-    double get_chimin();
+    index_t get_dim();
+    index_t get_called();
+    value_t get_chimin();
 
-    void set_confidence_limit(double);
-    void set_dof(int);
+    void set_confidence_limit(value_t);
+    void set_dof(index_t);
 
-    double evaluate(array_1d<double>&, int*);
+    value_t evaluate(array_1d<value_t>&, index_t*);
     void assess_good_points();
-    void assess_good_points(int);
-    void assess_good_points(int,int);
+    void assess_good_points(index_t);
+    void assess_good_points(index_t,index_t);
 
 private:
 
     chisq_wrapper _chifn;
-    int _ct_dalex;
+    index_t _ct_dalex;
 
     dalex _cloud;
 
     char _outname[letters],_timingname[letters];
 
-    array_1d<int> _good_points;
+    array_1d<index_t> _good_points;
 
-    int _last_did_min;
+    index_t _last_did_min;
 
 };
 

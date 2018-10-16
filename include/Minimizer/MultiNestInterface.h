@@ -26,65 +26,65 @@ namespace nested
 	// *apart* from the callbacks. The provided call back functions must still accept
 	// references rather than values. There is also some confusion as to the type
 	// of the first argument of LogLike.
-	// Should it be a double * or an farray<double, 1> *? The former seems to
+	// Should it be a value_t * or an farray<value_t, 1> *? The former seems to
 	// work and is simpler.
 
 	// This structure is reverse engineered from looking
 	// at gfortran stack traces. It is probably wrong
 
-	template<typename type, int ndims> class farray_traits;
+	template<typename type, index_t ndims> class farray_traits;
 
-	template<> class farray_traits<double, 1> { public: static const int id = 537; };
-	template<> class farray_traits<double, 2> { public: static const int id = 538; };
-	template<> class farray_traits<int, 1> { public: static const int id = 265; };
-	template<> class farray_traits<int, 2> { public: static const int id = 266; };
+	template<> class farray_traits<value_t, 1> { public: static const index_t id = 537; };
+	template<> class farray_traits<value_t, 2> { public: static const index_t id = 538; };
+	template<> class farray_traits<index_t, 1> { public: static const index_t id = 265; };
+	template<> class farray_traits<index_t, 2> { public: static const index_t id = 266; };
 
 	// the extra data for f90 that defines how arrays are arranged.
-	template<typename T, int ndim> class farray
+	template<typename T, index_t ndim> class farray
 	{
 		public:
-			farray(T *_data, int w, int h = 0) : data(_data), offset(0), type(farray_traits<T, ndim>::id),
+			farray(T *_data, index_t w, index_t h = 0) : data(_data), offset(0), type(farray_traits<T, ndim>::id),
 			x_stride(1), x_lbound(1), x_ubound(w), y_stride(w), y_lbound(1), y_ubound(h) {};
 
 			T *data;
-			int offset;
-			int type;
-			int x_stride, x_lbound, x_ubound;
-			int y_stride, y_lbound, y_ubound;
+			index_t offset;
+			index_t type;
+			index_t x_stride, x_lbound, x_ubound;
+			index_t y_stride, y_lbound, y_ubound;
 	};
 
 	extern "C" {
-		void NESTRUN(int &IS, int &mmodal, int &ceff, int &nlive, double &tol, double &efr, int &ndims,
-			int &nPar, int &nClsPar, int &maxModes, int &updInt, double &Ztol, char *root, int &seed,
-			int *pWrap, int &fb, int &resume, int &outfile, int &initMPI, double &logZero, int &maxiter,
-			void (*Loglike)(double *Cube, int &n_dim, int &n_par, double &lnew, void *),
-			void (*dumper)(int &, int &, int &, double **, double **, double **, double &, double &, double &, double &, int &, void *),
-			void *context, int &root_len);
+		void NESTRUN(index_t &IS, index_t &mmodal, index_t &ceff, index_t &nlive, value_t &tol, value_t &efr, index_t &ndims,
+			index_t &nPar, index_t &nClsPar, index_t &maxModes, index_t &updInt, value_t &Ztol, char *root, index_t &seed,
+			index_t *pWrap, index_t &fb, index_t &resume, index_t &outfile, index_t &initMPI, value_t &logZero, index_t &maxiter,
+			void (*Loglike)(value_t *Cube, index_t &n_dim, index_t &n_par, value_t &lnew, void *),
+			void (*dumper)(index_t &, index_t &, index_t &, value_t **, value_t **, value_t **, value_t &, value_t &, value_t &, value_t &, index_t &, void *),
+			void *context, index_t &root_len);
 	}
 
-	static void run(bool IS, bool mmodal, bool ceff, int nlive, double tol,
-        double efr, int ndims, int nPar,
-        int nClsPar,
-        int maxModes, int updInt,
-        double Ztol, const std::string & root, int seed,
-        int *pWrap, bool fb, bool resume,
-        bool outfile, bool initMPI, double logZero, int maxiter,
-        void (*LogLike)(double *Cube, int &n_dim, int &n_par, double &lnew, void *),
-		void (*dumper)(int &, int &, int &, double **, double **, double **, double &, double &, double &, double &, int &, void *), void *context)
+	static void run(bool IS, bool mmodal, bool ceff, index_t nlive, value_t tol,
+        value_t efr, index_t ndims, index_t nPar,
+        index_t nClsPar,
+        index_t maxModes, index_t updInt,
+        value_t Ztol, const std::string & root, index_t seed,
+        index_t *pWrap, bool fb, bool resume,
+        bool outfile, bool initMPI, value_t logZero, index_t maxiter,
+        void (*LogLike)(value_t *Cube, index_t &n_dim, index_t &n_par, value_t &lnew, void *),
+		void (*dumper)(index_t &, index_t &, index_t &, value_t **, value_t **, value_t **, value_t &, value_t &, value_t &, value_t &, index_t &, void *), void *context)
 	{
 		char t_root[100];
 		std::fill(t_root, t_root + 100, ' ');
 		snprintf(t_root, 99, "%s", root.c_str());
-		int root_len = strlen(t_root);
+		index_t root_len = strlen(t_root);
 		t_root[strlen(t_root)] = ' ';
 
-		int t_fb = fb;
-		int t_resume = resume;
-		int t_outfile = outfile;
-		int t_initMPI = initMPI;
-		int t_mmodal = mmodal;
-		int t_IS = IS;
-		int t_ceff = ceff;
+		index_t t_fb = fb;
+		index_t t_resume = resume;
+		index_t t_outfile = outfile;
+		index_t t_initMPI = initMPI;
+		index_t t_mmodal = mmodal;
+		index_t t_IS = IS;
+		index_t t_ceff = ceff;
 
 		NESTRUN(t_IS, t_mmodal, t_ceff, nlive, tol, efr, ndims, nPar, nClsPar, maxModes, updInt, Ztol, t_root, seed, pWrap, t_fb,
 		t_resume, t_outfile, t_initMPI, logZero, maxiter, LogLike, dumper, context, root_len);
@@ -97,18 +97,18 @@ namespace nested
 
 /***************************************** C Interface to MultiNest **************************************************/
 
-extern void NESTRUN(int *, int *, int *, int *, double *, double *, int *, int *, int *, int *, int *, double *,
-char *, int *, int *, int *, int *, int *, int *, double *, int *, void (*Loglike)(double *, int *, int *,
-double *, void *), void (*dumper)(int *, int *, int *, double **, double **, double **, double *,
-double *, double *, double *, int *, void *), void *context);
+extern void NESTRUN(index_t *, index_t *, index_t *, index_t *, value_t *, value_t *, index_t *, index_t *, index_t *, index_t *, index_t *, value_t *,
+char *, index_t *, index_t *, index_t *, index_t *, index_t *, index_t *, value_t *, index_t *, void (*Loglike)(value_t *, index_t *, index_t *,
+value_t *, void *), void (*dumper)(index_t *, index_t *, index_t *, value_t **, value_t **, value_t **, value_t *,
+value_t *, value_t *, value_t *, index_t *, void *), void *context);
 
-void run(int IS, int mmodal, int ceff, int nlive, double tol, double efr, int ndims, int nPar, int nClsPar,
-int maxModes, int updInt, double Ztol, char root[], int seed, int *pWrap, int fb, int resume, int outfile,
-int initMPI, double logZero, int maxiter, void (*LogLike)(double *, int *, int *, double *, void *),
-void (*dumper)(int *, int *, int *, double **, double **, double **, double *, double *, double *, double *, int *, void *),
+void run(index_t IS, index_t mmodal, index_t ceff, index_t nlive, value_t tol, value_t efr, index_t ndims, index_t nPar, index_t nClsPar,
+index_t maxModes, index_t updInt, value_t Ztol, char root[], index_t seed, index_t *pWrap, index_t fb, index_t resume, index_t outfile,
+index_t initMPI, value_t logZero, index_t maxiter, void (*LogLike)(value_t *, index_t *, index_t *, value_t *, void *),
+void (*dumper)(index_t *, index_t *, index_t *, value_t **, value_t **, value_t **, value_t *, value_t *, value_t *, value_t *, index_t *, void *),
 void *context)
 {
-	int i;
+	index_t i;
 	for (i = strlen(root); i < 100; i++) root[i] = ' ';
 
         NESTRUN(&IS, &mmodal, &ceff, &nlive, &tol, &efr, &ndims, &nPar, &nClsPar, &maxModes, &updInt, &Ztol,

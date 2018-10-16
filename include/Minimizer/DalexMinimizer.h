@@ -28,7 +28,7 @@
 class DalexMinimizer : public Minimizer {
 public:
     
-    DalexMinimizer(int max_iter, int max_points, int seed=1025, 
+    DalexMinimizer(index_t max_iter, index_t max_points, index_t seed=1025, 
                 bool dump_points=false);
 
     virtual std::unique_ptr<Minimizer> clone() const override {
@@ -37,17 +37,17 @@ public:
 
     std::string get_name();
 
-    void execute(uint32_t nDims);
+    void execute(index_t nDims);
     
     /// core method: minimizer a given function with given initial conditions
     MinimizerResult Minimize(TestFunctions test_func, v_d lower_bounds,
                              v_d upper_bounds);
 
     /// Transform point from hypercube to physical space
-    v_d to_physics(v_d cube, uint32_t nDims);
+    v_d to_physics(v_d cube, index_t nDims);
 
 private:
-    int seed_;
+    index_t seed_;
 };
 
 #endif

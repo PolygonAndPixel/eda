@@ -23,10 +23,10 @@ TestFunctions::TestFunctions() {
 
 TestFunctions::TestFunctions(
     std::string func_name,
-    uint32_t ndims,
-    uint32_t n_x,
-    uint32_t n_y,
-    uint32_t n_z) {
+    index_t ndims,
+    index_t n_x,
+    index_t n_y,
+    index_t n_z) {
 
     name = func_name;
     if(func_name == EGG) {
@@ -75,7 +75,7 @@ std::string TestFunctions::get_name() {
  *
  *  \return         ndims_
  * */
-uint32_t TestFunctions::get_ndims() {
+index_t TestFunctions::get_ndims() {
 
     return ndims_;
 }
@@ -87,7 +87,7 @@ uint32_t TestFunctions::get_ndims() {
  *
  *  \return         negative Likelihood
  * */
-double TestFunctions::get_lh(
+value_t TestFunctions::get_lh(
     v_d & theta) {
 
     return CALL_MEMBER_FN(*this, lh_p)(theta);
@@ -101,7 +101,7 @@ double TestFunctions::get_lh(
  *
  *  \return         Negative likelihood
  * */
-double TestFunctions::get_neg_lh(
+value_t TestFunctions::get_neg_lh(
     v_d & theta) {
 
     return -CALL_MEMBER_FN(*this, lh_p)(theta);
@@ -116,7 +116,7 @@ double TestFunctions::get_neg_lh(
  *
  *  \return         negative log-likelihood
  * */
-double TestFunctions::get_neg_llh(
+value_t TestFunctions::get_neg_llh(
     v_d & theta) {
 
     return -log(CALL_MEMBER_FN(*this, lh_p)(theta));
@@ -131,11 +131,11 @@ double TestFunctions::get_neg_llh(
  *
  *  \return         Likelihood
  * */
-double TestFunctions::eggholder(
+value_t TestFunctions::eggholder(
     v_d & theta) {
 
-    double left = -(theta[1] + 47)*sin(sqrt(abs(theta[0]/2 + (theta[1]+47))));
-    double right = theta[0] * sin(sqrt(abs(theta[0] - (theta[1]+47))));
+    value_t left = -(theta[1] + 47)*sin(sqrt(abs(theta[0]/2 + (theta[1]+47))));
+    value_t right = theta[0] * sin(sqrt(abs(theta[0] - (theta[1]+47))));
 
     return left - right;
 }
@@ -148,10 +148,10 @@ double TestFunctions::eggholder(
  *
  *  \return         Likelihood
  * */
-double TestFunctions::paraboloid(
+value_t TestFunctions::paraboloid(
     v_d & theta) {
 
-    double sum = 0;
+    value_t sum = 0;
     for(auto v: theta) {
         sum += v*v;
     }
@@ -170,20 +170,20 @@ double TestFunctions::paraboloid(
  *
  *  \return         Likelihood
  * */
-double TestFunctions::townsend(
+value_t TestFunctions::townsend(
     v_d & theta) {
 
-    double t = atan2(theta[0], theta[1]);
-    double constraint = 2*cos(t) - 0.5*cos(2*t)
+    value_t t = atan2(theta[0], theta[1]);
+    value_t constraint = 2*cos(t) - 0.5*cos(2*t)
         - 0.25*cos(3*t) - 0.125*cos(4*t);
     constraint *= constraint;
     constraint += (2*sin(t)) * (2*sin(t));
     if(theta[0]*theta[0] + theta[1]*theta[1] < constraint) {
-        double left = cos((theta[0] - 0.1)*theta[1]);
+        value_t left = cos((theta[0] - 0.1)*theta[1]);
         left *= left;
         return (-left - (theta[0]*sin(3*theta[0]+theta[1])));
     } else {
-        return std::numeric_limits<double>::infinity();
+        return std::numeric_limits<value_t>::infinity();
     }
 }
 
@@ -195,11 +195,11 @@ double TestFunctions::townsend(
  *
  *  \return         Likelihood
  * */
-double TestFunctions::rosenbrock(
+value_t TestFunctions::rosenbrock(
     v_d & theta) {
 
-    double lh = 0;
-    for(uint32_t i = 0; i<theta.size()-1; ++i) {
+    value_t lh = 0;
+    for(index_t i = 0; i<theta.size()-1; ++i) {
         lh += (100 * (theta[i+1]-theta[i]*theta[i])
             * (theta[i+1]-theta[i]*theta[i]) + (theta[i]-1)*(theta[i]-1));
     }
@@ -218,12 +218,12 @@ double TestFunctions::rosenbrock(
  *
  *  \return         Likelihood
  * */
-double TestFunctions::himmelblau(
+value_t TestFunctions::himmelblau(
     v_d & theta) {
 
-    double left = (theta[0]*theta[0] + theta[1] - 11);
+    value_t left = (theta[0]*theta[0] + theta[1] - 11);
     left *= left;
-    double right = (theta[0] + theta[1]*theta[1] - 7);
+    value_t right = (theta[0] + theta[1]*theta[1] - 7);
     right *= right;
     return left+right;
 }
@@ -241,13 +241,13 @@ double TestFunctions::himmelblau(
  *
  *  \return         Likelihood
  * */
-double TestFunctions::gauss_shell(
+value_t TestFunctions::gauss_shell(
     v_d & theta) {
 
-    double factor = 1.0/sqrt(2*M_PI*shell_width*shell_width);
+    value_t factor = 1.0/sqrt(2*M_PI*shell_width*shell_width);
 
-    double left = (theta[0]-2.5)*(theta[0]-2.5);
-    double right = (theta[0]+2.5)*(theta[0]+2.5);
+    value_t left = (theta[0]-2.5)*(theta[0]-2.5);
+    value_t right = (theta[0]+2.5)*(theta[0]+2.5);
     for(v_d::iterator theta_iter=theta.begin()+1; theta_iter<theta.end();
         theta_iter++) {
 
@@ -274,7 +274,7 @@ double TestFunctions::gauss_shell(
  *
  *  \return         Likelihood
  * */
-double TestFunctions::icecube(
+value_t TestFunctions::icecube(
     v_d & theta) {
 
     return 0;
@@ -294,10 +294,10 @@ double TestFunctions::icecube(
  * */
 void TestFunctions::set_func(
     std::string func_name,
-    uint32_t ndims,
-    uint32_t n_x,
-    uint32_t n_y,
-    uint32_t n_z) {
+    index_t ndims,
+    index_t n_x,
+    index_t n_y,
+    index_t n_z) {
 
     name = func_name;
     if(func_name == EGG) {

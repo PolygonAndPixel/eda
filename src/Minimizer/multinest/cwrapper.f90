@@ -5,20 +5,20 @@
 ! allows calling multinest with the "natural" C prototype
 !
 ! void run(bool nest_IS,bool nest_mmodal,bool nest_ceff, \
-!          int nest_nlive,double nest_tol,double nest_ef,int nest_ndims,int nest_totPar,int nest_nCdims,int maxClst, \
-!          int nest_updInt,double nest_Ztol,char nest_root[],int seed,int nest_pWrap[], \
-!          bool nest_fb,bool nest_resume,bool nest_outfile,bool initMPI,double nest_logZero,int nest_maxIter, \
-!          double (*loglike)(double *,int,int,void *context), \
-!          void (*dumper)(int,int,int,double *,double *,double *,double,double,double,void *context),void *context);
+!          index_t nest_nlive,value_t nest_tol,value_t nest_ef,index_t nest_ndims,index_t nest_totPar,index_t nest_nCdims,index_t maxClst, \
+!          index_t nest_updInt,value_t nest_Ztol,char nest_root[],index_t seed,index_t nest_pWrap[], \
+!          bool nest_fb,bool nest_resume,bool nest_outfile,bool initMPI,value_t nest_logZero,index_t nest_maxIter, \
+!          value_t (*loglike)(value_t *,index_t,index_t,void *context), \
+!          void (*dumper)(index_t,index_t,index_t,value_t *,value_t *,value_t *,value_t,value_t,value_t,void *context),void *context);
 !
 ! as well as
 !
-! double loglike(double *Cube,int n_dim,int nPar,void *context);
-! void dumper(int nSamples,int nlive,int nPar, \
-!             double *physLive,double *posterior,double *paramConstr, \
-!             double maxLogLike,double logZ,double INSlogZ,double logZerr,void *context);
+! value_t loglike(value_t *Cube,index_t n_dim,index_t nPar,void *context);
+! void dumper(index_t nSamples,index_t nlive,index_t nPar, \
+!             value_t *physLive,value_t *posterior,value_t *paramConstr, \
+!             value_t maxLogLike,value_t logZ,value_t INSlogZ,value_t logZerr,void *context);
 !
-! note that we are assuming that (void *) is the same size as int, but that's what multinest uses
+! note that we are assuming that (void *) is the same size as index_t, but that's what multinest uses
 
 module cnested
 	use iso_c_binding, only: c_funptr
@@ -32,8 +32,8 @@ module cnested
 	implicit none
 
 	integer          :: n_dim,nPar,context_pass
-	double precision :: Cube(nPar)
-	double precision :: lnew
+	value_t precision :: Cube(nPar)
+	value_t precision :: lnew
 
 	interface
 		real(c_double) function loglike_proto(Cube,n_dim,nPar,context)
@@ -68,8 +68,8 @@ module cnested
 	implicit none
 
 	integer          :: nSamples, nlive, nPar, context_pass, n_accepted
-	double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-	double precision :: maxLogLike, logZ, INSlogZ, logZerr
+	value_t precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
+	value_t precision :: maxLogLike, logZ, INSlogZ, logZerr
 
 	interface
 		subroutine dumper_proto(nSamples,nlive,nPar,physLive,posterior,&
