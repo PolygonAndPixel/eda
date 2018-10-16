@@ -50,36 +50,7 @@ TestFunctions::TestFunctions(
         ndims_ = ndims;
     }
     else if(func_name == ICECUBE) {
-        // Generate detector
-        uint32_t dist_xy = 50;
-        uint32_t dist_z = 15;
-
-        v_d dummy;
-        v_d dummy2;
-        std::mt19937 intgen(1025);
-        std::normal_distribution<double> nf(0.2, 0.03);
-        for(uint32_t i=0; i<n_x; i++) {
-            for(uint32_t j=0; j<n_y; j++) {
-                for(uint32_t k=0; k<n_z; k++) {
-                    double x = (i-0.5*(n_x-1)) * dist_xy;
-                    double y = (j-0.5*(n_y-1)) * dist_xy;
-                    double z = (k-0.5*(n_z-1)) * dist_z;
-                    DOM dom(x, y, z, 0.4+nf(intgen));
-                    pulse_map.add_DOM(dom, dummy, dummy2);
-                }
-            }
-        }
-        // Generate track (single event)
-        length = 5.0;
-        seg_length = 5.0;
-        Track track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, 5.0, 5.0);
-        // Generate data
-        pulse_map.fill(track);
-        // track.fill_PulseMap(pulse_map);
-        pulse_map.add_noise();
         lh_p = &TestFunctions::icecube;
-        // x, y, z, t, theta, phi, energy
-        ndims_ = 7;
     }
     else {
         lh_p = &TestFunctions::gauss_shell;
@@ -297,8 +268,7 @@ double TestFunctions::gauss_shell(
 }
 
 /** Calculate the negative log-likelihood by evaluating the
- *  likelihood of a neutrino event within an IceCube dummy detector with
- *  only one event modelled after Millipede.
+ *  likelihood of a neutrino event within the IceCube detector.
  *
  *  \param theta    Physical parameters of point that shall be evaluated.
  *
@@ -307,35 +277,7 @@ double TestFunctions::gauss_shell(
 double TestFunctions::icecube(
     v_d & theta) {
 
-    double llh = 0.0;
-    DOM dom;
-    v_d charges;
-    v_d times;
-    Track test_track(theta[0], theta[1], theta[2], theta[3], theta[4],
-        theta[5], theta[6], seg_length);
-    while(pulse_map.get_next(dom, charges, times)) {
-        double p_time_sum = 0.0;
-        ESource source;
-        // Sources in track is empty?
-        while(test_track.get_next_source(source)) {
-            double delta_r = dist(source.get_pos(), dom.get_pos());
-            if(!charges.empty()) {
-                for(uint32_t i=0; i<times.size(); i++) {
-                    double delta_time = times[i] - source.get_time();
-                    p_time_sum += hit_prob(delta_r, delta_time);
-                }
-            }
-            llh -= hit_charge(delta_r);
-        }
-        if(!charges.empty()) {
-            double charge_sum = 0.0;
-            for(auto &i: charges) charge_sum += i;
-            llh += charge_sum * log(p_time_sum + 0.3/80.0);
-        }
-    }
-    // std::cout << "llh before anything " << llh << " charge_sum: " << charge_sum << "\n";
-    if(llh <= 0) return std::numeric_limits<double>::infinity();
-    return llh;
+    return 0;
 }
 
 /** Change the used function and the number of dimensions.
@@ -379,37 +321,7 @@ void TestFunctions::set_func(
         ndims_ = ndims;
     }
     else if(func_name == ICECUBE) {
-        // Generate detector
-        uint32_t dist_xy = 50;
-        uint32_t dist_z = 15;
-
-        v_d dummy;
-        v_d dummy2;
-        std::mt19937 intgen(1025);
-        std::normal_distribution<double> nf(0.2, 0.03);
-        for(uint32_t i=0; i<n_x; i++) {
-            for(uint32_t j=0; j<n_y; j++) {
-                for(uint32_t k=0; k<n_z; k++) {
-                    double x = (i-0.5*(n_x-1)) * dist_xy;
-                    double y = (j-0.5*(n_y-1)) * dist_xy;
-                    double z = (k-0.5*(n_z-1)) * dist_z;
-                    DOM dom(x, y, z, 0.4+nf(intgen));
-                    pulse_map.add_DOM(dom, dummy, dummy2);
-                }
-            }
-        }
-        // Generate track (single event)
-        length = 5.0;
-        seg_length = 5.0;
-        // x, y, z, t, theta, phi, length, seg_length
-        Track track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, length, seg_length);
-        // Generate data
-        pulse_map.fill(track);
-        // track.fill_PulseMap(pulse_map);
-        pulse_map.add_noise();
         lh_p = &TestFunctions::icecube;
-        // x, y, z, t, theta, phi, energy
-        ndims_ = 7;
     }
     else {
         lh_p = &TestFunctions::gauss_shell;

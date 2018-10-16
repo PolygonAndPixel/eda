@@ -7,11 +7,6 @@
 #include <string>
 #include <limits>
 #include "helper/abbreviations.h"
-#include "IceCubeToy/DOM.h"
-#include "IceCubeToy/ESource.h"
-#include "IceCubeToy/IceCube_helper.h"
-#include "IceCubeToy/PulseMap.h"
-#include "IceCubeToy/Track.h"
 
 class TestFunctions {
     typedef double(TestFunctions::*lh_pointer)(v_d & theta);
@@ -49,10 +44,6 @@ private:
     uint32_t ndims_;
     // Some variables for the gaussian shell
     double shell_width, r; // width and radius of the shells
-    // Some variables for IceCube
-    PulseMap pulse_map;
-    double length;
-    double seg_length;
 };
 
 #endif
