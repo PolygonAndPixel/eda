@@ -1,3 +1,8 @@
+#include <stdint.h>
+#include <opari2/pomp2_lib.h>
+#include <opari2/pomp2_user_lib.h>
+___POMP2_INCLUDE___
+#line 1 "/home/mhierony/Documents/Uni/Masterthesis/git/github/eda/src/likelihood/TestFunctions.cpp"
 /* Several different test functions for minimizing. See
  * https://en.wikipedia.org/wiki/Test_functions_for_optimization
  * for a list of test functions and their definitions.
@@ -333,7 +338,7 @@ double TestFunctions::icecube(
             llh += charge_sum * log(p_time_sum + 0.3/80.0);
         }
     }
-    // std::cout << "llh before anything " << llh << " charge_sum: " << charge_sum << "\n";
+    std::cout << "llh before anything " << llh << " charge_sum: " << charge_sum << "\n";
     if(llh <= 0) return std::numeric_limits<double>::infinity();
     return llh;
 }

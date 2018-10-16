@@ -85,6 +85,80 @@ void Scan::scan_space(
         
 }
 
+
+/** Function that samples in a grid and dumps every max_points_ the points.
+ *  \param nDims             Dimensionallity of parameter space in terms of
+ *                           free parameter for minimization
+ * */
+void Scan::scan_space_tmp(
+    uint32_t nDims){
+
+    v_d cube(nDims, 0.0);
+//     double x,
+//     double y,
+//     double z,
+//     double t,
+//     double theta,
+//     double phi,
+//     double length,
+//     double seg_length,
+//     int seed) {
+// // track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, 5.0, 5.0);
+    if(dump_points_) {
+        std::cout << "Saving files to " << base_dir_ << file_name_ << std::endl;
+        std::ofstream ofile((base_dir_+file_name_).c_str(),
+            std::ofstream::out  | std::ofstream::app);
+
+        for(uint32_t j=0; j<nDims; j++) ofile << "Param" << j << "\t";
+        // ofile << "X\tY\tZ\tT\tZenith\tAzimuth\tEnergy";
+        ofile << std::endl;
+        ofile.close();
+    }
+    uint32_t i = 0;
+    double delta = 1.0/n_points;
+    for(double a = 0; a <= 1.0; a += delta) {
+        std::cout << a << "\n";
+        for(double b = 0; b <= 1.0; b += delta) {
+            for(double c = 0; c <= 1.0; c += delta) {
+                i++;
+                cube[0] = c;
+                cube[1] = b;
+                cube[3] = a;
+                v_d theta = to_physics(cube, nDims);
+                theta[2] = -5.0;
+                theta[4] = 0.6;
+                theta[5] = 1.5;
+                theta[6] = 5.0;
+
+                double current_result = get_llh(theta);
+                if(dump_points_) {
+                    results.insert(results.end(), theta.begin(), theta.end());
+                    results.push_back(current_result);
+                }
+
+                if(i == 0 || result.best_fit > current_result) {
+                    result.best_fit = current_result;
+                    result.params_best_fit = theta;
+                }
+                if(dump_points_ && (i%max_points_ == 0 || a >= 1.0)) {
+                    uint32_t d = 1;
+                    std::ofstream ofile((base_dir_+file_name_).c_str(),
+                        std::ofstream::out  | std::ofstream::app);
+                    for(auto & p: results) {
+                        ofile << p << "\t";
+                        if(d%(nDims+1) == 0) ofile << std::endl;
+                        d++;
+                    }
+                    ofile.close();
+                    results.clear();
+                }
+            }
+        }
+    }
+    result.lh_efficiency = 1.0/i;
+        
+}
+
 /** Return the name of this class.
  *
  *  \return     Name of this class.
@@ -135,7 +209,7 @@ Scan::Minimize(
     lower_bnds = lower_bounds;
     test_func_ = &test_func;
     file_name_ = test_func_->get_name();
-    scan_space(test_func_->get_ndims());
+    scan_space_tmp(test_func_->get_ndims());
     result.minimizer_name = "Scan";
     result.function_name = test_func_->get_name();
     return result;

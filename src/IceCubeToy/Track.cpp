@@ -8,6 +8,7 @@
  * */
 
 #include "IceCubeToy/Track.h"
+#include <iostream>
 
 Track::Track(
     double x,
@@ -19,7 +20,7 @@ Track::Track(
     double length,
     double seg_length,
     int seed) {
-
+// track(35.0, -21.0, -5.0, 0.0, 0.6, 1.5, 5.0, 5.0);
     seg_length_ = seg_length;
     double current_length = 0;
 
@@ -30,49 +31,48 @@ Track::Track(
         double n_time = current_length/0.3 + t;
         ESource source = ESource(n_x, n_y, n_z, n_time,
             theta, phi, minIo(seg_length_));
-        sources.push_back(source);
+        sources_.push_back(source);
         current_length += seg_length_;
     }
-    sum_length = current_length;
-    nom_length = length;
+    sum_length_ = current_length;
+    nom_length_ = length;
     intgen.seed(seed);
-    index = 0;
+    index_ = 0;
 }
 
-/** Fill the pulse map with pulses from the energy sources along the track.
- *
- * \param void_map      The pulse map to be filled.
- * */
-void Track::fill_PulseMap(
-    PulseMap &void_map) {
+// /** Fill the pulse map with pulses from the energy sources along the track.
+//  *
+//  * \param void_map      The pulse map to be filled.
+//  * */
+// void Track::fill_PulseMap(
+//     PulseMap &void_map) {
 
-    DOM dom;
-    v_d charges;
-    v_d times;
-    std::uniform_real_distribution<double> uf2(0.0, 0.3);
-    std::normal_distribution<double> nf(1.0, 0.2);
-    for(ESource &source: sources) {
-        while(void_map.get_next(dom, charges, times)) {
-            double delta_r = dist(source.get_pos(), dom.get_pos());
-            double abs_time = source.get_time() + delta_r/0.3;
-            double mu = hit_charge(delta_r) * source.get_energy();
-            std::poisson_distribution<uint32_t> pf(mu);
-            uint32_t n_photons = pf(intgen);
-            uint32_t count = 0;
-            std::uniform_real_distribution<double> uf(0.0, 15.0*(delta_r/10.0));
-
-            while(count < n_photons) {
-                double t_time = uf(intgen);
-                double t_y = uf2(intgen);
-                if(hit_time(delta_r, t_time) > t_y) {
-                    charges.push_back(nf(intgen));
-                    times.push_back(t_time + t_y);
-                    count++;
-                }
-            }
-        }
-    }
-}
+//     DOM dom;
+//     v_d charges;
+//     v_d times;
+//     std::uniform_real_distribution<double> uf2(0.0, 0.3);
+//     std::normal_distribution<double> nf(1.0, 0.2);
+//     for(ESource &source: sources_) {
+//         while(void_map.get_next(dom, charges, times)) {
+//             double delta_r = dist(source.get_pos(), dom.get_pos());
+//             double abs_time = source.get_time() + delta_r/0.3;
+//             double mu = hit_charge(delta_r) * source.get_energy();
+//             std::poisson_distribution<uint32_t> pf(mu);
+//             uint32_t n_photons = pf(intgen);
+//             uint32_t count = 0;
+//             std::uniform_real_distribution<double> uf(0.0, 15.0*(delta_r/10.0));
+//             while(count < n_photons) {
+//                 double t_time = uf(intgen);
+//                 double t_y = uf2(intgen);
+//                 if(hit_time(delta_r, t_time) > t_y) {
+//                     charges.push_back(nf(intgen));
+//                     times.push_back(t_time + t_y);
+//                     count++;
+//                 }
+//             }
+//         }
+//     }
+// }
 
 /** Get next Source.
  *
@@ -83,11 +83,11 @@ void Track::fill_PulseMap(
 bool Track::get_next_source(
     ESource &source) {
 
-        if(index == sources.size()) {
-            index = 0;
-            return false;
-        }
-        source = sources[index];
-        index++;
-        return true;
+    if(index_ == sources_.size()) {
+        index_ = 0;
+        return false;
+    }
+    source = sources_[index_];
+    index_++;
+    return true;
 }

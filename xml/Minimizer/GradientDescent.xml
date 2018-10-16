@@ -8,10 +8,10 @@ xsi:schemaLocation="MinimizerSchema.xsd">
         <max_iter>1000000</max_iter>
         <min_iter>200</min_iter>
         <max_points>10000</max_points>
-        <n_gradients>10</n_gradients>
+        <n_gradients>2</n_gradients>
         <seed>1025</seed>
         <dump_points>false</dump_points>
-        <stepsize>0.001</stepsize>
+        <stepsize>0.0001</stepsize>
         <conv_crit>0.00001</conv_crit>
     </GD>
 </Minimizers>

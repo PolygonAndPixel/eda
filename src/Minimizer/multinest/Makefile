@@ -1,4 +1,4 @@
-FC = gfortran
+FC = scorep gfortran
 BUILD = ../../../build
 OBJ_DIR = $(BUILD)/objects
 TARGET_DIR = $(OBJ_DIR)/src/Minimizer/multinest

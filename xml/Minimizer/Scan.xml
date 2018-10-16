@@ -5,8 +5,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="MinimizerSchema.xsd">
     <scan>
         <name>scan</name>
-        <n_points_per_dim>10</n_points_per_dim>
-        <max_points>1000000</max_points>
+        <n_points_per_dim>1</n_points_per_dim>
+        <max_points>100</max_points>
         <dump_points>true</dump_points>
     </scan>
 </Minimizers>

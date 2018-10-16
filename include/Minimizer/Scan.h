@@ -21,6 +21,7 @@ public:
                              v_d upper_bounds);
 
     void scan_space(uint32_t nDims);
+    void scan_space_tmp(uint32_t nDims);
 
     /// Transform point from hypercube to physical space
     v_d to_physics(v_d cube, uint32_t nDims);

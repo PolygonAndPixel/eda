@@ -1,4 +1,4 @@
-CXX = g++
+CXX = scorep g++
 CXXFLAGS = -std=c++14 -fopenmp  -w
 CXX_THIRD_PARTY =
 LDFLAGS = -L/usr/lib -L/opt/OpenBLAS/lib -L/home/mhierony/ARPACK -lpthread -llapack -llapacke -fopenmp -lgfortran -larpack
