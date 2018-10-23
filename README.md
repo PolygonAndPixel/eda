@@ -35,3 +35,7 @@ This leads to a very long run.
 A similar problem occurs for MultiNest where it does not find the shells.
 You may increase the number of live points in the configuration file to
 overcome this problem.
+
+The IceCube Toymodel does not work properly yet (the likelihood surface is 
+not modelled correctly). This approach might be exchanged for 
+the real version that uses photosplines to evaluate the likelihood.
