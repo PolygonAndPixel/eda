@@ -47,50 +47,6 @@ std::vector<MinimizerResult> run_tests(
     }
     return results;
 }
-//
-// /* Can be used to get the best estimated time. Not sure why I would need it.
-//  *
-//  */
-// double best_time_seed(
-//     Track track,
-//     PulseMap t_map) {
-//
-//     ESource casc = track.get_source(0);
-//     v_d shell_times;
-//     v_d shell_charges;
-//     v_d shell_distances;
-//
-//     DOM dom;
-//     v_d times;
-//     v_d charges;
-//     while(t_map.get_next(dom, times, charges)) {
-//         if(times.empty()) continue;
-//         double d = dist(dom.get_pos(), casc.get_pos());
-//         shell_times.push_back(times[0] - d/0.3);
-//         shell_distances.push_back(d);
-//         shell_charges.push_back(charges[9]);
-//     }
-//
-//     double best_time = shell_times[0];
-//     double best_val = std::numeric_limits<double>::min();
-//
-//     for(double &s_time: shell_times) {
-//         v_d gamma_singles(shell_charges.size());
-//         double gamma_sum = 0;
-//         for(uint32_t i=0; i<shell_charges.size(); i++) {
-//             gamma_singles[i] = shell_charges[i] * log(
-//                 hit_time(shell_distances[i], shell_times[i] - s_time)
-//                 * hit_charge(shell_distances[i]) + 1e-3);
-//
-//             gamma_sum += gamma_singles[i];
-//         }
-//         if(gamma_sum > best_val) {
-//             best_val = gamma_sum;
-//             best_time = s_time;
-//         }
-//     }
-//     return best_time;
-// }
 
 int main(int argc, char* argv[]) {
 

@@ -7,11 +7,6 @@
 #include <string>
 #include <limits>
 #include "helper/abbreviations.h"
-#include "IceCubeToy/DOM.h"
-#include "IceCubeToy/ESource.h"
-#include "IceCubeToy/IceCube_helper.h"
-#include "IceCubeToy/PulseMap.h"
-#include "IceCubeToy/Track.h"
 
 class TestFunctions {
     typedef double(TestFunctions::*lh_pointer)(v_d & theta);
@@ -39,7 +34,6 @@ public:
     double rosenbrock(v_d & theta);
     double himmelblau(v_d & theta);
     double gauss_shell(v_d & theta);
-    double icecube(v_d & theta);
 
     void set_func(std::string func_name, uint32_t ndims,
         uint32_t n_x=3, uint32_t n_y=3, uint32_t n_z=5);
@@ -49,10 +43,6 @@ private:
     uint32_t ndims_;
     // Some variables for the gaussian shell
     double shell_width, r; // width and radius of the shells
-    // Some variables for IceCube
-    PulseMap pulse_map;
-    double length;
-    double seg_length;
 };
 
 #endif

@@ -5,15 +5,15 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="MinimizerSchema.xsd">
     <multi>
         <name>multi</name>
-        <tolerance>1e-3</tolerance>
-        <max_iter>0</max_iter>
+        <tolerance>0.5</tolerance>
+        <max_iter>80000</max_iter>
         <seed>1025</seed>
         <dump_points>false</dump_points>
 
         <ins>false</ins>
         <mode_separation>true</mode_separation>
         <const_eff>false</const_eff>
-        <n_live>500</n_live>
+        <n_live>60</n_live>
         <enlargement>0.5</enlargement>
         <feedback_interval>1000</feedback_interval>
         <max_modes>10</max_modes>
