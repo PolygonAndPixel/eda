@@ -4,6 +4,7 @@
  *
  * Author: Maicon Hieronymus <mhierony@students.uni-mainz.de>
  * */
+#include <cuda.h>
 #include <iostream>
 #include "likelihood/TestFunctions.h"
 
@@ -72,6 +73,7 @@ std::string TestFunctions::get_name() {
  *
  *  \return         ndims_
  * */
+__host__ __device__
 uint32_t TestFunctions::get_ndims() {
 
     return ndims_;
@@ -84,6 +86,7 @@ uint32_t TestFunctions::get_ndims() {
  *
  *  \return         negative Likelihood
  * */
+__host__ __device__
 double TestFunctions::get_lh(
     v_d & theta) {
 
@@ -98,6 +101,7 @@ double TestFunctions::get_lh(
  *
  *  \return         Negative likelihood
  * */
+__host__ __device__
 double TestFunctions::get_neg_lh(
     v_d & theta) {
 
@@ -113,6 +117,7 @@ double TestFunctions::get_neg_lh(
  *
  *  \return         negative log-likelihood
  * */
+__host__ __device__
 double TestFunctions::get_neg_llh(
     v_d & theta) {
 
@@ -128,6 +133,7 @@ double TestFunctions::get_neg_llh(
  *
  *  \return         Likelihood
  * */
+__host__ __device__
 double TestFunctions::eggholder(
     v_d & theta) {
 
@@ -145,6 +151,7 @@ double TestFunctions::eggholder(
  *
  *  \return         Likelihood
  * */
+__host__ __device__
 double TestFunctions::paraboloid(
     v_d & theta) {
 
@@ -167,6 +174,7 @@ double TestFunctions::paraboloid(
  *
  *  \return         Likelihood
  * */
+__host__ __device__
 double TestFunctions::townsend(
     v_d & theta) {
 
@@ -192,6 +200,7 @@ double TestFunctions::townsend(
  *
  *  \return         Likelihood
  * */
+__host__ __device__
 double TestFunctions::rosenbrock(
     v_d & theta) {
 
@@ -215,6 +224,7 @@ double TestFunctions::rosenbrock(
  *
  *  \return         Likelihood
  * */
+__host__ __device__
 double TestFunctions::himmelblau(
     v_d & theta) {
 
@@ -238,6 +248,7 @@ double TestFunctions::himmelblau(
  *
  *  \return         Likelihood
  * */
+__host__ __device__
 double TestFunctions::gauss_shell(
     v_d & theta) {
 

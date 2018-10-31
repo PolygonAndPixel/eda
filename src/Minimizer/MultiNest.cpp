@@ -129,8 +129,8 @@ void MultiNest::c_dumper(
  *  Not used here but still implemented because baseclass Minimizer needs it.
  *
  * \param cube              Hypercube coordinates of point that
- *                          shall be evaluated.
- * \param n_dims             Dimensionallity of parameter space in terms of
+ *                          shall be evaluated
+ * \param n_dims            Dimensionallity of parameter space in terms of
  *                          free parameter for minimization
  *
  *  \return                 Physical coordinates
