@@ -1,0 +1,46 @@
+CXX = g++
+
+CXXFLAGS = -std=c++14 -fopenmp
+LDFLAGS = -latomic
+NVCC = nvcc
+NVCCFLAGS = -std=c++11 -Xcompiler -fopenmp -Xcompiler -fPIC -D_FORCE_INLINES -arch=sm_50 -lcufft -D_MWAITXINTRIN_H_INCLUDED
+
+BUILD = build
+OBJ_DIR = $(BUILD)/objects
+APP_DIR = $(BUILD)/apps
+TARGET = tests
+INCLUDE = -I /opt/OpenBLAS/include/ -Iinclude
+
+CUDA_SRC = \
+	$(wildcard src/Minimizer/MN_gpu/linear_algebra.cu) \
+	$(wildcard src/tests/test_linear_algebra.cu)
+	 
+
+CUDA_OBJECTS = $(CUDA_SRC:%.cu=$(OBJ_DIR)/%.o)
+CUDA_TARGETS = $(CUDA_SRC:%.cu=$(APP_DIR)/%)
+
+all: build $(APP_DIR)/$(CUDA_TARGETS)
+
+$(OBJ_DIR)/%.o: %.cu
+	@mkdir -p $(@D)
+	$(NVCC) $(NVCCFLAGS) $(INCLUDE) -o $@ -c $<
+
+$(APP_DIR)/$(CUDA_TARGETS): $(CUDA_OBJECTS)
+	$(NVCC) $(NVCCFLAGS) $(INCLUDE) -o $(APP_DIR)/$(TARGET) $(CUDA_OBJECTS) $(LDFLAGS)
+
+.PHONY: all build clean debug release
+
+build:
+	@mkdir -p $(BUILD)
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(APP_DIR)
+
+debug: CXXFLAGS += -g
+debug: NVCCFLAGS += -g
+debug: FFLAG += debug
+debug: all
+
+release: CXXFLAGS += -O2 -march=native
+release: NVCCFLAGS += -O2
+release: FFLAG += release
+release: all

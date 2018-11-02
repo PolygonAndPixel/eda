@@ -422,38 +422,38 @@ contains
 	if(my_rank==0) then
 
 		if(outfile) then
-    			open(unit=u_resume,file=resumename,form='formatted',status='replace')
-    			write(u_resume,'(l2)')genLive
-    			close(u_resume)
-    			write(fmt,'(a,i5,a)')  '(',ndims+1,'E28.18)'
-    			write(fmt2,'(a,i5,a)')  '(',totPar+1,'E28.18,i4)'
+            open(unit=u_resume,file=resumename,form='formatted',status='replace')
+            write(u_resume,'(l2)')genLive
+            close(u_resume)
+            write(fmt,'(a,i5,a)')  '(',ndims+1,'E28.18)'
+            write(fmt2,'(a,i5,a)')  '(',totPar+1,'E28.18,i4)'
 		endif
 
-    		id=0
-    		i=0
+        id=0
+        i=0
 
-    		!resume from previous live points generation?
+        !resume from previous live points generation?
 		if(outfile) then
-	    		if(resumeflag) then
-	    			!read hypercube-live file
+            if(resumeflag) then
+                !read hypercube-live file
 				open(unit=u_live,file=livename,status='old')
 				do
-	      				i=i+1
+                    i=i+1
 					read(u_live,*,IOSTAT=iostatus) p(:,i),l(i)
-	            			if(iostatus<0) then
-	            				i=i-1
-	                  			if(i>nlive) then
+                    if(iostatus<0) then
+                        i=i-1
+                        if(i>nlive) then
 							write(*,*)"ERROR: more than ",nlive," points in the live points file."
 							write(*,*)"Aborting"
 #ifdef MPI
 							call MPI_ABORT(MPI_COMM_WORLD,errcode)
 #endif
-	                        			stop
+                            stop
 						endif
-	                  			exit
+                        exit
 					endif
 				enddo
-	    			close(u_live)
+                close(u_live)
 
 				if(i>0) then
 					!read physical live file
@@ -464,25 +464,25 @@ contains
 	    				close(u_phys)
 				endif
 
-	      			open(unit=u_live,file=livename,form='formatted',status='old',position='append')
-	    			open(unit=u_phys,file=physname,form='formatted',status='old',position='append')
-	    		else
-	      			open(unit=u_live,file=livename,form='formatted',status='replace')
-	    			open(unit=u_phys,file=physname,form='formatted',status='replace')
+                open(unit=u_live,file=livename,form='formatted',status='old',position='append')
+                open(unit=u_phys,file=physname,form='formatted',status='old',position='append')
+            else
+                open(unit=u_live,file=livename,form='formatted',status='replace')
+                open(unit=u_phys,file=physname,form='formatted',status='replace')
 
 				if( IS ) then
-	      				open(unit=u_IS(2),file=IS_Files(2),form='unformatted',access='sequential',status='replace')
+                    open(unit=u_IS(2),file=IS_Files(2),form='unformatted',access='sequential',status='replace')
 					write(u_IS(2))0,0,0
 					close(u_IS(2))
-	      				open(unit=u_IS(1),file=IS_Files(1),form='unformatted',access='sequential',status='replace')
+                    open(unit=u_IS(1),file=IS_Files(1),form='unformatted',access='sequential',status='replace')
 					close(u_IS(1))
-	      				open(unit=u_IS(3),file=IS_Files(3),form='unformatted',access='sequential',status='replace')
+                    open(unit=u_IS(3),file=IS_Files(3),form='unformatted',access='sequential',status='replace')
 					close(u_IS(3))
 				endif
-	    		endif
+            endif
 		endif
 
-    		j=i
+        j=i
 		nend=i
 
 		nGen = nlive - j
@@ -495,10 +495,10 @@ contains
 	call MPI_BCAST(nptPerProc,1,MPI_INTEGER,0,MPI_COMM_WORLD,errcode)
 #endif
 
-      	if(nGen==0) then
-      		if(my_rank==0) then
-            		genLive=.false.
-    			resumeFlag=.false.
+    if(nGen==0) then
+        if(my_rank==0) then
+            genLive=.false.
+            resumeFlag=.false.
 		endif
 
 		deallocate( pnewP, phyPnewP, lnewP )
@@ -510,32 +510,32 @@ contains
 			close(u_phys)
 		endif
 
-            	return
+        return
 
 	elseif(nGen<0) then
-      		if(my_rank==0) then
-			write(*,*)"ERROR: live points files have more live points than required."
+        if(my_rank==0) then
+            write(*,*)"ERROR: live points files have more live points than required."
 			write(*,*)"Aborting"
 		endif
 #ifdef MPI
-            	call MPI_ABORT(MPI_COMM_WORLD,errcode)
+        call MPI_ABORT(MPI_COMM_WORLD,errcode)
 #endif
-            	stop
+        stop
 	endif
 
 	k=0
 	j=0
 	id=my_rank
 	do
-    		k=k+1
+        k=k+1
 		j=j+1
-            	do
+        do
 			call getrandom(ndims,pnewP(:,j),id)  ! start points
 			phyPnewP(1:ndims,j)=pnewP(1:ndims,j)
 			lnewP(j)=logZero
 			call loglike(phyPnewP(:,j),ndims,totPar,lnewP(j),context)
 			if( lnewP(j) == HUGE(1d0) ) bogus = .true.
-                  	if(lnewP(j)>logZero) exit
+            if(lnewP(j)>logZero) exit
 		enddo
 		if(k==nptPerProc .or. j==10) then
 			if(k==nptPerProc) then
@@ -587,7 +587,7 @@ contains
 					!now write this batch to the files
 					do m=nstart,nend
 						write(u_live,fmt) p(1:ndims,m),l(m)
-            					write(u_phys,fmt2) phyP(:,m),l(m),1
+                        write(u_phys,fmt2) phyP(:,m),l(m),1
 					enddo
 				endif
 			endif
@@ -608,11 +608,11 @@ contains
 #endif
 
 	if( outfile ) then
-    		close(u_live)
+        close(u_live)
    		close(u_phys)
 	endif
 	genLive=.false.
-    	resumeFlag=.false.
+    resumeFlag=.false.
 #ifdef MPI
 	call MPI_BARRIER(MPI_COMM_WORLD,errcode)
 #endif
